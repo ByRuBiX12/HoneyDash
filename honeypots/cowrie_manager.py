@@ -38,7 +38,7 @@ class CowrieManager:
                 ["find", "/opt", "-name", "honeyfs", "-type", "d", "-path", "*/cowrie/*"],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=7
             )
             glob_res = subprocess.run(
                 ["find", "/", "-name", "honeyfs", "-type", "d", "-path", "*/cowrie/*"],
@@ -211,22 +211,20 @@ class CowrieManager:
             
             # Install necessary dependencies
             print("[!] Installing system dependencies...")
-            deps_result = subprocess.run([
-                "apt-get", "update", "&&",
-                "apt-get", "install", "-y",
-                "git", "python3", "python3-venv", "python3-pip",
-                "libssl-dev", "libffi-dev", "build-essential",
-                "python3-virtualenv"], 
+            deps_result = subprocess.run(
+                "apt-get update && apt-get install -y git python3 python3-venv python3-pip libssl-dev libffi-dev build-essential python3-virtualenv",
                 shell=True,
                 capture_output=True, 
                 text=True
-                )
+            )
             
             if deps_result.returncode != 0:
                 return {
                     "success": False,
                     "message": "Error installing system dependencies",
-                    "error": deps_result.stderr
+                    "error": deps_result.stderr,
+                    "error_message": deps_result.stdout,
+                    "error_code": deps_result.returncode
                 }
             
             # Cloning Cowrie repository
@@ -275,6 +273,17 @@ class CowrieManager:
             config_file = install_path / "etc" / "cowrie.cfg"
             if config_dist.exists():
                 subprocess.run(["cp", str(config_dist), str(config_file)])
+            
+            # Change ownership to the user who will run Cowrie
+            sudo_user = os.environ.get("SUDO_USER", "root")
+            if sudo_user != "root":
+                print(f"[!] Changing ownership to {sudo_user}...")
+                chown_result = subprocess.run([
+                    "chown", "-R", f"{sudo_user}:{sudo_user}", str(install_path)
+                ], capture_output=True, text=True)
+                
+                if chown_result.returncode != 0:
+                    print(f"[!] Warning: Could not change ownership: {chown_result.stderr}")
             
             # Update manager paths
             self.cowrie_path = install_path
@@ -511,6 +520,35 @@ class CowrieManager:
                     "error": venv_result.stderr
                 }
 
+            # Activating virtual environment
+            act_result = subprocess.run([
+                f"{self.cowrie_path}/cowrie-env/bin/pip", "install", "-r",
+                f"{self.cowrie_path}/requirements.txt"
+            ], capture_output=True, text=True)
+            if act_result.returncode != 0:
+                return {
+                    "success": False,
+                    "message": "Error installing Python dependencies",
+                    "error": act_result.stderr
+                }
+            act2_result = subprocess.run([
+                f"{self.cowrie_path}/cowrie-env/bin/python", "-m", "pip", "install", "-e", f"{self.cowrie_path}"
+            ], capture_output=True, text=True)
+            if act2_result.returncode != 0:
+                return {
+                    "success": False,
+                    "message": "Error installing Cowrie in editable mode",
+                    "error": act2_result.stderr
+                }
+
+            # Owner of Cowrie must NOT be root
+            sudo_user = os.environ.get("SUDO_USER", "root")
+            if sudo_user != "root":
+                print(f"[!] Ensuring ownership for {sudo_user}...")
+                subprocess.run([
+                    "chown", "-R", f"{sudo_user}:{sudo_user}", str(self.cowrie_path)
+                ], capture_output=True, text=True)
+
             # Cowrie MUST NOT be run as root, dropping privileges...
             cowrie_bin = self.cowrie_path / "cowrie-env" / "bin" / "cowrie"
             venv_bin = self.cowrie_path / "cowrie-env" / "bin"
@@ -617,8 +655,8 @@ class CowrieManager:
             with open(self.ssh_config_file, 'w') as f:
                 f.write(content)
 
-            subprocess.run(["systemctl", "restart", "sshd"], stderr=subprocess.DEVNULL)
-            subprocess.run(["systemctl", "restart", "ssh"], stderr=subprocess.DEVNULL)
+            subprocess.run(["systemctl", "stop", "sshd"], stderr=subprocess.DEVNULL)
+            subprocess.run(["systemctl", "stop", "ssh"], stderr=subprocess.DEVNULL)
             
             # Remove state file
             self.state_file.unlink()
