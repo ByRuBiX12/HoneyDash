@@ -671,3 +671,56 @@ class CowrieManager:
                 "success": False,
                 "message": f"Error cleaning up configuration: {str(e)}"
             }
+
+    def get_logs(self, limit, event_id, timestamp):
+        """Retrieves logs from Cowrie based on filters"""
+        try:
+            if not self.is_installed():
+                return {"success": False, "message": "Cowrie is not installed"}
+            
+            log_file = self.cowrie_path / "var" / "log" / "cowrie" / "cowrie.json"
+            if not log_file.exists():
+                return {"success": False, "message": "Log file not found"}
+            
+            logs = []
+            with open(log_file, 'r') as f:
+                for line in f:
+                    try:
+                        log_entry = json.loads(line)
+                        if event_id and log_entry.get('eventid') != event_id:
+                            continue
+                        if timestamp and log_entry.get('timestamp', '') < timestamp:
+                            continue
+                        # Only include relevant fields in original order
+                        filtered_log_entry = {
+                            "eventid": log_entry.get('eventid'),
+                            "timestamp": log_entry.get('timestamp')[:-8], # not showing miliseconds and timezone
+                            "src_ip": log_entry.get('src_ip'),
+                            "src_port": log_entry.get('src_port'),
+                            "username": log_entry.get('username'),
+                            "password": log_entry.get('password'),
+                            "duration": log_entry.get('duration'),
+                            "message": log_entry.get('message')
+                        }
+                        # If a field is missing, do not show it
+                        for key in list(filtered_log_entry.keys()):
+                            if filtered_log_entry[key] is None:
+                                del filtered_log_entry[key]
+
+                        logs.append(filtered_log_entry)
+                    except json.JSONDecodeError:
+                        continue
+            
+            # Limit of logs returned
+            logs = logs[:limit]
+            
+            return {
+                "success": True,
+                "logs": logs
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error retrieving logs: {str(e)}"
+            }

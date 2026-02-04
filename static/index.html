@@ -225,6 +225,84 @@
             background: #ffc107;
             color: #333;
         }
+
+        /* Filter styles */
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filter-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .filter-toggle {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .filter-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .filter-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .filter-content.show {
+            display: block;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .filter-buttons button {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -271,31 +349,117 @@
         <div class="card">
             <h2>🎮 Control de Cowrie</h2>
             <div class="button-grid">
-                <button class="btn-warning" onclick="installCowrie()">📥 Instalar Cowrie</button>
-                <button class="btn-primary" onclick="configureCowrie()">⚙️ Configurar Puerto</button>
-                <button class="btn-warning" onclick="setupRedirect()">🔀 Configurar SSH</button>
-                <button class="btn-success" onclick="startCowrie()">▶️ Iniciar</button>
-                <button class="btn-danger" onclick="stopCowrie()">⏸️ Detener</button>
-                <button class="btn-secondary" onclick="cleanup()">🧹 Limpiar</button>
+                <button class="btn-warning" onclick="installCowrie()">Instalar Cowrie</button>
+                <button class="btn-primary" onclick="configureCowrie()">Configurar Puerto</button>
+                <button class="btn-warning" onclick="setupRedirect()">Configurar SSH</button>
+                <button class="btn-success" onclick="startCowrie()">Iniciar</button>
+                <button class="btn-danger" onclick="stopCowrie()">Detener</button>
+                <button class="btn-secondary" onclick="cleanup()">Limpiar</button>
+                <button class="btn-info" onclick="getLogs()">Obtener Logs</button>
             </div>
         </div>
 
         <!-- Respuesta del Servidor -->
         <div class="card">
-            <h2>📝 Respuesta del Servidor</h2>
+            <h2>Respuesta del Servidor</h2>
             <div id="response" class="response-box">Esperando solicitud...</div>
+        </div>
+
+        <!-- Logs de Cowrie -->
+        <div class="card">
+            <h2>Logs de Cowrie</h2>
+            
+            <!-- Query Filters Section -->
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleQueryFilter()">
+                    <h3>Parámetros de Búsqueda</h3>
+                    <span class="filter-toggle" id="query-filter-toggle">▼</span>
+                </div>
+                <div class="filter-content" id="query-filter-content">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div>
+                            <label for="log-limit" style="display: block; font-weight: bold; margin-bottom: 5px;">Límite de logs:</label>
+                            <input type="number" id="log-limit" value="50" min="1" max="1000" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label for="log-eventid" style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de evento:</label>
+                            <select id="log-eventid" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+                                <option value="">Todos los eventos</option>
+                                <option value="cowrie.session.connect">Intento de conexión</option>
+                                <option value="cowrie.login.success">Login exitoso</option>
+                                <option value="cowrie.login.failed">Login fallido</option>
+                                <option value="cowrie.command.input">Comando ejecutado</option>
+                                <option value="cowrie.session.file_download">Descarga de archivo</option>
+                                <option value="cowrie.client.version">Versión del cliente</option>
+                                <option value="cowrie.session.closed">Sesión cerrada</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="log-timestamp" style="display: block; font-weight: bold; margin-bottom: 5px;">Desde fecha (opcional):</label>
+                            <input type="datetime-local" id="log-timestamp" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn-info" onclick="getLogs()" style="width: 100%;">🔍 Buscar Logs</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Visibility Section -->
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFieldFilter()">
+                    <h3>Campos Visibles</h3>
+                    <span class="filter-toggle" id="field-filter-toggle">▼</span>
+                </div>
+                <div class="filter-content" id="field-filter-content">
+                    <strong style="display: block; margin-bottom: 10px;">Selecciona los campos a mostrar:</strong>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-eventid" checked>
+                            <label for="field-eventid">Event ID</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-timestamp" checked>
+                            <label for="field-timestamp">Timestamp</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-src_ip" checked>
+                            <label for="field-src_ip">Source IP</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-src_port" checked>
+                            <label for="field-src_port">Source Port</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-username" checked>
+                            <label for="field-username">Username</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-password" checked>
+                            <label for="field-password">Password</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-duration" checked>
+                            <label for="field-duration">Duration</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-message" checked>
+                            <label for="field-message">Message</label>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-success" onclick="selectAllFields()">Seleccionar Todo</button>
+                        <button class="btn-danger" onclick="deselectAllFields()">Deseleccionar Todo</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="logs" class="response-box">Esperando solicitud...</div>
         </div>
     </div>
 
     <script>
         const API_URL = 'http://localhost:5000';
-
-        // Función auxiliar para mostrar respuesta
-        function showResponse(data, isError = false) {
-            const responseBox = document.getElementById('response');
-            responseBox.textContent = JSON.stringify(data, null, 2);
-            responseBox.className = 'response-box ' + (isError ? 'error' : 'success');
-        }
 
         // Función auxiliar para hacer peticiones
         async function makeRequest(endpoint, method = 'GET', body = null) {
@@ -318,10 +482,13 @@
                 const response = await fetch(`${API_URL}${endpoint}`, options);
                 const data = await response.json();
                 
-                showResponse(data, !response.ok);
+                responseBox.textContent = JSON.stringify(data, null, 2);
+                responseBox.className = 'response-box ' + (response.ok ? 'success' : 'error');
                 return data;
             } catch (error) {
-                showResponse({ error: error.message }, true);
+                const responseBox = document.getElementById('response');
+                responseBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+                responseBox.className = 'response-box error';
             }
         }
 
@@ -399,6 +566,107 @@
             await makeRequest('/api/cowrie/cleanup', 'POST');
             //await getStatus();
         }
+
+        // GET: Obtener logs
+        async function getLogs() {
+            const logsBox = document.getElementById('logs');
+            logsBox.textContent = 'Cargando logs...';
+            logsBox.className = 'response-box';
+
+            try {
+
+                const limit = document.getElementById('log-limit').value || 50;
+                const eventid = document.getElementById('log-eventid').value || '';
+                const timestampInput = document.getElementById('log-timestamp').value;
+                
+                // Add seconds and timezone
+                let timestamp = '';
+                if (timestampInput) {
+                    timestamp = timestampInput + ':00Z';
+                }
+
+                let url = `${API_URL}/api/cowrie/logs?limit=${limit}`;
+                if (eventid) {
+                    url += `&event_id=${eventid}`;
+                }
+                if (timestamp) {
+                    url += `&timestamp=${timestamp}`;
+                }
+
+
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const filteredLogs = filterLogFields(data.logs);
+                    logsBox.textContent = JSON.stringify({ success: true, logs: filteredLogs, total: data.logs.length }, null, 2);
+                    logsBox.className = 'response-box success';
+                } else {
+                    logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
+                    logsBox.className = 'response-box error';
+                }
+            } catch (error) {
+                logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+                logsBox.className = 'response-box error';
+            }
+        }
+
+        // Toggle query filter visibility
+        function toggleQueryFilter() {
+            const content = document.getElementById('query-filter-content');
+            const toggle = document.getElementById('query-filter-toggle');
+            content.classList.toggle('show');
+            toggle.classList.toggle('open');
+        }
+
+        // Toggle field filter visibility
+        function toggleFieldFilter() {
+            const content = document.getElementById('field-filter-content');
+            const toggle = document.getElementById('field-filter-toggle');
+            content.classList.toggle('show');
+            toggle.classList.toggle('open');
+        }
+
+        // Select all fields
+        function selectAllFields() {
+            const checkboxes = document.querySelectorAll('[id^="field-"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+        }
+
+        // Deselect all fields
+        function deselectAllFields() {
+            const checkboxes = document.querySelectorAll('[id^="field-"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+        }
+
+        // Filter log fields based on checkbox selection
+        function filterLogFields(logs) {
+            const fields = ['eventid', 'timestamp', 'src_ip', 'src_port', 'username', 'password', 'duration', 'message'];
+            const selectedFields = [];
+            for (let i = 0; i < fields.length; i++) {
+                const field = fields[i];
+                const checkbox = document.getElementById(`field-${field}`);
+                if (checkbox && checkbox.checked) {
+                    selectedFields.push(field);
+                }
+            }
+
+            const filteredLogs = [];
+            for (let i = 0; i < logs.length; i++) {
+                const log = logs[i];
+                const filteredLog = {};  
+                for (let j = 0; j < selectedFields.length; j++) {
+                    const field = selectedFields[j];
+                    if (log.hasOwnProperty(field)) {
+                        filteredLog[field] = log[field];
+                    }
+                }
+                filteredLogs.push(filteredLog);
+            }
+            
+            return filteredLogs;
+        }
+
         /*
         // Cargar estado al inicio
         window.addEventListener('load', () => {

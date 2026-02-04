@@ -37,7 +37,8 @@ def api_info():
                 "setup_redirect": "/api/cowrie/setup-redirect",
                 "start": "/api/cowrie/start",
                 "stop": "/api/cowrie/stop",
-                "cleanup": "/api/cowrie/cleanup"
+                "cleanup": "/api/cowrie/cleanup",
+                "logs": "/api/cowrie/logs?limit=50&event_id=cowrie.login.success&timestamp=2024-01-01T00:00:00"
             }
         }
     })
@@ -191,6 +192,22 @@ def cowrie_cleanup():
             "message": "Error cleaning up configuration"
         }), 500
 
+@app.route('/api/cowrie/logs', methods=['GET'])
+def cowrie_logs():
+    """Retrieves Cowrie logs with optional filtering""" # El usuario filtrará por límite de logs, tipo de evento y timestamp. Más tarde podrá ocultar campos que no quiera ver <- TODO
+    try:
+        limit = request.args.get('limit', default=50, type=int)
+        event_id = request.args.get('event_id', default=None, type=str)
+        timestamp = request.args.get('timestamp', default=None, type=str)
+
+        result = cowrie_manager.get_logs(limit=limit, event_id=event_id, timestamp=timestamp)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error retrieving Cowrie logs"
+        })
 
 # ============== ERROR HANDLING ==============
 @app.errorhandler(404)
