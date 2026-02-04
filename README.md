@@ -2,7 +2,7 @@
 ## TFG Ingeniería Informática - UDC
 ## Computer Engineering Final Project - UDC (Spain)
 
-**HoneyDash** HoneyDash is more than my Final Degree Project, is the first platform ever made that simplifies and unifies several Honeypots, offering a simple way to deploy, configure and manage them through its single Dashboard.
+**HoneyDash** is more than my Final Degree Project, is the first platform ever made that simplifies and unifies several Honeypots, offering a simple way to deploy, configure and manage them through its single Dashboard.
 
 > **Active Development**: This project is under development as part of my final degree project. Many features are still being implemented.
 
@@ -40,7 +40,7 @@
 
 ```bash
 # Clone repository
-git clone <your-repo> HoneyDash
+git clone https://github.com/ByRuBiX12/HoneyDash.git HoneyDash
 cd HoneyDash
 
 # Install dependencies
