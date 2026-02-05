@@ -13,9 +13,7 @@ class CowrieManager:
         self.cowrie_path = None # None because it may be auto-detected
         self.config_file = None # None because it may be auto-detected
         self.ssh_config_file = Path("/etc/ssh/sshd_config")
-        self.original_ssh_port = 22 # Default SSH port
         self.cowrie_port = 2222 # Cowrie needs to listen on port 2222
-        self.state_file = Path("/var/lib/honeydash/cowrie_state.json") # State file to store original config
         self.default_install_path = Path("/opt/cowrie") # Default installation path for Cowrie
         
         # If a path is provided, use it
@@ -34,21 +32,28 @@ class CowrieManager:
         Looks for "honeyfs" directory, unique in Cowrie.
         """
         try:
-            opt_res = subprocess.run(
-                ["find", "/opt", "-name", "honeyfs", "-type", "d", "-path", "*/cowrie/*"],
-                capture_output=True,
-                text=True,
-                timeout=7
-            )
-            glob_res = subprocess.run(
-                ["find", "/", "-name", "honeyfs", "-type", "d", "-path", "*/cowrie/*"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-
-            result = opt_res if opt_res.stdout != "" else glob_res
-
+            # /opt search first
+            opt_res = None
+            try:
+                opt_res = subprocess.run(
+                    ["find", "/opt", "-name", "honeyfs", "-type", "d", "-path", "*/cowrie/*", "-print", "-quit"],
+                    capture_output=True,
+                    text=True,
+                    timeout=7
+                )
+            except subprocess.TimeoutExpired:
+                print("[!] Timeout searching in /opt, continuing with global search...")
+        
+            if opt_res and opt_res.stdout.strip():
+                result = opt_res
+            else:
+                glob_res = subprocess.run(
+                    ["find", "/", "-name", "honeyfs", "-type", "d", "-path", "*/cowrie/*", "-print", "-quit"],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                result = glob_res
             if result.stdout.strip():
                 honeyfs_paths = result.stdout.strip().split('\n')
                 for honeyfs_path in honeyfs_paths:
@@ -81,7 +86,10 @@ class CowrieManager:
             path / "etc"
         ]
         
-        return all(item.exists() for item in required_items)
+        for item in required_items:
+            if not item.exists():
+                return False
+        return True
     
     def set_cowrie_path(self, custom_path):
         """
@@ -375,9 +383,6 @@ class CowrieManager:
             # Find an available random port
             new_ssh_port = self._find_available_port()
             
-            # Save current state
-            self._save_state(new_ssh_port)
-            
             # Modify SSH configuration
             ssh_result = self._move_ssh_to_port(new_ssh_port)
             if not ssh_result["success"]:
@@ -472,20 +477,6 @@ class CowrieManager:
                 "success": False,
                 "message": f"Error modifying SSH configuration: {str(e)}"
             }
-    
-    def _save_state(self, ssh_port):
-        """Saves the current state to restore it later"""
-        state = {
-            "ssh_port": ssh_port,
-            "original_ssh_port": self.original_ssh_port,
-            "iptables_configured": True
-        }
-        
-        # Create parent directory if it does not exist
-        self.state_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(self.state_file, 'w') as f:
-            json.dump(state, f)
     
     def _restore_ssh_config(self):
         """Restores the original SSH configuration"""
@@ -657,9 +648,6 @@ class CowrieManager:
 
             subprocess.run(["systemctl", "stop", "sshd"], stderr=subprocess.DEVNULL)
             subprocess.run(["systemctl", "stop", "ssh"], stderr=subprocess.DEVNULL)
-            
-            # Remove state file
-            self.state_file.unlink()
             
             return {
                 "success": True,
