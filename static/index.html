@@ -345,9 +345,29 @@
             </div>
         </div>
 
+        <!-- Estado de Splunk -->
+        <div class="card">
+            <h2>Estado de Splunk</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <label>Instalado</label>
+                    <div class="value" id="splunk-installed">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Estado</label>
+                    <div class="value" id="splunk-running">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Token</label>
+                    <div class="value" id="splunk-token">-</div>
+                </div>
+            </div>
+            <button class="btn-info" onclick="getSplunkStatus()">Actualizar Estado</button>
+        </div>
+
         <!-- Controles de Cowrie -->
         <div class="card">
-            <h2>🎮 Control de Cowrie</h2>
+            <h2>Control de Cowrie</h2>
             <div class="button-grid">
                 <button class="btn-warning" onclick="installCowrie()">Instalar Cowrie</button>
                 <button class="btn-primary" onclick="configureCowrie()">Configurar Puerto</button>
@@ -358,6 +378,16 @@
                 <button class="btn-info" onclick="getLogs()">Obtener Logs</button>
             </div>
         </div>
+
+        <!-- Controles de Splunk -->
+         <div class="card">
+            <h2>Control de Splunk</h2>
+            <div class="button-grid">
+                <button class="btn-success" onclick="makeRequest('/api/splunk/start', 'POST')">Iniciar Splunk</button>
+                <button class="btn-danger" onclick="makeRequest('/api/splunk/stop', 'POST')">Detener Splunk</button>
+                <button class="btn-primary" onclick="makeRequest('/api/splunk/create', 'POST')">Crear Token</button>
+            </div>
+         </div>
 
         <!-- Respuesta del Servidor -->
         <div class="card">
@@ -400,7 +430,7 @@
                         </div>
                     </div>
                     <div style="margin-top: 15px;">
-                        <button class="btn-info" onclick="getLogs()" style="width: 100%;">🔍 Buscar Logs</button>
+                        <button class="btn-info" onclick="getLogs()" style="width: 100%;">Buscar Logs</button>
                     </div>
                 </div>
             </div>
@@ -454,7 +484,8 @@
                 </div>
             </div>
             
-            <div id="logs" class="response-box">Esperando solicitud...</div>
+            <div id="logs" class="response-box">Esperando solicitud...</div><br>
+            <button id="sendToSplunk" class="btn-primary" onclick="sendToSplunk()" disabled="True">Enviar a Splunk</button>
         </div>
     </div>
 
@@ -494,13 +525,13 @@
 
         // Actualizar UI con el estado
         function updateStatusUI(status) {
-            document.getElementById('status-installed').textContent = status.installed ? '✅ Sí' : '❌ No';
+            document.getElementById('status-installed').textContent = status.installed ? 'Sí' : 'No';
             document.getElementById('status-installed').className = 'value ' + (status.installed ? 'success' : 'error');
             
-            document.getElementById('status-running').textContent = status.running ? '🟢 Activo' : '🔴 Inactivo';
+            document.getElementById('status-running').textContent = status.running ? 'Activo' : 'Inactivo';
             document.getElementById('status-running').className = 'value ' + (status.running ? 'success' : 'error');
             
-            document.getElementById('status-configured').textContent = status.configured ? '✅ Sí' : '❌ No';
+            document.getElementById('status-configured').textContent = status.configured ? 'Sí' : 'No';
             document.getElementById('status-configured').className = 'value ' + (status.configured ? 'success' : 'error');
             
             document.getElementById('status-path').textContent = status.cowrie_path || 'No detectado';
@@ -511,6 +542,18 @@
             const data = await makeRequest('/api/cowrie/status');
             if (data && !data.error) {
                 updateStatusUI(data);
+            }
+        }
+
+        // GET: Obtener estado de Splunk
+        async function getSplunkStatus() {
+            const data = await makeRequest('/api/splunk/status');
+            if (data && !data.error) {
+                document.getElementById('splunk-installed').textContent = data.installed ? 'Sí' : 'No';
+                document.getElementById('splunk-installed').className = 'value ' + (data.installed ? 'success' : 'error');
+                document.getElementById('splunk-running').textContent = data.running ? 'Activo' : 'Inactivo';
+                document.getElementById('splunk-running').className = 'value ' + (data.running ? 'success' : 'error');
+                document.getElementById('splunk-token').textContent = data.token || 'No detectado';
             }
         }
 
@@ -540,10 +583,10 @@
 
         // POST: Configurar redirección SSH
         async function setupRedirect() {
-            if (!confirm('⚠️ Esto moverá tu SSH real a un puerto aleatorio. ¿Continuar?')) return;
+            if (!confirm('Esto moverá tu SSH real a un puerto aleatorio. ¿Continuar?')) return;
             const data = await makeRequest('/api/cowrie/setup-redirect', 'POST');
             if (data && data.success) {
-                alert(`✅ SSH real movido al puerto: ${data.ssh_port}\n¡Anota este puerto!`);
+                alert(`SSH real movido al puerto: ${data.ssh_port}\n¡Anota este puerto!`);
             }
             //await getStatus();
         }
@@ -598,6 +641,7 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    document.getElementById('sendToSplunk').disabled = false;
                     const filteredLogs = filterLogFields(data.logs);
                     logsBox.textContent = JSON.stringify({ success: true, logs: filteredLogs, total: data.logs.length }, null, 2);
                     logsBox.className = 'response-box success';
@@ -608,6 +652,31 @@
             } catch (error) {
                 logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
                 logsBox.className = 'response-box error';
+            }
+        }
+
+        // POST: Enviar logs a Splunk
+        async function sendToSplunk() {
+            const logsBox = document.getElementById('logs').textContent;
+
+            try {
+                const logsData = JSON.parse(logsBox);
+                
+                if (!logsData.logs || logsData.logs.length === 0) {
+                    alert('No hay logs para enviar a Splunk.');
+                    return;
+                }
+
+                const payload = {
+                    logs: logsData.logs
+                };
+
+                const response = await makeRequest('/api/splunk/send', 'POST', payload);
+            }
+            catch (error) {
+                alert('No hay logs válidos para enviar a Splunk.');
+                console.error('Error:', error);
+                return;
             }
         }
 
@@ -667,14 +736,11 @@
             return filteredLogs;
         }
 
-        /*
-        // Cargar estado al inicio
+        // Execute at startup
         window.addEventListener('load', () => {
             getStatus();
-            // Actualizar cada 5 segundos
-            setInterval(getStatus, 5000);
+            getSplunkStatus();
         });
-        */
     </script>
 </body>
 </html>

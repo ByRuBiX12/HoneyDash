@@ -6,10 +6,12 @@ from pathlib import Path
 from signal import signal, SIGINT
 import pwd
 
-# Add honeypots directory to path
+from honeypots.cowrie_manager import CowrieManager
+from siem.splunk_manager import SplunkManager
+
+# Add siem and honeypots directories to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from honeypots.cowrie_manager import CowrieManager
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
@@ -208,6 +210,83 @@ def cowrie_logs():
             "error": str(e),
             "message": "Error retrieving Cowrie logs"
         })
+    
+# ============== SPLUNK ENDPOINTS ==============
+@app.route('/api/splunk/status', methods=['GET'])
+def splunk_status():
+    """Gets the current status of Splunk"""
+    try:
+        status = splunk_manager.get_status()
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error getting Splunk status"
+        }), 500
+
+@app.route('/api/splunk/start', methods=['POST'])
+def splunk_start():
+    """Starts Splunk"""
+    try:
+        result = splunk_manager.start()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error starting Splunk"
+        })
+
+@app.route('/api/splunk/stop', methods=['POST'])
+def splunk_stop():
+    """Stop Splunk"""
+    try:
+        result = splunk_manager.stop()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error stopping Splunk"
+        })
+
+@app.route('/api/splunk/search', methods=['GET'])
+def splunk_search():
+    """Searches for HoneyDash token in Slunk's HTTP Event Collector inputs"""
+    try:
+        result = splunk_manager.search_token()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error searching for token in Splunk"
+        })
+    
+@app.route('/api/splunk/create', methods=['POST'])
+def splunk_create():
+    """Creates HoneyDash token in Splunk's HTTP Event Collector inputs"""
+    try:
+        result = splunk_manager.create_token()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error creating token in Splunk"
+        })
+
+@app.route('/api/splunk/send', methods=['POST'])
+def splunk_send():
+    """Sends event to Splunk using the HEC token"""
+    try:
+        event = request.get_json()
+        result = splunk_manager.send_event(event)
+        status_code = 200 if result.get("success") else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error sending event to Splunk"
+        }), 500
 
 # ============== ERROR HANDLING ==============
 @app.errorhandler(404)
@@ -252,5 +331,7 @@ if __name__ == '__main__':
 
     # Start Cowrie manager
     cowrie_manager = CowrieManager()
+    # Start Splunk manager
+    splunk_manager = SplunkManager()
 
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False) # Set to False to avoid running the initialization twice
