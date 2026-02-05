@@ -1,5 +1,33 @@
 # Changelog
 
+## [Unreleased] - 2026-02-05
+
+### Added
+- **Splunk SIEM Integration**: Complete Splunk management with status monitoring, service control, and HEC token operations
+- **HEC Token Management**: Automatic creation and retrieval of HTTP Event Collector tokens for event forwarding
+- **Event Forwarding**: Send Cowrie logs to Splunk with configurable sourcetype and index
+- **Log Retrieval API**: Query Cowrie JSON logs with filtering by limit, event_id, and timestamp
+- **Batch Event Processing**: Handle multiple events efficiently with error tracking and partial success reporting
+- **SSL Warnings Suppression**: Disabled urllib3 warnings for self-signed certificates in local Splunk instances
+
+### Changed
+- **Cowrie Detection Optimization**: Added `-quit` flag to `find` command for immediate exit after first match
+- **Detection Timeout Strategy**: Reduced `/opt` search timeout to 5s, separate timeout handling for global search
+- **Log Response Format**: Filter and return only relevant fields (eventid, timestamp, src_ip, username, password, etc.)
+- **Event Payload Parsing**: Extract logs from nested `{"logs": [...]}` structure before sending to Splunk
+- **API Documentation**: Updated with Splunk endpoints and Cowrie log retrieval query parameters
+
+### Fixed
+- **Timeout Exception Handling**: Wrapped `/opt` search in try-except to continue with global search on timeout
+- **Find Output Issue**: Added `-print` flag before `-quit` to ensure results are displayed before exit
+- **Event Structure Problem**: Fixed event parsing to handle dictionary with "logs" key instead of raw array
+
+### Technical Details
+- **SplunkManager Class**: New manager in `siem/splunk_manager.py` with REST API communication
+- **Base64 Authentication**: Uses basic auth with admin credentials for Splunk management API
+- **HEC Communication**: Proper header formatting with `Splunk <token>` authorization
+- **Error Aggregation**: Tracks failed events separately while reporting successful sends
+
 ## [Unreleased] - 2026-02-03
 
 ### Added
