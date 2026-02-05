@@ -2,7 +2,7 @@
 ## TFG Ingeniería Informática - UDC
 ## Computer Engineering Final Project - UDC (Spain)
 
-**HoneyDash** is more than my Final Degree Project, is the first platform ever made that simplifies and unifies several Honeypots, offering a simple way to deploy, configure and manage them through its single Dashboard.
+**HoneyDash** is more than my Final Degree Project, is the first platform ever made that simplifies and unifies several Honeypots, offering a simple way to deploy, configure and manage them through its single Dashboard, as well as offering a great integration with Splunk SIEM.
 
 > **Active Development**: This project is under development as part of my final degree project. Many features are still being implemented.
 
@@ -10,18 +10,28 @@
 
 ### Cowrie Honeypot Management
 - **Auto-detection**: Automatically finds Cowrie installations across the system
-- **Easy installation**: One-click automated setup with all dependencies
+- **Easy installation**: One-click automated setup with all dependencies and virtual environment
 - **SSH redirection**: Moves real SSH to a random port (1024-65535) and redirects port 22 to Cowrie
-- **Port configuration**: Configures Cowrie to listen on port 2222
-- **iptables management**: Handles NAT rules automatically
-- **Start/Stop control**: Simple honeypot lifecycle management
-- **Auto-cleanup**: Restores SSH and iptables on exit (via SIGINT handler)
-- **Security**: Cowrie runs as non-root user (drops privileges at runtime)
+- **Smart configuration**: Automatically configures Cowrie to listen on port 2222
+- **iptables management**: Handles NAT rules automatically for transparent redirection
+- **Lifecycle control**: Start/Stop operations with privilege management
+- **Log retrieval**: Query Cowrie JSON logs with filtering by limit, event type, and timestamp
+- **Auto-cleanup**: Restores SSH and iptables on exit (SIGINT handler)
+- **Security**: Cowrie runs as non-root user (automatic privilege dropping)
+
+### Splunk SIEM Integration
+- **Status monitoring**: Check if Splunk is installed and running
+- **Service control**: Start/Stop Splunk from the dashboard
+- **HEC token management**: Automatic creation and retrieval of HTTP Event Collector tokens
+- **Event forwarding**: Send honeypot logs to Splunk with configurable sourcetype and index
+- **Batch processing**: Handles multiple events efficiently with error tracking
 
 ### REST API
-- Full CRUD operations for honeypot management
+- Full CRUD operations for honeypot and SIEM management
+- Comprehensive error handling with descriptive messages
 - JSON responses with detailed status information
 - CORS-enabled for frontend integration
+- Query parameters for log filtering
 
 ### Web Dashboard
 - Real-time status monitoring (auto-refresh)
@@ -54,27 +64,39 @@ Access the dashboard at: `http://localhost:5000`
 
 ## API Reference
 
-### Status
+### Cowrie Endpoints
 ```bash
-GET /api/cowrie/status
+# Status and configuration
+GET  /api/cowrie/status
+POST /api/cowrie/set-path        # Manual path: {"path": "/custom/path"}
+
+# Installation and setup
+POST /api/cowrie/install
+POST /api/cowrie/configure
+POST /api/cowrie/setup-redirect
+
+# Operations
+POST /api/cowrie/start
+POST /api/cowrie/stop
+POST /api/cowrie/cleanup
+
+# Log retrieval
+GET  /api/cowrie/logs?limit=50&event_id=cowrie.login.success&timestamp=2024-01-01T00:00:00
 ```
 
-### Operations
+### Splunk Endpoints
 ```bash
-POST /api/cowrie/install      # Install Cowrie
-POST /api/cowrie/configure    # Configure port 2222
-POST /api/cowrie/setup-redirect  # Move SSH + add iptables rule
-POST /api/cowrie/start        # Start honeypot (runs as non-root)
-POST /api/cowrie/stop         # Stop honeypot
-POST /api/cowrie/cleanup      # Restore SSH to port 22
-```
+# Status and control
+GET  /api/splunk/status
+POST /api/splunk/start
+POST /api/splunk/stop
 
-### Manual Path (if auto-detection fails)
-```bash
-POST /api/cowrie/set-path
-Content-Type: application/json
+# Token management
+GET  /api/splunk/search          # Find HoneyDash HEC token
+POST /api/splunk/create          # Create HEC token
 
-{"path": "/custom/path/to/cowrie"}
+# Event forwarding
+POST /api/splunk/send            # Body: {"logs": [{event1}, {event2}]}
 ```
 
 ## Security Model
@@ -88,32 +110,39 @@ Content-Type: application/json
 
 ```
 HoneyDash/
-├── app.py                    # Flask backend with signal handling
+├── app.py                    # Flask backend with API endpoints and signal handling
 ├── honeypots/
-│   └── cowrie_manager.py    # Cowrie lifecycle management
+│   └── cowrie_manager.py    # Cowrie lifecycle and log management
+├── siem/
+│   └── splunk_manager.py    # Splunk integration and HEC communication
 ├── static/
-│   └── index.html           # Web dashboard
-└── requirements.txt         # Python dependencies
+│   └── index.html           # Web dashboard interface
+└── requirements.txt         # Python dependencies (Flask, requests, etc.)
 ```
 
 ## Roadmap
 
-- [X] Cowrie honeypot
-- [ ] Dionaea honeypot
-- [ ] DDoSPot honeypot
-- [ ] Real-time log parsing and visualization
-- [ ] Splunk HEC integration
-- [ ] Suricata alerts analysis with CVE lookup
-- [ ] Advanced dashboard with metrics
-- [ ] Docker deployment
+- [X] Cowrie honeypot integration
+- [X] Splunk SIEM connectivity
+- [X] Log retrieval and filtering
+- [ ] Real-time log visualization on dashboard
+- [ ] Dionaea honeypot support
+- [ ] DDoSPot honeypot support
+- [ ] Suricata IDS integration with CVE enrichment
+- [ ] Advanced threat analytics
+- [ ] Docker deployment option
 
 ## Troubleshooting
 
 **"Must run with sudo"**: Execute as `sudo python3 app.py` from your regular user (not root)
 
-**Auto-detection fails**: Use `/api/cowrie/set-path` endpoint to set Cowrie location manually
+**Cowrie auto-detection fails**: Use `/api/cowrie/set-path` endpoint with custom path
 
-**Lost SSH access**: SSH moved to random port shown in `/api/cowrie/setup-redirect` response. Run `/api/cowrie/cleanup` to restore port 22.
+**Lost SSH access**: SSH moved to random port shown in `/api/cowrie/setup-redirect` response. Run `/api/cowrie/cleanup` to restore port 22
+
+**Splunk token not found**: Ensure Splunk is running, then use `/api/splunk/create` to generate HEC token
+
+**Events not sent to Splunk**: Verify HEC is enabled and token exists. Check logs contain `{"logs": [...]}`structure
 
 ## License
 
