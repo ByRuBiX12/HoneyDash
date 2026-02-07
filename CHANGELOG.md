@@ -1,5 +1,31 @@
 # Changelog
 
+## [Unreleased] - 2026-02-06
+
+### Added
+- **Modern Web Dashboard UI**: Complete redesign with professional gradient background and card-based layout
+- **Navigation Bar**: Centered navigation with Home and Logs pages, logo integration with hover effects
+- **Service Cards Layout**: Grid system with 3 honeypot cards (Cowrie, Dionaea, DDoSPot) and 2-column layout for SIEM/IDS
+- **Multiple Status Badges**: Display installation, running, and configuration status simultaneously per service
+- **Section Dividers**: Visual separators with titles for Honeypots, SIEM, and IDS sections
+- **Responsive Design**: Adaptive grid layout (3 columns → 2 columns → 1 column based on screen size)
+- **Footer**: Copyright and branding information
+
+### Changed
+- **Card Actions Layout**: Reorganized buttons into logical rows with full-width distribution
+- **Cowrie Controls**: Separated Install/Configure/Restore, Start/Stop, and Path/Status controls into distinct rows
+- **Status Badge Styling**: Closely grouped badges with minimal spacing, right-aligned for standard cards
+- **Suricata Card Alignment**: Right-to-left text alignment with reversed badge order for visual symmetry
+- **Background Pattern**: Added subtle diagonal pattern overlay for depth without distraction
+- **Color Scheme**: Updated to golden/brown gradient (#a88100 to #433100) with improved contrast
+
+### Technical Details
+- **CSS Grid System**: `repeat(3, 1fr)` for honeypots, `repeat(2, 1fr)` for SIEM/IDS section with `.two-columns` class
+- **Flexbox Navigation**: Centered nav with `position: absolute` and `transform: translateX(-50%)`
+- **Badge Grouping**: `margin-left: 0.5rem` for tight spacing, reversed with `margin-right` for Suricata
+- **Card Hover Effects**: `translateY(-5px)` elevation with enhanced shadows
+- **Blur/shadow Filter**: Blur and shadow effects on header and cards.
+
 ## [Unreleased] - 2026-02-05
 
 ### Added

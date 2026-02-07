@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoneyDash - Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .status-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-item label {
+            display: block;
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .status-item .value {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .status-item .value.success {
+            color: #28a745;
+        }
+
+        .status-item .value.error {
+            color: #dc3545;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-primary {
+            background: #667eea;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .response-box {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .response-box.success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .response-box.error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* Filter styles */
+        .filter-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filter-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .filter-toggle {
+            font-size: 20px;
+            transition: transform 0.3s;
+        }
+
+        .filter-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .filter-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .filter-content.show {
+            display: block;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .filter-buttons button {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HoneyDash</h1>
+            <p class="subtitle">Panel de Control de Honeypots</p>
+        </header>
+
+        <!-- Estado de Cowrie -->
+        <div class="card">
+            <h2>Estado de Cowrie</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <label>Instalado</label>
+                    <div class="value" id="status-installed">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Estado</label>
+                    <div class="value" id="status-running">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Configurado</label>
+                    <div class="value" id="status-configured">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Ruta</label>
+                    <div class="value" id="status-path" style="font-size: 12px;">-</div>
+                </div>
+            </div>
+            <button class="btn-info" onclick="getStatus()">Actualizar Estado</button>
+        </div>
+
+        <!-- Configuración Manual de Ruta -->
+        <div class="card">
+            <h2>Configurar Ruta Manual</h2>
+            <div class="input-group">
+                <input type="text" id="custom-path" placeholder="/ruta/a/cowrie" value="/home/kali/TFG/cowrie">
+                <button class="btn-primary" onclick="setCustomPath()">Establecer Ruta</button>
+            </div>
+        </div>
+
+        <!-- Estado de Splunk -->
+        <div class="card">
+            <h2>Estado de Splunk</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <label>Instalado</label>
+                    <div class="value" id="splunk-installed">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Estado</label>
+                    <div class="value" id="splunk-running">-</div>
+                </div>
+                <div class="status-item">
+                    <label>Token</label>
+                    <div class="value" id="splunk-token">-</div>
+                </div>
+            </div>
+            <button class="btn-info" onclick="getSplunkStatus()">Actualizar Estado</button>
+        </div>
+
+        <!-- Controles de Cowrie -->
+        <div class="card">
+            <h2>Control de Cowrie</h2>
+            <div class="button-grid">
+                <button class="btn-warning" onclick="installCowrie()">Instalar Cowrie</button>
+                <button class="btn-primary" onclick="configureCowrie()">Configurar Puerto</button>
+                <button class="btn-warning" onclick="setupRedirect()">Configurar SSH</button>
+                <button class="btn-success" onclick="startCowrie()">Iniciar</button>
+                <button class="btn-danger" onclick="stopCowrie()">Detener</button>
+                <button class="btn-secondary" onclick="cleanup()">Limpiar</button>
+                <button class="btn-info" onclick="getLogs()">Obtener Logs</button>
+            </div>
+        </div>
+
+        <!-- Controles de Splunk -->
+         <div class="card">
+            <h2>Control de Splunk</h2>
+            <div class="button-grid">
+                <button class="btn-success" onclick="makeRequest('/api/splunk/start', 'POST')">Iniciar Splunk</button>
+                <button class="btn-danger" onclick="makeRequest('/api/splunk/stop', 'POST')">Detener Splunk</button>
+                <button class="btn-primary" onclick="makeRequest('/api/splunk/create', 'POST')">Crear Token</button>
+            </div>
+         </div>
+
+        <!-- Respuesta del Servidor -->
+        <div class="card">
+            <h2>Respuesta del Servidor</h2>
+            <div id="response" class="response-box">Esperando solicitud...</div>
+        </div>
+
+        <!-- Logs de Cowrie -->
+        <div class="card">
+            <h2>Logs de Cowrie</h2>
+            
+            <!-- Query Filters Section -->
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleQueryFilter()">
+                    <h3>Parámetros de Búsqueda</h3>
+                    <span class="filter-toggle" id="query-filter-toggle">▼</span>
+                </div>
+                <div class="filter-content" id="query-filter-content">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                        <div>
+                            <label for="log-limit" style="display: block; font-weight: bold; margin-bottom: 5px;">Límite de logs:</label>
+                            <input type="number" id="log-limit" value="50" min="1" max="1000" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label for="log-eventid" style="display: block; font-weight: bold; margin-bottom: 5px;">Tipo de evento:</label>
+                            <select id="log-eventid" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+                                <option value="">Todos los eventos</option>
+                                <option value="cowrie.session.connect">Intento de conexión</option>
+                                <option value="cowrie.login.success">Login exitoso</option>
+                                <option value="cowrie.login.failed">Login fallido</option>
+                                <option value="cowrie.command.input">Comando ejecutado</option>
+                                <option value="cowrie.session.file_download">Descarga de archivo</option>
+                                <option value="cowrie.client.version">Versión del cliente</option>
+                                <option value="cowrie.session.closed">Sesión cerrada</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="log-timestamp" style="display: block; font-weight: bold; margin-bottom: 5px;">Desde fecha (opcional):</label>
+                            <input type="datetime-local" id="log-timestamp" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px;">
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn-info" onclick="getLogs()" style="width: 100%;">Buscar Logs</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Visibility Section -->
+            <div class="filter-section">
+                <div class="filter-header" onclick="toggleFieldFilter()">
+                    <h3>Campos Visibles</h3>
+                    <span class="filter-toggle" id="field-filter-toggle">▼</span>
+                </div>
+                <div class="filter-content" id="field-filter-content">
+                    <strong style="display: block; margin-bottom: 10px;">Selecciona los campos a mostrar:</strong>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-eventid" checked>
+                            <label for="field-eventid">Event ID</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-timestamp" checked>
+                            <label for="field-timestamp">Timestamp</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-src_ip" checked>
+                            <label for="field-src_ip">Source IP</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-src_port" checked>
+                            <label for="field-src_port">Source Port</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-username" checked>
+                            <label for="field-username">Username</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-password" checked>
+                            <label for="field-password">Password</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-duration" checked>
+                            <label for="field-duration">Duration</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="field-message" checked>
+                            <label for="field-message">Message</label>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-success" onclick="selectAllFields()">Seleccionar Todo</button>
+                        <button class="btn-danger" onclick="deselectAllFields()">Deseleccionar Todo</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="logs" class="response-box">Esperando solicitud...</div><br>
+            <button id="sendToSplunk" class="btn-primary" onclick="sendToSplunk()" disabled="True">Enviar a Splunk</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        // Función auxiliar para hacer peticiones
+        async function makeRequest(endpoint, method = 'GET', body = null) {
+            const responseBox = document.getElementById('response');
+            responseBox.textContent = 'Cargando...';
+            responseBox.className = 'response-box';
+
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                };
+
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${API_URL}${endpoint}`, options);
+                const data = await response.json();
+                
+                responseBox.textContent = JSON.stringify(data, null, 2);
+                responseBox.className = 'response-box ' + (response.ok ? 'success' : 'error');
+                return data;
+            } catch (error) {
+                const responseBox = document.getElementById('response');
+                responseBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+                responseBox.className = 'response-box error';
+            }
+        }
+
+        // Actualizar UI con el estado
+        function updateStatusUI(status) {
+            document.getElementById('status-installed').textContent = status.installed ? 'Sí' : 'No';
+            document.getElementById('status-installed').className = 'value ' + (status.installed ? 'success' : 'error');
+            
+            document.getElementById('status-running').textContent = status.running ? 'Activo' : 'Inactivo';
+            document.getElementById('status-running').className = 'value ' + (status.running ? 'success' : 'error');
+            
+            document.getElementById('status-configured').textContent = status.configured ? 'Sí' : 'No';
+            document.getElementById('status-configured').className = 'value ' + (status.configured ? 'success' : 'error');
+            
+            document.getElementById('status-path').textContent = status.cowrie_path || 'No detectado';
+        }
+
+        // GET: Obtener estado
+        async function getStatus() {
+            const data = await makeRequest('/api/cowrie/status');
+            if (data && !data.error) {
+                updateStatusUI(data);
+            }
+        }
+
+        // GET: Obtener estado de Splunk
+        async function getSplunkStatus() {
+            const data = await makeRequest('/api/splunk/status');
+            if (data && !data.error) {
+                document.getElementById('splunk-installed').textContent = data.installed ? 'Sí' : 'No';
+                document.getElementById('splunk-installed').className = 'value ' + (data.installed ? 'success' : 'error');
+                document.getElementById('splunk-running').textContent = data.running ? 'Activo' : 'Inactivo';
+                document.getElementById('splunk-running').className = 'value ' + (data.running ? 'success' : 'error');
+                document.getElementById('splunk-token').textContent = data.token || 'No detectado';
+            }
+        }
+
+        // POST: Establecer ruta personalizada
+        async function setCustomPath() {
+            const path = document.getElementById('custom-path').value;
+            if (!path) {
+                alert('Por favor, ingresa una ruta');
+                return;
+            }
+            await makeRequest('/api/cowrie/set-path', 'POST', { path: path });
+            //await getStatus();
+        }
+
+        // POST: Instalar Cowrie
+        async function installCowrie() {
+            if (!confirm('¿Instalar Cowrie? Esto puede tardar varios minutos.')) return;
+            await makeRequest('/api/cowrie/install', 'POST');
+            //await getStatus();
+        }
+
+        // POST: Configurar Cowrie
+        async function configureCowrie() {
+            await makeRequest('/api/cowrie/configure', 'POST');
+            //await getStatus();
+        }
+
+        // POST: Configurar redirección SSH
+        async function setupRedirect() {
+            if (!confirm('Esto moverá tu SSH real a un puerto aleatorio. ¿Continuar?')) return;
+            const data = await makeRequest('/api/cowrie/setup-redirect', 'POST');
+            if (data && data.success) {
+                alert(`SSH real movido al puerto: ${data.ssh_port}\n¡Anota este puerto!`);
+            }
+            //await getStatus();
+        }
+
+        // POST: Iniciar Cowrie
+        async function startCowrie() {
+            await makeRequest('/api/cowrie/start', 'POST');
+            //await getStatus();
+        }
+
+        // POST: Detener Cowrie
+        async function stopCowrie() {
+            await makeRequest('/api/cowrie/stop', 'POST');
+            //await getStatus();
+        }
+
+        // POST: Limpiar configuración
+        async function cleanup() {
+            if (!confirm('¿Restaurar configuración SSH original?')) return;
+            await makeRequest('/api/cowrie/cleanup', 'POST');
+            //await getStatus();
+        }
+
+        // GET: Obtener logs
+        async function getLogs() {
+            const logsBox = document.getElementById('logs');
+            logsBox.textContent = 'Cargando logs...';
+            logsBox.className = 'response-box';
+
+            try {
+
+                const limit = document.getElementById('log-limit').value || 50;
+                const eventid = document.getElementById('log-eventid').value || '';
+                const timestampInput = document.getElementById('log-timestamp').value;
+                
+                // Add seconds and timezone
+                let timestamp = '';
+                if (timestampInput) {
+                    timestamp = timestampInput + ':00Z';
+                }
+
+                let url = `${API_URL}/api/cowrie/logs?limit=${limit}`;
+                if (eventid) {
+                    url += `&event_id=${eventid}`;
+                }
+                if (timestamp) {
+                    url += `&timestamp=${timestamp}`;
+                }
+
+
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('sendToSplunk').disabled = false;
+                    const filteredLogs = filterLogFields(data.logs);
+                    logsBox.textContent = JSON.stringify({ success: true, logs: filteredLogs, total: data.logs.length }, null, 2);
+                    logsBox.className = 'response-box success';
+                } else {
+                    logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
+                    logsBox.className = 'response-box error';
+                }
+            } catch (error) {
+                logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+                logsBox.className = 'response-box error';
+            }
+        }
+
+        // POST: Enviar logs a Splunk
+        async function sendToSplunk() {
+            const logsBox = document.getElementById('logs').textContent;
+
+            try {
+                const logsData = JSON.parse(logsBox);
+                
+                if (!logsData.logs || logsData.logs.length === 0) {
+                    alert('No hay logs para enviar a Splunk.');
+                    return;
+                }
+
+                const payload = {
+                    logs: logsData.logs
+                };
+
+                const response = await makeRequest('/api/splunk/send', 'POST', payload);
+            }
+            catch (error) {
+                alert('No hay logs válidos para enviar a Splunk.');
+                console.error('Error:', error);
+                return;
+            }
+        }
+
+        // Toggle query filter visibility
+        function toggleQueryFilter() {
+            const content = document.getElementById('query-filter-content');
+            const toggle = document.getElementById('query-filter-toggle');
+            content.classList.toggle('show');
+            toggle.classList.toggle('open');
+        }
+
+        // Toggle field filter visibility
+        function toggleFieldFilter() {
+            const content = document.getElementById('field-filter-content');
+            const toggle = document.getElementById('field-filter-toggle');
+            content.classList.toggle('show');
+            toggle.classList.toggle('open');
+        }
+
+        // Select all fields
+        function selectAllFields() {
+            const checkboxes = document.querySelectorAll('[id^="field-"]');
+            checkboxes.forEach(checkbox => checkbox.checked = true);
+        }
+
+        // Deselect all fields
+        function deselectAllFields() {
+            const checkboxes = document.querySelectorAll('[id^="field-"]');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+        }
+
+        // Filter log fields based on checkbox selection
+        function filterLogFields(logs) {
+            const fields = ['eventid', 'timestamp', 'src_ip', 'src_port', 'username', 'password', 'duration', 'message'];
+            const selectedFields = [];
+            for (let i = 0; i < fields.length; i++) {
+                const field = fields[i];
+                const checkbox = document.getElementById(`field-${field}`);
+                if (checkbox && checkbox.checked) {
+                    selectedFields.push(field);
+                }
+            }
+
+            const filteredLogs = [];
+            for (let i = 0; i < logs.length; i++) {
+                const log = logs[i];
+                const filteredLog = {};  
+                for (let j = 0; j < selectedFields.length; j++) {
+                    const field = selectedFields[j];
+                    if (log.hasOwnProperty(field)) {
+                        filteredLog[field] = log[field];
+                    }
+                }
+                filteredLogs.push(filteredLog);
+            }
+            
+            return filteredLogs;
+        }
+
+        // Execute at startup
+        window.addEventListener('load', () => {
+            getStatus();
+            getSplunkStatus();
+        });
+    </script>
+</body>
+</html>

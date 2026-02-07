@@ -34,10 +34,14 @@
 - Query parameters for log filtering
 
 ### Web Dashboard
-- Real-time status monitoring (auto-refresh)
-- One-click operations for all endpoints
+- Modern card-based UI with gradient design
+- Navigation bar with Home and Logs sections
+- Real-time status monitoring with multiple badges per service
+- Organized button layouts with logical grouping
+- Section dividers for Honeypots, SIEM, and IDS
+- Responsive grid layout (3→2→1 columns)
 - JSON response viewer with syntax highlighting
-- Responsive design with gradient UI
+- Responsive design with gradient UI and hover animations
 
 ## Quick Start
 
@@ -116,7 +120,12 @@ HoneyDash/
 ├── siem/
 │   └── splunk_manager.py    # Splunk integration and HEC communication
 ├── static/
-│   └── index.html           # Web dashboard interface
+│   ├── index.html           # Main dashboard interface
+│   ├── css/
+│   │   └── style.css        # Modern gradient styling with responsive design
+│   ├── js/
+│   │   └── dashboard.js     # Dashboard interactions and API calls
+│   └── assets/              # Logo and icons
 └── requirements.txt         # Python dependencies (Flask, requests, etc.)
 ```
 
@@ -125,6 +134,7 @@ HoneyDash/
 - [X] Cowrie honeypot integration
 - [X] Splunk SIEM connectivity
 - [X] Log retrieval and filtering
+- [X] Modern web dashboard with responsive design
 - [ ] Real-time log visualization on dashboard
 - [ ] Dionaea honeypot support
 - [ ] DDoSPot honeypot support
