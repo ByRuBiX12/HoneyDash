@@ -156,6 +156,53 @@ nav a:hover:after {width: 100%;}
     color: #eeaf00;
 }
 
+/* Messages Container */
+.messages-container {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+/* Action Message */
+.action-message {
+    background: rgba(191, 114, 0, 0.95);
+    color: #fff8c5;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 0.9rem;
+    opacity: 1;
+    pointer-events: auto;
+    max-width: 350px;
+    word-wrap: break-word;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
 /* Dashboard Container */
 .dashboard-container {
     max-width: 1800px;
@@ -319,10 +366,11 @@ nav a:hover:after {width: 100%;}
 }
 
 /* Input fields */
-input[type="text"] {
+input:not([type="checkbox"]) {
     padding: 0.6rem 1rem;
     border: 2px solid #ddd;
     border-radius: 6px;
+    background-color: #cccccc;
     font-size: 0.9rem;
     font-family: 'Bricolage Grotesque', sans-serif;
     transition: border-color 0.3s ease;
@@ -330,8 +378,24 @@ input[type="text"] {
     min-width: 200px;
 }
 
-input[type="text"]:focus {
+input:focus {
     outline: none;
+    border-color: #eeaf00;
+}
+
+select {
+    padding: 0.6rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background-color: #cccccc;
+    font-size: 0.9rem;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    transition: border-color 0.3s ease;
+    flex: 1;
+    min-width: 200px;
+}
+
+select:focus {
     border-color: #eeaf00;
 }
 
@@ -391,6 +455,23 @@ input[type="text"]:focus {
 .btn-info {
     background: #17a2b8;
     color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+:disabled {
+    background: #7f8c8d;
+    background-color: #7f8c8d;
+    cursor: not-allowed;
+    color: #4a4a4a;
+}
+
+:disabled:hover {
+    transform: none;
+    box-shadow: none;
+    background: #7f8c8d;
 }
 
 /* Response Section */

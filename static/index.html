@@ -1,7 +1,4 @@
 <!-- TODO: Poner una i para mostrar información de cada botón -->
-<!-- TODO: Cada vez que se pulse un botón mostrar mensaje arriba a la derecha que desaparezca con x segundos y muestre información sobre la acción realizada -->
-<!-- TODO: Bloquear botones de ejecución si el servicio no está instalado, y mostrar un mensaje de error si se intenta ejecutar sin instalación previa. -->
-<!-- TODO: Bloquear botones de inicio si el servicio no está configurado; bloquear botones de confguración si el servicio ya está configurado, etc -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,6 +29,9 @@
         </div>
     </header>
 
+    <!-- Contenedor de mensajes informativos -->
+    <div id="messages-container" class="messages-container"></div>
+
     <!-- Contenido principal del dashboard -->
     <main class="dashboard-container">
         <div class="welcome-section">
@@ -57,17 +57,17 @@
                     <p>SSH/Telnet honeypot for threat detection</p>
                     <div class="card-actions">
                         <div>
-                            <button class="btn btn-info" onclick="installCowrie()">Install &#8681;</button>
-                            <button class="btn btn-info" onclick="configureCowrie(), configureSSH()">Configure &#9881;</button>
+                            <button class="btn btn-info" id="cowrie-install-btn" onclick="installCowrie()">Install &#8681;</button>
+                            <button class="btn btn-info" id="cowrie-configure-btn" onclick="configureCowrie(), configureSSH()">Configure &#9881;</button>
                             <button class="btn btn-info" onclick="cleanupCowrie()">Restore &#8634;</button>
                         </div>
                         <div>
-                            <button class="btn btn-success" onclick="startCowrie()">Start &#9658;</button>
-                            <button class="btn btn-danger" onclick="stopCowrie()">Stop &#9632;</button>
+                            <button class="btn btn-success" id="cowrie-start-btn" onclick="startCowrie()">Start &#9658;</button>
+                            <button class="btn btn-danger" id="cowrie-stop-btn" onclick="stopCowrie()">Stop &#9632;</button>
                         </div>
                         <div>
-                            <input type="text" id="custom-path" placeholder="Enter custom path" style="background-color: #cccccc;">
-                            <button class="btn btn-secondary" onclick="setCustomPath()">Set Path</button>
+                            <input type="text" id="custom-path" placeholder="Enter custom path" oninput="document.getElementById('set-path-btn').disabled = !this.value.trim(); document.getElementById('set-path-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" id="set-path-btn" onclick="setCustomPath()">Set Path</button>
                             <button class="btn btn-primary" onclick="checkCowrieStatus()">Check Status</button>
                         </div>
                     </div>
@@ -84,9 +84,13 @@
                 <div class="card-body">
                     <p>Multi-protocol honeypot for malware collection</p>
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="checkDionaeaStatus()">Check Status</button>
-                        <button class="btn btn-success" onclick="startDionaea()">Start &#9658;</button>
-                        <button class="btn btn-danger" onclick="stopDionaea()">Stop &#9632;</button>
+                        <div>
+                            <button class="btn btn-success" onclick="startDionaea()">Start &#9658;</button>
+                            <button class="btn btn-danger" onclick="stopDionaea()">Stop &#9632;</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="checkDionaeaStatus()">Check Status</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -126,14 +130,19 @@
                     <h3>Splunk SIEM</h3>
                     <span class="status-ui" id="splunk-installed">Checking...</span>
                     <span class="status-ui" id="splunk-status">Checking...</span>
-                    <span class="status-ui" id="splunk-token">Checking...</span>
+                    <span class="status-ui" id="splunk-token">Checking Token...</span>
                 </div>
                 <div class="card-body">
                     <p>Security Information and Event Management</p>
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="checkSplunkStatus()">Check Status</button>
-                        <button class="btn btn-success" onclick="startSplunk()">Start &#9658;</button>
-                        <button class="btn btn-danger" onclick="stopSplunk()">Stop &#9632;</button>
+                        <div>
+                            <button class="btn btn-success" id="splunk-start-btn" onclick="startSplunk()">Start &#9658;</button>
+                            <button class="btn btn-danger" id="splunk-stop-btn" onclick="stopSplunk()">Stop &#9632;</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-info" id="create-token-btn" onclick="createSplunkToken()">Create Token &#9881;</button>
+                            <button class="btn btn-primary" onclick="checkSplunkStatus()">Check Status</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -156,7 +165,7 @@
             </div>
         </div>
 
-        <!-- Sección de respuesta JSON -->
+        <!-- Sección de respuesta JSON | TODO: ELIMINAR ESTE DIV <- ONLY FOR TESTING!!! -->
         <div class="response-section">
             <h3>API Response</h3>
             <pre id="api-response">Select an action to see the response...</pre>

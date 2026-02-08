@@ -1,5 +1,24 @@
 # Changelog
 
+## [Unreleased] - 2026-02-08
+
+### Added
+- **Logs Page**: Dedicated page for Cowrie log visualization with collapsible filter sections
+- **Field Selection**: Checkboxes to show/hide specific log fields (eventid, timestamp, src_ip, etc.)
+- **Stacked Notifications**: Multiple messages now stack vertically without overlapping
+- **Send to Splunk**: Button to forward filtered logs directly to Splunk SIEM
+
+### Changed
+- **Notification System**: Messages now use individual DOM elements with smooth slide-in/out animations
+- **Message Position**: Fixed at 100px from top to remain visible below sticky header during scroll
+- **Log Display**: Formatted text output with line breaks instead of raw JSON for better readability
+- **Action Messages**: Extended display duration (7.4s + 7s animation) for better visibility
+
+### Fixed
+- **Notification Visibility**: Messages now stay visible when scrolling down the page
+- **Line Breaks**: Added `white-space: pre-wrap` to properly display multi-line log output
+- **Message Overlap**: Implemented flexbox container with gap to prevent message stacking issues
+
 ## [Unreleased] - 2026-02-06
 
 ### Added

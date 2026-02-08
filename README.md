@@ -40,6 +40,8 @@
 - Organized button layouts with logical grouping
 - Section dividers for Honeypots, SIEM, and IDS
 - Responsive grid layout (3→2→1 columns)
+- Stacked notification system with smooth slide animations
+- **Logs page**: Filter and visualize Cowrie logs with field selection
 - JSON response viewer with syntax highlighting
 - Responsive design with gradient UI and hover animations
 
