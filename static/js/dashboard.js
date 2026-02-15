@@ -50,18 +50,20 @@ async function makeRequest(endpoint, method = 'GET', body = null) {
 function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigured, isRunning, isInstalled, isConfigured, buttonStart, buttonStop, buttonInstall, buttonConfigure) {
     const UIRunning = document.getElementById(elementIdRunning);
     const UIInstalled = document.getElementById(elementIdInstalled);
-    const UIConfigured = document.getElementById(elementIdConfigured);
+    const UIConfigured = elementIdConfigured ? document.getElementById(elementIdConfigured) : null;
     const startBtn = document.getElementById(buttonStart);
     const stopBtn = document.getElementById(buttonStop);
     const installBtn = document.getElementById(buttonInstall);
-    const configureBtn = document.getElementById(buttonConfigure);
+    const configureBtn = buttonConfigure ? document.getElementById(buttonConfigure) : null;
     if (isInstalled) {
         UIInstalled.textContent = 'Installed';
         UIInstalled.className = 'status-ui installed';
         installBtn.disabled = true;
         installBtn.classList.add('disabled');
-        configureBtn.disabled = false;
-        configureBtn.classList.remove('disabled');
+        if (configureBtn) {
+            configureBtn.disabled = false;
+            configureBtn.classList.remove('disabled');
+        }
         startBtn.disabled = false;
         startBtn.classList.remove('disabled');
         stopBtn.disabled = false;
@@ -87,18 +89,22 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
             configureBtn.disabled = true;
             configureBtn.classList.add('disabled');
         } else {
-            UIConfigured.textContent = 'Not Configured';
-            UIConfigured.className = 'status-ui not-configured';
-            configureBtn.disabled = false;
-            configureBtn.classList.remove('disabled');
+            if (UIConfigured && configureBtn) {
+                UIConfigured.textContent = 'Not Configured';
+                UIConfigured.className = 'status-ui not-configured';
+                configureBtn.disabled = false;
+                configureBtn.classList.remove('disabled');
+            }
         }
     } else {
         UIInstalled.textContent = 'Not Installed';
         UIInstalled.className = 'status-ui not-installed';
         installBtn.disabled = false;
         installBtn.classList.remove('disabled');
-        configureBtn.disabled = true;
-        configureBtn.classList.add('disabled');
+        if (configureBtn) {
+            configureBtn.disabled = true;
+            configureBtn.classList.add('disabled');
+        }
         startBtn.disabled = true;
         startBtn.classList.add('disabled');
         stopBtn.disabled = true;
@@ -207,6 +213,13 @@ async function setCustomPath() {
     }
     try {
         const response = await makeRequest('/cowrie/set-path', 'POST', { path: path });
+        if (response.success) {
+            showActionMessage('Custom path for Cowrie Honeypot set successfully.');
+            const statusResponse = await makeRequest('/cowrie/status');
+            updateStatusUI('cowrie-status', 'cowrie-installed', 'cowrie-configured', statusResponse.running, statusResponse.installed, statusResponse.configured, 'cowrie-start-btn', 'cowrie-stop-btn', 'cowrie-install-btn', 'cowrie-configure-btn');
+        } else {
+            showActionMessage(path + ' is not a valid path for Cowrie Honeypot. Please enter a valid path.');
+        }
     } catch (error) {
         showActionMessage('Error setting custom path for Cowrie Honeypot: ' + error.message);
     }
@@ -268,6 +281,53 @@ async function cleanupCowrie() {
     }
 }
 
+// Dionaea Functions
+async function checkDionaeaStatus() {
+    try {
+        const response = await makeRequest('/dionaea/status');
+        updateStatusUI('dionaea-status', 'dionaea-installed', null, response.running, response.installed, null, 'dionaea-start-btn', 'dionaea-stop-btn', 'dionaea-install-btn', null);
+        if (response.installed) {
+            document.getElementById('custom-dionaea-path').value = response.dionaea_path || '';
+        }
+    } catch (error) {
+        showActionMessage('Error checking Dionaea Honeypot status: ' + error.message);
+    }
+}
+
+async function setCustomDionaeaPath() {
+    const path = document.getElementById('custom-dionaea-path').value;
+    if (!path) {
+        showActionMessage('Please enter a valid path for Dionaea Honeypot.');
+        return;
+    }
+    try {
+        const response = await makeRequest('/dionaea/set-path', 'POST', { path: path });
+        if (response.success) {
+            showActionMessage('Custom path for Dionaea Honeypot set successfully.');
+            const statusResponse = await makeRequest('/dionaea/status');
+            updateStatusUI('dionaea-status', 'dionaea-installed', null, statusResponse.running, statusResponse.installed, null, 'dionaea-start-btn', 'dionaea-stop-btn', 'dionaea-install-btn', null);
+        } else {
+            showActionMessage(path + ' is not a valid path for Dionaea Honeypot. Please enter a valid path.');
+        }
+    } catch (error) {
+        showActionMessage('Error setting custom path for Dionaea Honeypot: ' + error.message);
+    }
+}
+
+async function installDionaea() {
+    try {
+        showActionMessage('Installing Dionaea Honeypot... This may take a few minutes.');
+        const response = await makeRequest('/dionaea/install', 'POST');
+        const statusResponse = await makeRequest('/dionaea/status');
+        if (response.success) {
+            showActionMessage('Dionaea Honeypot installed successfully.');
+            updateStatusUI('dionaea-status', 'dionaea-installed', null, statusResponse.running, statusResponse.installed, null, 'dionaea-start-btn', 'dionaea-stop-btn', 'dionaea-install-btn', null);            
+        }
+    } catch (error) {
+        showActionMessage('Error installing Dionaea Honeypot: ' + error.message);
+    }
+}
+
 // Splunk Functions
 async function checkSplunkStatus() {
     try {
@@ -307,5 +367,6 @@ async function stopSplunk() {
 // Auto-refresh status on page load
 window.addEventListener('DOMContentLoaded', () => {
     checkCowrieStatus();
+    checkDionaeaStatus();
     checkSplunkStatus();
 });

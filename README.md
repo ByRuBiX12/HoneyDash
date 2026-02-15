@@ -19,6 +19,15 @@
 - **Auto-cleanup**: Restores SSH and iptables on exit (SIGINT handler)
 - **Security**: Cowrie runs as non-root user (automatic privilege dropping)
 
+### Dionaea Honeypot Management
+- **Auto-detection**: Searches for unique Dionaea directories with prioritized /opt scanning
+- **Source compilation**: Automated build from GitHub with all dependencies
+- **Python 3.13 compatibility**: Automatic patching of build files to disable incompatible modules
+- **One-click installation**: Handles git clone, CMake configuration, compilation, and installation
+- **Multi-protocol support**: Captures attacks on SMB, HTTP, FTP, MySQL, MSSQL, and more (without libemu/python modules)
+- **Status monitoring**: Real-time detection of installation and running state
+- **Simplified UI**: Full-width install button with streamlined controls
+
 ### Splunk SIEM Integration
 - **Status monitoring**: Check if Splunk is installed and running
 - **Service control**: Start/Stop Splunk from the dashboard
@@ -32,6 +41,7 @@
 - JSON responses with detailed status information
 - CORS-enabled for frontend integration
 - Query parameters for log filtering
+- Dionaea endpoints for status, installation, and control
 
 ### Web Dashboard
 - Modern card-based UI with gradient design
@@ -44,6 +54,7 @@
 - **Logs page**: Filter and visualize Cowrie logs with field selection
 - JSON response viewer with syntax highlighting
 - Responsive design with gradient UI and hover animations
+- Generic status update function supporting optional UI elements
 
 ## Quick Start
 

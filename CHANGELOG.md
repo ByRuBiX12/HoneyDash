@@ -1,5 +1,37 @@
 # Changelog
 
+## [Unreleased] - 2026-02-14
+
+### Added
+- **Dionaea Honeypot Integration**: Complete Dionaea management system with installation, detection, and status monitoring
+- **Auto-compilation**: Automated source compilation from GitHub with dependency resolution
+- **CMakeLists.txt Patching**: Automatic disabling of incompatible Python and emu modules for Python 3.13 compatibility
+- **Smart Dependency Installation**: Installs all required system packages via apt-get automatically
+- **Module Disabling**: Intelligent detection and removal of problematic modules (Python bindings, libemu)
+- **Dionaea UI Card**: Dedicated dashboard card with Install/Start/Stop controls
+- **Generic Status Function**: Refactored `updateStatusUI()` to handle optional configuration elements with null safety
+
+### Changed
+- **Dashboard Layout**: Simplified Dionaea card with single Install button that spans full width
+- **Installation Strategy**: Switched from package installation to source compilation for better compatibility
+- **Build Configuration**: Custom CMake configuration to skip Python 3.13 incompatible modules
+- **Error Handling**: Enhanced installation error reporting with cmake/make output capture
+- **Status UI Logic**: Updated to gracefully handle null values for optional UI elements (config badges, buttons)
+
+### Fixed
+- **Python 3.13 Compatibility**: Resolved setuptools InvalidVersion errors by disabling Python module compilation
+- **libemu Header Issues**: Disabled emu module to avoid compilation failures with libemu include paths
+- **CMake Configuration**: Fixed module detection by editing modules/CMakeLists.txt directly
+- **Button Width**: Dionaea install button now properly spans full container width
+- **Notification Display**: Removed debug alerts from status update functions
+
+### Technical Details
+- **DionaeaManager Class**: New manager in `honeypots/dionaea_manager.py` with source compilation workflow
+- **CMake Patching**: Replaces `add_subdirectory(python)` and disables `if(WITH_MODULE_EMU)` in build files
+- **Build Process**: git clone → patch CMakeLists → cmake → make → make install to `/opt/dionaea`
+- **Detection Method**: Searches for unique `ihandlers` directory with `/opt` priority and timeout handling
+- **Simplified Dependencies**: Removed libemu and Cython installation as modules are now disabled
+
 ## [Unreleased] - 2026-02-08
 
 ### Added

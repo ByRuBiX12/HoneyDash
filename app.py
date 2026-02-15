@@ -7,6 +7,7 @@ from signal import signal, SIGINT
 import pwd
 
 from honeypots.cowrie_manager import CowrieManager
+from honeypots.dionaea_manager import DionaeaManager
 from siem.splunk_manager import SplunkManager
 
 # Add siem and honeypots directories to path
@@ -211,6 +212,63 @@ def cowrie_logs():
             "message": "Error retrieving Cowrie logs"
         })
     
+# ============== DIONAEA ENDPOINTS ==============
+@app.route('/api/dionaea/status', methods=['GET'])
+def dionaea_status():
+    """Gets the current status of Dionaea"""
+    try:
+        status = dionaea_manager.get_status()
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error getting Dionaea status"
+        }), 500
+    
+@app.route('/api/dionaea/set-path', methods=['POST'])
+def dionaea_set_path():
+    """Manually sets Dionaea installation path"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'path' not in data:
+            return jsonify({
+                "success": False,
+                "message": "'path' field is required in JSON"
+            }), 400
+        
+        result = dionaea_manager.set_dionaea_path(data['path'])
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error setting Dionaea path"
+        }), 500
+
+
+@app.route('/api/dionaea/install', methods=['POST'])
+def dionaea_install():
+    """Installs Dionaea honeypot"""
+    try:
+        # Check if running as root
+        if os.geteuid() != 0: # Get EFFECTIVE not real UID
+            return jsonify({
+                "success": False,
+                "message": "Root privileges are required to install Dionaea"
+            }), 403
+        
+        result = dionaea_manager.install()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error installing Dionaea"
+        }), 500
+
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])
 def splunk_status():
@@ -331,6 +389,8 @@ if __name__ == '__main__':
 
     # Start Cowrie manager
     cowrie_manager = CowrieManager()
+    # Start Dionaea manager
+    dionaea_manager = DionaeaManager()
     # Start Splunk manager
     splunk_manager = SplunkManager()
 

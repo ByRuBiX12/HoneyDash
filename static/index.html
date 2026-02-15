@@ -67,7 +67,7 @@
                         </div>
                         <div>
                             <input type="text" id="custom-path" placeholder="Enter custom path" oninput="document.getElementById('set-path-btn').disabled = !this.value.trim(); document.getElementById('set-path-btn').classList.toggle('disabled', !this.value.trim());">
-                            <button class="btn btn-secondary" id="set-path-btn" onclick="setCustomPath()">Set Path</button>
+                            <button class="btn btn-secondary" onclick="setCustomPath()">Set Path</button>
                             <button class="btn btn-primary" onclick="checkCowrieStatus()">Check Status</button>
                         </div>
                     </div>
@@ -84,11 +84,16 @@
                 <div class="card-body">
                     <p>Multi-protocol honeypot for malware collection</p>
                     <div class="card-actions">
-                        <div>
-                            <button class="btn btn-success" onclick="startDionaea()">Start &#9658;</button>
-                            <button class="btn btn-danger" onclick="stopDionaea()">Stop &#9632;</button>
+                        <div style="width: 100%;">
+                            <button class="btn btn-info" id="dionaea-install-btn" onclick="installDionaea()">Install &#8681;</button>
                         </div>
                         <div>
+                            <button class="btn btn-success" id="dionaea-start-btn" onclick="startDionaea()">Start &#9658;</button>
+                            <button class="btn btn-danger" id="dionaea-stop-btn" onclick="stopDionaea()">Stop &#9632;</button>
+                        </div>
+                        <div>
+                            <input type="text" id="custom-dionaea-path" placeholder="Enter custom path" oninput="document.getElementById('set-dionaea-path-btn').disabled = !this.value.trim(); document.getElementById('set-dionaea-path-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" onclick="setCustomDionaeaPath()">Set Path</button>
                             <button class="btn btn-primary" onclick="checkDionaeaStatus()">Check Status</button>
                         </div>
                     </div>
