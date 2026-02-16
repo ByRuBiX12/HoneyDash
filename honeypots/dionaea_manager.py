@@ -4,6 +4,7 @@ import random
 import re
 import json
 from pathlib import Path
+import shutil
 
 
 class DionaeaManager:
@@ -112,9 +113,25 @@ class DionaeaManager:
             os.makedirs(self.data_dir / "binaries", exist_ok=True)
             os.makedirs(self.data_dir / "bistreams", exist_ok=True)
             os.makedirs(self.data_dir / "http" / "root", exist_ok=True)
+            os.makedirs(self.data_dir / "ftp" / "root", exist_ok=True)
+            os.makedirs(self.data_dir / "tftp" / "root", exist_ok=True)
+            os.makedirs(self.data_dir / "printer" / "root", exist_ok=True)
             os.makedirs(self.data_dir / "sip", exist_ok=True)
             os.makedirs(self.data_dir / "sqlite", exist_ok=True)
             
+            # Copy static/conf/root/ to http/root
+            static_root = Path("static/confs/root")
+            http_root = self.data_dir / "http" /"root"
+            try:
+                shutil.copytree(static_root, http_root, dirs_exist_ok=True)
+            except Exception as e:
+                print(f"[-] Error copying static files to http root: {e}")
+                return {
+                    "success": False,
+                    "message": f"Error copying static files to http root: {str(e)}"
+                }
+
+
             # Allow container writes
             subprocess.run(["chmod", "-R", "777", str(self.data_dir)], check=False)
             
@@ -134,14 +151,16 @@ class DionaeaManager:
             
             # Create container
             create_result = subprocess.run(
-                f"docker create --name {self.container_name} --restart unless-stopped \
+                f"docker create --name {self.container_name} --restart unless-stopped --network host \
                 -v {self.data_dir}/logs:/opt/dionaea/var/log/dionaea \
                 -v {self.data_dir}/binaries:/opt/dionaea/var/lib/dionaea/binaries \
                 -v {self.data_dir}/bistreams:/opt/dionaea/var/lib/dionaea/bistreams \
                 -v {self.data_dir}/http:/opt/dionaea/var/lib/dionaea/http \
+                -v {self.data_dir}/ftp:/opt/dionaea/var/lib/dionaea/ftp \
+                -v {self.data_dir}/tftp:/opt/dionaea/var/lib/dionaea/tftp \
+                -v {self.data_dir}/printer:/opt/dionaea/var/lib/dionaea/printer \
                 -v {self.data_dir}/sqlite:/opt/dionaea/var/lib/dionaea \
-                -p 21:21 -p 23:23 -p 42:42 -p 80:80 -p 135:135 -p 443:443 -p 445:445 -p 1433:1433 -p 1723:1723 -p 1883:1883 -p 1900:1900/udp \
-                -p 3306:3306 -p 5060:5060 -p 5060:5060/udp -p 5061:5061 -p 11211:11211 dinotools/dionaea",
+                dinotools/dionaea",
                 shell=True,
                 capture_output=True,
                 text=True
