@@ -84,12 +84,16 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
             stopBtn.classList.add('disabled');
         }
         if (isConfigured) {
+            startBtn.disabled = false;
+            startBtn.classList.remove('disabled');
             UIConfigured.textContent = 'Configured';
             UIConfigured.className = 'status-ui configured';
             configureBtn.disabled = true;
             configureBtn.classList.add('disabled');
         } else {
             if (UIConfigured && configureBtn) {
+                startBtn.disabled = true;
+                startBtn.classList.add('disabled');
                 UIConfigured.textContent = 'Not Configured';
                 UIConfigured.className = 'status-ui not-configured';
                 configureBtn.disabled = false;
@@ -183,7 +187,7 @@ async function startCowrie() {
         const response = await makeRequest('/cowrie/start', 'POST');
         const statusResponse = await makeRequest('/cowrie/status');
         if (response.success) {
-            showActionMessage('Cowrie Honeypot started successfully.');
+            showActionMessage('Cowrie Honeypot started successfully. Listening on port 22.');
             updateStatusUI('cowrie-status', 'cowrie-installed', 'cowrie-configured', statusResponse.running, statusResponse.installed, statusResponse.configured, 'cowrie-start-btn', 'cowrie-stop-btn', 'cowrie-install-btn', 'cowrie-configure-btn');
         }
     } catch (error) {
@@ -232,6 +236,7 @@ async function installCowrie() {
         const statusResponse = await makeRequest('/cowrie/status');
         if (response.success) {
             showActionMessage('Cowrie Honeypot installed successfully.');
+            showActionMessage('You can find Cowrie logs in ' + response.path + '/var/log/cowrie')
             updateStatusUI('cowrie-status', 'cowrie-installed', 'cowrie-configured', statusResponse.running, statusResponse.installed, statusResponse.configured, 'cowrie-start-btn', 'cowrie-stop-btn', 'cowrie-install-btn', 'cowrie-configure-btn');            
         }
     } catch (error) {
@@ -286,31 +291,8 @@ async function checkDionaeaStatus() {
     try {
         const response = await makeRequest('/dionaea/status');
         updateStatusUI('dionaea-status', 'dionaea-installed', null, response.running, response.installed, null, 'dionaea-start-btn', 'dionaea-stop-btn', 'dionaea-install-btn', null);
-        if (response.installed) {
-            document.getElementById('custom-dionaea-path').value = response.dionaea_path || '';
-        }
     } catch (error) {
         showActionMessage('Error checking Dionaea Honeypot status: ' + error.message);
-    }
-}
-
-async function setCustomDionaeaPath() {
-    const path = document.getElementById('custom-dionaea-path').value;
-    if (!path) {
-        showActionMessage('Please enter a valid path for Dionaea Honeypot.');
-        return;
-    }
-    try {
-        const response = await makeRequest('/dionaea/set-path', 'POST', { path: path });
-        if (response.success) {
-            showActionMessage('Custom path for Dionaea Honeypot set successfully.');
-            const statusResponse = await makeRequest('/dionaea/status');
-            updateStatusUI('dionaea-status', 'dionaea-installed', null, statusResponse.running, statusResponse.installed, null, 'dionaea-start-btn', 'dionaea-stop-btn', 'dionaea-install-btn', null);
-        } else {
-            showActionMessage(path + ' is not a valid path for Dionaea Honeypot. Please enter a valid path.');
-        }
-    } catch (error) {
-        showActionMessage('Error setting custom path for Dionaea Honeypot: ' + error.message);
     }
 }
 
@@ -321,10 +303,42 @@ async function installDionaea() {
         const statusResponse = await makeRequest('/dionaea/status');
         if (response.success) {
             showActionMessage('Dionaea Honeypot installed successfully.');
+            showActionMessage('Dionaea docker container name: ' + response.container_name);
+            showActionMessage('You can find Dionaea logs and binaries in: ' + response.data_dir);
             updateStatusUI('dionaea-status', 'dionaea-installed', null, statusResponse.running, statusResponse.installed, null, 'dionaea-start-btn', 'dionaea-stop-btn', 'dionaea-install-btn', null);            
         }
     } catch (error) {
         showActionMessage('Error installing Dionaea Honeypot: ' + error.message);
+    }
+}
+
+async function startDionaea() {
+    try {
+        showActionMessage('Starting Dionaea Honeypot...');
+        const response = await makeRequest('/dionaea/start', 'POST');
+        if (response.success) {
+            showActionMessage('Dionaea Honeypot started successfully. Listening on ports 21, 23, 42, 80, 135, 443, 445, 1433, 1723, 1883, 1900/udp, 3306, 5060, 5060/udp, 5061, 11211.');
+            checkDionaeaStatus();
+        } else {
+            showActionMessage('Error: ' + (response.message || 'Unknown error'));
+        }
+    } catch (error) {
+        showActionMessage('Error starting Dionaea Honeypot: ' + error.message);
+    }
+}
+
+async function stopDionaea() {
+    try {
+        showActionMessage('Stopping Dionaea Honeypot...');
+        const response = await makeRequest('/dionaea/stop', 'POST');
+        if (response.success) {
+            showActionMessage('Dionaea Honeypot stopped successfully.');
+            checkDionaeaStatus();
+        } else {
+            showActionMessage('Error: ' + (response.message || 'Unknown error'));
+        }
+    } catch (error) {
+        showActionMessage('Error stopping Dionaea Honeypot: ' + error.message);
     }
 }
 

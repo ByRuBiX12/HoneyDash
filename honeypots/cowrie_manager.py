@@ -167,9 +167,36 @@ class CowrieManager:
     
     def _is_properly_configured(self):
         """Checks if Cowrie is configured to listen on port 2222"""
+        """Also checks for ssh redirection and iptables rule"""
         if not self.config_file.exists():
             return False
         
+        # Check for ssh redirection
+        try:
+            with open(self.ssh_config_file, 'r') as f:
+                ssh_content = f.read()
+                port = re.search(r'^Port\s+(\d+)', ssh_content, flags=re.MULTILINE)
+                if port.group(1) == '22':
+                    return False
+        except Exception as e:
+            print(f"[-] Error checking SSH configuration: {e}")
+            return False
+
+        # Check for iptables rule
+        try:
+            result = subprocess.run(
+                "iptables -L PREROUTING -t nat",
+                shell=True,
+                capture_output=True,
+                text=True
+            )
+        except Exception as e:
+            print(f"[-] Error checking iptables rules: {e}")
+            return False
+        if "tcp dpt:ssh redir ports 2222" not in result.stdout:
+            return False
+        
+        # Checks for Cowrie listening on port 2222
         try:
             with open(self.config_file, 'r') as f:
                 content = f.read()
@@ -189,7 +216,7 @@ class CowrieManager:
                         return match is not None
             
             return False
-            
+          
         except Exception as e:
             print(f"[-] Error checking Cowrie configuration: {e}")
             return False

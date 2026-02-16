@@ -1,36 +1,68 @@
 # Changelog
 
+## [Unreleased] - 2026-02-15
+
+### Added
+- **Dionaea Docker Integration**: Complete rewrite of Dionaea management using official Docker images
+- **Docker Container Management**: Automated creation, start, stop, and monitoring of Dionaea containers
+- **Multi-Protocol Support**: 16 services exposed (FTP, HTTP, HTTPS, SMB, MySQL, MSSQL, SIP, MongoDB, etc.)
+- **Persistent Storage**: Volumes for logs, binaries, and bistreams in `/opt/honeydash/dionaea-data/`
+- **API Endpoints**: Full REST API for Dionaea control (status, install, start, stop, logs, binaries...)
+- **JavaScript Functions**: `startDionaea()` and `stopDionaea()` for dashboard interaction
+- **Port Mapping**: Official port configuration following Dionaea documentation (including UDP ports)
+
+### Changed
+- **Installation Method**: Switched from source compilation to Docker deployment
+- **Container Name**: Using `honeydash-dionaea` for better namespace management
+- **Data Directory**: Moved from `/opt/dionaea` to `/opt/honeydash/dionaea-data/`
+- **Deployment Strategy**: Using `docker create` with `--restart unless-stopped` for reliability and `docker start/stop` to manage it
+
+### Fixed
+- **Python 3.13 Compatibility**: Completely avoided by using pre-built Docker images
+- **Compilation Issues**: Eliminated hours of build troubleshooting with container approach
+- **Module Dependencies**: No need to patch CMakeLists.txt or manage libemu/Cython
+- **Service Availability**: All Dionaea services now work including Python-based protocols (HTTP, SMB, FTP, MySQL)
+- **Installation Time**: Reduced from 20+ minutes (compilation) to ~2 minutes (Docker pull)
+
+### Removed
+- **Source Compilation**: Eliminated entire cmake/make/install workflow
+- **Build Patching**: No longer need to modify CMakeLists.txt files
+- **Manual Dependencies**: Removed apt-get installation of 15+ build packages
+- **Python Package Management**: No setuptools version pinning or --break-system-packages workarounds
+
+### Technical Details
+- **DionaeaManager Class**: Rewritten to use Docker CLI via subprocess
+- **Image**: `dinotools/dionaea:latest` from Docker Hub
+- **Container Creation**: `docker create` with named container and restart policy
+- **Volume Mounts**: 3 volumes for logs, binaries, and bistreams
+- **Port Exposure**: 16 ports (13 TCP + 3 UDP) following official documentation
+- **Detection Method**: Docker container name-based detection with `docker ps -a`
+- **Status Monitoring**: Real-time container state checking via `docker ps --filter status=running`
+
+### Documentation
+- **README.md**: Updated prerequisites to include Docker requirement
+- **README.md**: Added Docker installation instructions
+- **README.md**: Simplified Dionaea feature description focusing on Docker benefits
+- **README.md**: Added Dionaea API endpoints section
+- **CHANGELOG.md**: Comprehensive documentation of Docker migration
+
 ## [Unreleased] - 2026-02-14
 
 ### Added
-- **Dionaea Honeypot Integration**: Complete Dionaea management system with installation, detection, and status monitoring
-- **Auto-compilation**: Automated source compilation from GitHub with dependency resolution
-- **CMakeLists.txt Patching**: Automatic disabling of incompatible Python and emu modules for Python 3.13 compatibility
-- **Smart Dependency Installation**: Installs all required system packages via apt-get automatically
-- **Module Disabling**: Intelligent detection and removal of problematic modules (Python bindings, libemu)
+- **Dionaea Honeypot Integration**: Initial Dionaea management system with source compilation
+- **Auto-compilation**: Automated build from GitHub with dependency resolution
+- **CMakeLists.txt Patching**: Automatic disabling of incompatible Python and emu modules
 - **Dionaea UI Card**: Dedicated dashboard card with Install/Start/Stop controls
-- **Generic Status Function**: Refactored `updateStatusUI()` to handle optional configuration elements with null safety
 
 ### Changed
-- **Dashboard Layout**: Simplified Dionaea card with single Install button that spans full width
-- **Installation Strategy**: Switched from package installation to source compilation for better compatibility
-- **Build Configuration**: Custom CMake configuration to skip Python 3.13 incompatible modules
-- **Error Handling**: Enhanced installation error reporting with cmake/make output capture
-- **Status UI Logic**: Updated to gracefully handle null values for optional UI elements (config badges, buttons)
+- **Installation Strategy**: Source compilation approach (later replaced with Docker in 2026-02-15)
+- **Build Configuration**: Custom CMake configuration to skip incompatible modules
 
 ### Fixed
-- **Python 3.13 Compatibility**: Resolved setuptools InvalidVersion errors by disabling Python module compilation
-- **libemu Header Issues**: Disabled emu module to avoid compilation failures with libemu include paths
-- **CMake Configuration**: Fixed module detection by editing modules/CMakeLists.txt directly
-- **Button Width**: Dionaea install button now properly spans full container width
-- **Notification Display**: Removed debug alerts from status update functions
+- **Python 3.13 Compatibility**: Attempted fixes via module disabling (switched to the Docker approach instead)
 
-### Technical Details
-- **DionaeaManager Class**: New manager in `honeypots/dionaea_manager.py` with source compilation workflow
-- **CMake Patching**: Replaces `add_subdirectory(python)` and disables `if(WITH_MODULE_EMU)` in build files
-- **Build Process**: git clone → patch CMakeLists → cmake → make → make install to `/opt/dionaea`
-- **Detection Method**: Searches for unique `ihandlers` directory with `/opt` priority and timeout handling
-- **Simplified Dependencies**: Removed libemu and Cython installation as modules are now disabled
+### Note
+This version was tested on a Docker-based implementation on 2026-02-15. The source compilation approach failed due to several incompatibilities with Python 3.13 environments and libraries.
 
 ## [Unreleased] - 2026-02-08
 

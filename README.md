@@ -20,13 +20,14 @@
 - **Security**: Cowrie runs as non-root user (automatic privilege dropping)
 
 ### Dionaea Honeypot Management
-- **Auto-detection**: Searches for unique Dionaea directories with prioritized /opt scanning
-- **Source compilation**: Automated build from GitHub with all dependencies
-- **Python 3.13 compatibility**: Automatic patching of build files to disable incompatible modules
-- **One-click installation**: Handles git clone, CMake configuration, compilation, and installation
-- **Multi-protocol support**: Captures attacks on SMB, HTTP, FTP, MySQL, MSSQL, and more (without libemu/python modules)
-- **Status monitoring**: Real-time detection of installation and running state
-- **Simplified UI**: Full-width install button with streamlined controls
+- **Docker-based deployment**: Uses official `dinotools/dionaea` Docker image for hassle-free installation
+- **One-click installation**: Automated container creation with all required port mappings and volumes
+- **Multi-protocol support**: Emulates 16+ vulnerable services (FTP, HTTP, HTTPS, SMB, MySQL, MSSQL, SIP, MongoDB, and more)
+- **Persistent data storage**: Logs and captured binaries stored in `/opt/honeydash/dionaea-data/`
+- **No compilation needed**: Avoids Python 3.13 compatibility issues by using pre-built Docker images
+- **Service lifecycle**: Full start/stop/status control via Docker container management
+- **Port exposure**: Follows official Dionaea documentation with UDP/TCP support for 16 services
+- **Low-interaction honeypot**: Emulates vulnerabilities without requiring full service implementations
 
 ### Splunk SIEM Integration
 - **Status monitoring**: Check if Splunk is installed and running
@@ -61,6 +62,7 @@
 ### Prerequisites
 - **OS**: Linux (Debian/Ubuntu/Kali)
 - **Python**: 3.8+
+- **Docker**: Required for Dionaea honeypot
 - **Privileges**: Must run with `sudo` from a non-root user
 
 ### Installation
@@ -72,6 +74,29 @@ cd HoneyDash
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Install Docker (for Dionaea)
+## Set up Docker's apt repository
+### Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+### Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+
+## Install the Docker packages
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Run (IMPORTANT: use sudo from non-root user)
 sudo python3 app.py
@@ -99,6 +124,15 @@ POST /api/cowrie/cleanup
 
 # Log retrieval
 GET  /api/cowrie/logs?limit=50&event_id=cowrie.login.success&timestamp=2024-01-01T00:00:00
+```
+
+### Dionaea Endpoints
+```bash
+# Status and control
+GET  /api/dionaea/status
+POST /api/dionaea/install        # Creates Docker container with all services
+POST /api/dionaea/start
+POST /api/dionaea/stop
 ```
 
 ### Splunk Endpoints
@@ -129,7 +163,8 @@ POST /api/splunk/send            # Body: {"logs": [{event1}, {event2}]}
 HoneyDash/
 ├── app.py                    # Flask backend with API endpoints and signal handling
 ├── honeypots/
-│   └── cowrie_manager.py    # Cowrie lifecycle and log management
+│   ├── cowrie_manager.py    # Cowrie lifecycle and log management
+│   └── dionaea_manager.py   # Dionaea Docker container management
 ├── siem/
 │   └── splunk_manager.py    # Splunk integration and HEC communication
 ├── static/
@@ -145,9 +180,15 @@ HoneyDash/
 ## Roadmap
 
 - [X] Cowrie honeypot integration
+- [X] Dionaea honeypot integration (Docker-based)
 - [X] Splunk SIEM connectivity
 - [X] Log retrieval and filtering
 - [X] Modern web dashboard with responsive design
+- [ ] Dionaea log parsing and visualization
+- [ ] Captured malware analysis dashboard
+- [ ] Real-time attack monitoring
+- [ ] Suricata IDS integration
+- [ ] Alert correlation and threat intelligence
 - [ ] Real-time log visualization on dashboard
 - [ ] Dionaea honeypot support
 - [ ] DDoSPot honeypot support

@@ -224,29 +224,6 @@ def dionaea_status():
             "error": str(e),
             "message": "Error getting Dionaea status"
         }), 500
-    
-@app.route('/api/dionaea/set-path', methods=['POST'])
-def dionaea_set_path():
-    """Manually sets Dionaea installation path"""
-    try:
-        data = request.get_json()
-        
-        if not data or 'path' not in data:
-            return jsonify({
-                "success": False,
-                "message": "'path' field is required in JSON"
-            }), 400
-        
-        result = dionaea_manager.set_dionaea_path(data['path'])
-        status_code = 200 if result["success"] else 400
-        return jsonify(result), status_code
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e),
-            "message": "Error setting Dionaea path"
-        }), 500
-
 
 @app.route('/api/dionaea/install', methods=['POST'])
 def dionaea_install():
@@ -268,6 +245,36 @@ def dionaea_install():
             "error": str(e),
             "message": "Error installing Dionaea"
         }), 500
+
+@app.route('/api/dionaea/start', methods=['POST'])
+def dionaea_start():
+    """Starts Dionaea honeypot"""
+    try:
+        result = dionaea_manager.start()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error starting Dionaea"
+        }), 500
+
+@app.route('/api/dionaea/stop', methods=['POST'])
+def dionaea_stop():
+    """Stops Dionaea honeypot"""
+    try:
+        result = dionaea_manager.stop()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error stopping Dionaea"
+        }), 500
+
+# TODO: ENDPOINT PARA LOGS
 
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])
