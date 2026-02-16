@@ -110,7 +110,13 @@ class DionaeaManager:
             os.makedirs(self.data_dir, exist_ok=True)
             os.makedirs(self.data_dir / "logs", exist_ok=True)
             os.makedirs(self.data_dir / "binaries", exist_ok=True)
-            os.makedirs(self.data_dir / "bistreams", exist_ok=True) 
+            os.makedirs(self.data_dir / "bistreams", exist_ok=True)
+            os.makedirs(self.data_dir / "http" / "root", exist_ok=True)
+            os.makedirs(self.data_dir / "sip", exist_ok=True)
+            os.makedirs(self.data_dir / "sqlite", exist_ok=True)
+            
+            # Allow container writes
+            subprocess.run(["chmod", "-R", "777", str(self.data_dir)], check=False)
             
             # Docker image
             pull_res = subprocess.run(
@@ -132,6 +138,8 @@ class DionaeaManager:
                 -v {self.data_dir}/logs:/opt/dionaea/var/log/dionaea \
                 -v {self.data_dir}/binaries:/opt/dionaea/var/lib/dionaea/binaries \
                 -v {self.data_dir}/bistreams:/opt/dionaea/var/lib/dionaea/bistreams \
+                -v {self.data_dir}/http:/opt/dionaea/var/lib/dionaea/http \
+                -v {self.data_dir}/sqlite:/opt/dionaea/var/lib/dionaea \
                 -p 21:21 -p 23:23 -p 42:42 -p 80:80 -p 135:135 -p 443:443 -p 445:445 -p 1433:1433 -p 1723:1723 -p 1883:1883 -p 1900:1900/udp \
                 -p 3306:3306 -p 5060:5060 -p 5060:5060/udp -p 5061:5061 -p 11211:11211 dinotools/dionaea",
                 shell=True,
@@ -234,4 +242,5 @@ class DionaeaManager:
                 "message": f"Error stopping Dionaea: {str(e)}"
             }
     
-    #TODO: GET LOGS & GET BINARIES
+    # TODO: CREAR PÁGINA WEB báscia EN http/root y REVISAR el resto de puertos y cómo funcionan
+    # TODO: GET LOGS & GET BINARIES
