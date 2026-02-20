@@ -28,6 +28,11 @@
 - **Service lifecycle**: Full start/stop/status control via Docker container management
 - **Port exposure**: Follows official Dionaea documentation with UDP/TCP support for 16 services
 - **Low-interaction honeypot**: Emulates vulnerabilities without requiring full service implementations
+- **Log parsing**: Extract and filter HTTP and FTP bistream logs with field selection
+  - **HTTP logs**: User-Agent, IP, request type, endpoint, credentials, uploaded filenames
+  - **FTP logs**: Username, password, source IP, transferred files
+- **Advanced filtering**: Query logs by service type, timestamp, and custom field visibility
+- **Smart JSON output**: Only includes fields that exist in logs, omitting null values
 
 ### Splunk SIEM Integration
 - **Status monitoring**: Check if Splunk is installed and running

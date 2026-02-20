@@ -51,102 +51,233 @@
             <div class="card-body">
                 <!-- Query Filters Section -->
                 <div style="margin-bottom: 1.5rem;">
-                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleQueryFilter()">
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleQueryFilter('query-filter-content', 'query-filter-toggle')">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h4 style="color: #fff8c5; margin: 0;">Parámetros de Búsqueda</h4>
+                            <h4 style="color: #fff8c5; margin: 0;">Search Filters</h4>
                             <span id="query-filter-toggle" style="color: #eeaf00; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
                         </div>
                     </div>
-                    <div id="query-filter-content" style="display: block; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
+                    <div id="query-filter-content" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
                             <div>
-                                <label for="log-limit" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Límite de logs:</label>
+                                <label for="log-limit" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Log Limit:</label>
                                 <input type="number" id="log-limit" value="50" min="1" max="1000" style="width: 100%;">
                             </div>
                             <div>
-                                <label for="log-eventid" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Tipo de evento:</label>
+                                <label for="log-eventid" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Event Type:</label>
                                 <select id="log-eventid" style="width: 100%">
-                                    <option value="">Todos los eventos</option>
-                                    <option value="cowrie.session.connect">Intento de conexión</option>
-                                    <option value="cowrie.login.success">Login exitoso</option>
-                                    <option value="cowrie.login.failed">Login fallido</option>
-                                    <option value="cowrie.command.input">Comando ejecutado</option>
-                                    <option value="cowrie.session.file_download">Descarga de archivo</option>
-                                    <option value="cowrie.client.version">Versión del cliente</option>
-                                    <option value="cowrie.session.closed">Sesión cerrada</option>
+                                    <option value="">Every event</option>
+                                    <option value="cowrie.session.connect">Connection Attempt</option>
+                                    <option value="cowrie.login.success">Successful Login</option>
+                                    <option value="cowrie.login.failed">Failed Login</option>
+                                    <option value="cowrie.command.input">Command Executed</option>
+                                    <option value="cowrie.session.file_download">File Download</option>
+                                    <option value="cowrie.client.version">Client Version</option>
+                                    <option value="cowrie.session.closed">Session Closed</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="log-timestamp" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Desde fecha (opcional):</label>
+                                <label for="log-timestamp" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">From Date (optional):</label>
                                 <input type="datetime-local" id="log-timestamp" style="width: 100%">
                             </div>
                         </div>
-                        <button class="btn btn-info" onclick="getLogs('cowrie')" style="width: 100%;">Buscar Logs</button>
+                        <button class="btn btn-info" onclick="getLogs('cowrie')" style="width: 100%;">Search Logs</button>
                     </div>
                 </div>
 
                 <!-- Field Visibility Section -->
                 <div style="margin-bottom: 1.5rem;">
-                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleFieldFilter()">
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleFieldFilter('field-filter-content', 'field-filter-toggle')">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <h4 style="color: #fff8c5; margin: 0;">Campos Visibles</h4>
+                            <h4 style="color: #fff8c5; margin: 0;">Visible Fields</h4>
                             <span id="field-filter-toggle" style="color: #eeaf00; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
                         </div>
                     </div>
-                    <div id="field-filter-content" style="display: block; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
-                        <p style="color: #fff8c5; font-weight: bold; margin-bottom: 1rem;">Selecciona los campos a mostrar:</p>
+                    <div id="field-filter-content" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
+                        <p style="color: #fff8c5; font-weight: bold; margin-bottom: 1rem;">Select fields to display:</p>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-eventid" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-eventid" style="color: #fff8c5; cursor: pointer;">Event ID</label>
+                                <input type="checkbox" id="cowrie-field-eventid" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-eventid" style="color: #fff8c5; cursor: pointer;">Event ID</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-timestamp" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-timestamp" style="color: #fff8c5; cursor: pointer;">Timestamp</label>
+                                <input type="checkbox" id="cowrie-field-timestamp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-timestamp" style="color: #fff8c5; cursor: pointer;">Timestamp</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-src_ip" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-src_ip" style="color: #fff8c5; cursor: pointer;">Source IP</label>
+                                <input type="checkbox" id="cowrie-field-src_ip" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-src_ip" style="color: #fff8c5; cursor: pointer;">Source IP</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-src_port" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-src_port" style="color: #fff8c5; cursor: pointer;">Source Port</label>
+                                <input type="checkbox" id="cowrie-field-src_port" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-src_port" style="color: #fff8c5; cursor: pointer;">Source Port</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-username" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-username" style="color: #fff8c5; cursor: pointer;">Username</label>
+                                <input type="checkbox" id="cowrie-field-username" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-username" style="color: #fff8c5; cursor: pointer;">Username</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-password" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-password" style="color: #fff8c5; cursor: pointer;">Password</label>
+                                <input type="checkbox" id="cowrie-field-password" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-password" style="color: #fff8c5; cursor: pointer;">Password</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-duration" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-duration" style="color: #fff8c5; cursor: pointer;">Duration</label>
+                                <input type="checkbox" id="cowrie-field-duration" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-duration" style="color: #fff8c5; cursor: pointer;">Duration</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="field-message" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="field-message" style="color: #fff8c5; cursor: pointer;">Message</label>
+                                <input type="checkbox" id="cowrie-field-message" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="cowrie-field-message" style="color: #fff8c5; cursor: pointer;">Message</label>
                             </div>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <button class="btn btn-success" onclick="selectAllFields()" style="flex: 1;">Seleccionar Todo</button>
-                            <button class="btn btn-secondary" onclick="deselectAllFields()" style="flex: 1;">Deseleccionar Todo</button>
+                            <button class="btn btn-success" onclick="selectAllFields('cowrie')" style="flex: 1;">Select All</button>
+                            <button class="btn btn-secondary" onclick="deselectAllFields('cowrie')" style="flex: 1;">Deselect All</button>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Logs Display -->
                 <div style="background: #2c3e50; color: #ecf0f1; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.5; max-height: 600px; overflow-y: auto; margin-bottom: 1rem;">
-                    <div id="cowrie-logs" style="white-space: pre-wrap;">Esperando solicitud...</div>
+                    <div id="cowrie-logs" style="white-space: pre-wrap;">Waiting for request...</div>
                 </div>
                 
                 <!-- Actions -->
                 <div class="card-actions">
                     <div>
-                        <button id="sendToSplunk" class="btn btn-primary" onclick="sendToSplunk('cowrie')" disabled>Enviar a Splunk</button>
+                        <button id="sendToSplunk" class="btn btn-primary" onclick="sendToSplunk('cowrie')" disabled>Send to Splunk</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Logs de Dionaea-->
+        <div class="service-card">
+            <div class="card-header">
+                <h3>Dionaea Honeypot Logs</h3>
+            </div>
+            <div class="card-body">
+                <!-- Query Filters Section -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleQueryFilter('query-dionaea-filter-content', 'query-dionaea-filter-toggle')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="color: #fff8c5; margin: 0;">Search Filters</h4>
+                            <span id="query-dionaea-filter-toggle" style="color: #eeaf00; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
+                        </div>
+                    </div>
+                    <div id="query-dionaea-filter-content" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label for="log-limit-dionaea" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Log Limit:</label>
+                                <input type="number" id="log-limit-dionaea" value="50" min="1" max="1000" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label for="log-type-dionaea" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Log Type:</label>
+                                <select id="log-type-dionaea" style="width: 100%" onchange="toggleDionaeaFilter()">
+                                    <option value="httpd">HTTP</option>
+                                    <option value="ftpd">FTP</option>
+                                    <option value="mysqld">MySQL</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="log-timestamp-dionaea" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">From Date (optional):</label>
+                                <input type="datetime-local" id="log-timestamp-dionaea" style="width: 100%">
+                            </div>
+                        </div>
+                        <button class="btn btn-info" onclick="getLogs('dionaea')" style="width: 100%;">Search Logs</button>
+                    </div>
+                </div>
+                <!-- Field Visibility Section -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleFieldFilter('dionaea-field-filter-content', 'dionaea-field-filter-toggle')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="color: #fff8c5; margin: 0;">Visible Fields</h4>
+                            <span id="dionaea-field-filter-toggle" style="color: #eeaf00; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
+                        </div>
+                    </div>
+                    <div id="dionaea-field-filter-content" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
+                        <p style="color: #fff8c5; font-weight: bold; margin-bottom: 1rem;">Select fields to display:</p>
+                        <div id="http-filter" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-user_agent" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-user_agent" style="color: #fff8c5; cursor: pointer;">User Agent</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-timestamp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-timestamp" style="color: #fff8c5; cursor: pointer;">Timestamp</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-src_ip" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-src_ip" style="color: #fff8c5; cursor: pointer;">Source IP</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-request_type" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-request_type" style="color: #fff8c5; cursor: pointer;">Request Type</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-endpoint" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-endpoint" style="color: #fff8c5; cursor: pointer;">Endpoint</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-username" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-username" style="color: #fff8c5; cursor: pointer;">Username</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-password" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-password" style="color: #fff8c5; cursor: pointer;">Password</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-filename" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-filename" style="color: #fff8c5; cursor: pointer;">File uploaded</label>
+                            </div>
+                        </div>
+                        <div id="ftp-filter" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-username-ftp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-username-ftp" style="color: #fff8c5; cursor: pointer;">Username</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-password-ftp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-password-ftp" style="color: #fff8c5; cursor: pointer;">Password</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-filename-ftp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-filename-ftp" style="color: #fff8c5; cursor: pointer;">File uploaded</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-timestamp-ftp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-timestamp-ftp" style="color: #fff8c5; cursor: pointer;">Timestamp</label>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-success" onclick="selectAllFields('dionaea')" style="flex: 1;">Select All</button>
+                            <button class="btn btn-secondary" onclick="deselectAllFields('dionaea')" style="flex: 1;">Deselect All</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Logs Display -->
+                <div style="background: #2c3e50; color: #ecf0f1; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.5; max-height: 600px; overflow-y: auto; margin-bottom: 1rem;">
+                    <div id="dionaea-logs" style="white-space: pre-wrap;">Waiting for request...</div>
+                </div>
+                <!-- TODO -->
+                <p>¡PARA MySQL!</p>
+                <p>Obtener username, password e intentos de conexión fallidos y fecha (a partir del nombre del log)</p>
+                <p>ANTES DE ENVIAR SPLUNK HAY QUE PASARLO A JSON</p>
+                <p>¡¡¡ACORDARSE DE HACER GET BINARIES!!!</p>
+
+                <!-- Actions -->
+                <div class="card-actions">
+                    <div>
+                        <button id="sendToSplunkDionaea" class="btn btn-primary" onclick="sendToSplunk('dionaea')" disabled>Send to Splunk</button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-header">
+                <h3>Dionaea Honeypot Binaries</h3>
+            </div>
+            <div class="card-body">
+                <p>Obtener lista paginada con búsqueda de archivos subidos</p>
+                <p>Mostrar nombre, extensión, tamaño, hash y fecha de subida</p>
+                <p>Incluir botón para buscar su hash en virustotal (VirusTotal tiene API para verlo desde HoneyDash?)</p>
             </div>
         </div>
     </main>

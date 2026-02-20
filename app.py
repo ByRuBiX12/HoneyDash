@@ -274,7 +274,24 @@ def dionaea_stop():
             "message": "Error stopping Dionaea"
         }), 500
 
-# TODO: ENDPOINT PARA LOGS
+@app.route('/api/dionaea/logs', methods=['GET'])
+def dionaea_logs():
+    """Retrieves Dionaea logs"""
+    try:
+        limit = request.args.get('limit', default=50, type=int)
+        log_type = request.args.get('type', default="httpd", type=str)
+        timestamp = request.args.get('timestamp', default=None, type=str)
+
+        result = dionaea_manager.get_logs(limit=limit, itype=log_type, timestamp=timestamp)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error retrieving Dionaea logs"
+        }), 500
+
+# TODO: ENDPOINT PARA BINARIES
 
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])

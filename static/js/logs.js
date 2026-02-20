@@ -33,21 +33,21 @@ function showActionMessage(message) {
     messageBox.className = 'action-message';
     messageBox.textContent = message;
     messageBox.style.animation = 'slideIn 0.4s forwards';
-    
+
     container.appendChild(messageBox);
-    
+
     setTimeout(() => {
         messageBox.style.animation = 'slideOut 7s forwards';
-        
+
         setTimeout(() => {
             messageBox.remove();
         }, 7000);
     }, 7400);
 }
 
-function toggleQueryFilter() {
-    const content = document.getElementById('query-filter-content');
-    const toggle = document.getElementById('query-filter-toggle');
+function toggleQueryFilter(contentId, toggleId) {
+    const content = document.getElementById(contentId);
+    const toggle = document.getElementById(toggleId);
     if (content.style.display === 'none') {
         content.style.display = 'block';
         toggle.style.transform = 'rotate(0deg)';
@@ -58,9 +58,9 @@ function toggleQueryFilter() {
 }
 
 // Toggle para campos visibles
-function toggleFieldFilter() {
-    const content = document.getElementById('field-filter-content');
-    const toggle = document.getElementById('field-filter-toggle');
+function toggleFieldFilter(contentId, toggleId) {
+    const content = document.getElementById(contentId);
+    const toggle = document.getElementById(toggleId);
     if (content.style.display === 'none') {
         content.style.display = 'block';
         toggle.style.transform = 'rotate(0deg)';
@@ -71,14 +71,14 @@ function toggleFieldFilter() {
 }
 
 // Seleccionar todos los campos
-function selectAllFields() {
-    const checkboxes = document.querySelectorAll('[id^="field-"]');
+function selectAllFields(service) {
+    const checkboxes = document.querySelectorAll(`[id^="${service}-field-"]`);
     checkboxes.forEach(cb => cb.checked = true);
 }
 
 // Deseleccionar todos los campos
-function deselectAllFields() {
-    const checkboxes = document.querySelectorAll('[id^="field-"]');
+function deselectAllFields(service) {
+    const checkboxes = document.querySelectorAll(`[id^="${service}-field-"]`);
     checkboxes.forEach(cb => cb.checked = false);
 }
 
@@ -86,70 +86,121 @@ async function getLogs(service) {
     showActionMessage('Buscando logs...');
     const logsBox = document.getElementById(`${service}-logs`);
 
-    try {
-        const limit = document.getElementById('log-limit').value || 50;
-        const eventid = document.getElementById('log-eventid').value || '';
-        const timestampInput = document.getElementById('log-timestamp').value;
-        
-        // Add seconds and timezone
-        let timestamp = '';
-        if (timestampInput) {
-            timestamp = timestampInput + ':00Z';
-        }
+    if (service === 'cowrie') {
+        try {
+            const limit = document.getElementById('log-limit').value || 50;
+            const eventid = document.getElementById('log-eventid').value || '';
+            const timestampInput = document.getElementById('log-timestamp').value;
 
-        let url = `${API_URL}/cowrie/logs?limit=${limit}`;
-        if (eventid) {
-            url += `&event_id=${eventid}`;
-        }
-        if (timestamp) {
-            url += `&timestamp=${timestamp}`;
-        }
-
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.success) {
-            const statusResponse = await makeRequest('/splunk/status');
-            if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
-                document.getElementById('sendToSplunk').disabled = false;
-                document.getElementById('sendToSplunk').classList.remove('disabled');
+            let url = `${API_URL}/cowrie/logs?limit=${limit}`;
+            if (eventid) {
+                url += `&event_id=${eventid}`;
             }
-            const filteredLogs = filterLogFields(data.logs);
-            
-            let output = `Total de logs encontrados: ${data.logs.length}\n`;
-            output += '='.repeat(80) + '\n\n';
-            
-            filteredLogs.forEach((log, index) => {
-                output += `--- Log ${index + 1} ---\n`;
-                for (const [key, value] of Object.entries(log)) {
-                    output += `${key}: ${value}\n`;
+            if (timestampInput) {
+                url += `&timestamp=${timestampInput}`;
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.success) {
+                const statusResponse = await makeRequest('/splunk/status');
+                if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
+                    document.getElementById('sendToSplunk').disabled = false;
+                    document.getElementById('sendToSplunk').classList.remove('disabled');
                 }
-                output += '\n';
-            });
-            
-            logsBox.textContent = output;
-            showActionMessage(`${data.logs.length} logs encontrados`);
-        } else {
-            logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
+                const filteredLogs = filterLogFields(data.logs);
+
+                let output = `Total de logs encontrados: ${data.logs.length}\n`;
+                output += '='.repeat(80) + '\n\n';
+
+                filteredLogs.forEach((log, index) => {
+                    output += `--- Log ${index + 1} ---\n`;
+                    for (const [key, value] of Object.entries(log)) {
+                        output += `${key}: ${value}\n`;
+                    }
+                    output += '\n';
+                });
+
+                logsBox.textContent = output;
+                showActionMessage(`${data.logs.length} logs encontrados`);
+            } else {
+                logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
+                document.getElementById('sendToSplunk').disabled = true;
+                document.getElementById('sendToSplunk').classList.add('disabled');
+                showActionMessage(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
             document.getElementById('sendToSplunk').disabled = true;
             document.getElementById('sendToSplunk').classList.add('disabled');
-            showActionMessage(`Error: ${data.error}`);
+            showActionMessage(`Error: ${error.message}`);
         }
-    } catch (error) {
-        logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
-        document.getElementById('sendToSplunk').disabled = true;
-        document.getElementById('sendToSplunk').classList.add('disabled');
-        showActionMessage(`Error: ${error.message}`);
+    } else if (service === 'dionaea') {
+        try {
+            const limit = document.getElementById('log-limit-dionaea').value || 50;
+            const type = document.getElementById('log-type-dionaea').value;
+            const timestampInput = document.getElementById('log-timestamp-dionaea').value;
+
+            let url = `${API_URL}/dionaea/logs?limit=${limit}&type=${type}`
+
+            if (timestampInput) {
+                url += `&timestamp=${timestampInput}`;
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.success) {
+                const statusResponse = await makeRequest('/splunk/status');
+                if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
+                    document.getElementById('sendToSplunkDionaea').disabled = false;
+                    document.getElementById('sendToSplunkDionaea').classList.remove('disabled');
+                }
+                const filterOption = document.getElementById('log-type-dionaea').value;
+                let filteredLogs = [];
+                if (filterOption === 'httpd') {
+                    filteredLogs = filterDionaeaHttpLogFields(data.logs);
+                } else if (filterOption === 'ftpd') {
+                    filteredLogs = filterDionaeaFtpLogFields(data.logs);
+                } // MYSQL logs
+
+                let output = `Total de logs encontrados: ${data.logs.length}\n`;
+                output += '='.repeat(80) + '\n\n';
+
+                filteredLogs.forEach((log, index) => {
+                    output += `--- Log ${index + 1} ---\n`;
+                    for (const [key, value] of Object.entries(log)) {
+                        output += `${key}: ${value}\n`;
+                    }
+                    output += '\n';
+                });
+
+                logsBox.textContent = output;
+                showActionMessage(`${data.logs.length} logs encontrados`);
+            } else {
+                logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
+                document.getElementById('sendToSplunkDionaea').disabled = true;
+                document.getElementById('sendToSplunkDionaea').classList.add('disabled');
+                showActionMessage(`Error: ${data.error}`);
+            }
+        }
+        catch (error) {
+            logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+            document.getElementById('sendToSplunkDionaea').disabled = true;
+            document.getElementById('sendToSplunkDionaea').classList.add('disabled');
+            showActionMessage(`Error: ${error.message}`);
+        }
     }
 }
 
-// Filter log fields based on checkbox selection
+// Filter Cowrie log fields based on checkbox selection
 function filterLogFields(logs) {
     const fields = ['eventid', 'timestamp', 'src_ip', 'src_port', 'username', 'password', 'duration', 'message'];
     const selectedFields = [];
     for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
-        const checkbox = document.getElementById(`field-${field}`);
+        const checkbox = document.getElementById(`cowrie-field-${field}`);
         if (checkbox && checkbox.checked) {
             selectedFields.push(field);
         }
@@ -158,7 +209,7 @@ function filterLogFields(logs) {
     const filteredLogs = [];
     for (let i = 0; i < logs.length; i++) {
         const log = logs[i];
-        const filteredLog = {};  
+        const filteredLog = {};
         for (let j = 0; j < selectedFields.length; j++) {
             const field = selectedFields[j];
             if (log.hasOwnProperty(field)) {
@@ -167,8 +218,81 @@ function filterLogFields(logs) {
         }
         filteredLogs.push(filteredLog);
     }
-    
     return filteredLogs;
+}
+
+// Filter Dionaea HTTP log fields based on checkbox selection
+function filterDionaeaHttpLogFields(logs) {
+    const fields = ['user_agent', 'timestamp', 'src_ip', 'request_type', 'endpoint', 'username', 'password', 'filename'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`dionaea-field-${field}`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
+// Filter Dionaea FTP log fields based on checkbox selection
+function filterDionaeaFtpLogFields(logs) {
+    const fields = ['username', 'password', 'src_ip', 'filename', 'timestamp'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`dionaea-field-${field}-ftp`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
+// Toggle Dionaea filter options based on log type
+function toggleDionaeaFilter() {
+    const logType = document.getElementById('log-type-dionaea').value;
+    if (logType === 'httpd') {
+        document.getElementById('http-filter').style.display = 'grid';
+        document.getElementById('ftp-filter').style.display = 'none';
+        //document.getElementById('mysql-filter').style.display = 'none';
+    } else if (logType === 'ftpd') {
+        document.getElementById('http-filter').style.display = 'none';
+        document.getElementById('ftp-filter').style.display = 'grid';
+        //document.getElementById('mysql-filter').style.display = 'none';
+    } else if (logType === 'mysqld') {
+        document.getElementById('http-filter').style.display = 'none';
+        document.getElementById('ftp-filter').style.display = 'none';
+        //document.getElementById('mysql-filter').style.display = 'grid';
+    }
 }
 
 // POST: Enviar logs a Splunk
@@ -177,7 +301,7 @@ async function sendToSplunk(service) {
 
     try {
         const logsData = JSON.parse(logsBox);
-        
+
         if (!logsData.logs || logsData.logs.length === 0) {
             showActionMessage('No logs detected to send to Splunk.');
             return;

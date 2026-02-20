@@ -261,5 +261,124 @@ class DionaeaManager:
                 "message": f"Error stopping Dionaea: {str(e)}"
             }
     
-    # TODO: CREAR PÁGINA WEB báscia EN http/root y REVISAR el resto de puertos y cómo funcionan
+    def get_logs(self, limit, itype, timestamp):
+        """Get Dionaea logs"""
+        try:
+            if not self._detect_docker_installation():
+                return {
+                    "success": False,
+                    "message": "Docker is not installed"
+                }
+            if not self._detect_container():
+                return {
+                    "success": False,
+                    "message": "Dionaea is not installed"
+                }
+            
+            log_dir = self.data_dir / "bistreams"
+            if not log_dir.exists():
+                return {
+                    "success": False,
+                    "message": "Log directory not found"
+                }
+            
+            logs = []
+            counter = 0
+            if not timestamp:
+                for dir in log_dir.iterdir():
+                    if dir.is_dir():
+                        for log_file in dir.iterdir():
+                            log_type = log_file.name.split("-")[0]
+                            if log_type == itype:
+                                log_entry = self._to_json(log_file, log_type)
+                                if log_entry:
+                                    logs.append(log_entry)
+                                    counter += 1
+                                    if counter >= limit:
+                                        break
+                        if counter >= limit:
+                            break
+            else:
+                for dir in log_dir.iterdir():
+                    if dir.is_dir():
+                        for log_file in dir.iterdir():
+                            log_type = log_file.name.split("-")[0]
+                            log_timestamp = log_file.name.split("-")[5] + "-" + log_file.name.split("-")[6] + "-" + log_file.name.split("-")[7][:-7]
+                            if log_type == itype and log_timestamp >= timestamp:
+                                log_entry = self._to_json(log_file, log_type)
+                                if log_entry:
+                                    logs.append(log_entry)
+                                    counter += 1
+                                    if counter >= limit:
+                                        break
+                        if counter >= limit:
+                            break
+            return {
+                "success": True,
+                "logs": logs
+            }
+        
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error reading log file: {str(e)}"
+            }
+
+    def _to_json(self, log_file, log_type):
+        """Converts a Dionaea log file to JSON format"""
+        if log_type == "httpd":
+            with open(log_file, 'r') as f:
+                # fist line = request
+                request = f.readline().strip()
+                user_agent = re.search(r'User-Agent: ([^\\]+)', request)
+                ip = re.search(r'Host: ([^\\]+)', request)
+                request_type = re.search(r'(GET|POST|HEAD|PUT|DELETE|OPTIONS|TRACE|CONNECT)\s', request)
+                endpoint = re.search(r'(GET|POST|HEAD|PUT|DELETE|OPTIONS|TRACE|CONNECT)\s+(\S+)\s+HTTP', request)
+                date = log_file.name.split("-")[5] + "-" + log_file.name.split("-")[6] + "-" + log_file.name.split("-")[7][:-7]
+                username = re.search(r'username=([^\&]+)', request)
+                password = re.search(r'password=([^\']+)', request)
+                filename = re.search(r'filename="([^"]+)"', request)
+                
+                log_entry = {"timestamp": date}
+                
+                if ip:
+                    log_entry["ip"] = ip.group(1)
+                if user_agent:
+                    log_entry["user_agent"] = user_agent.group(1)
+                if request_type:
+                    log_entry["request_type"] = request_type.group(1)
+                if endpoint:
+                    log_entry["endpoint"] = endpoint.group(2)
+                if username:
+                    log_entry["username"] = username.group(1)
+                if password:
+                    log_entry["password"] = password.group(1)
+                if filename:
+                    log_entry["filename"] = filename.group(1)
+                
+                return log_entry
+        elif log_type == "ftpd":
+            with open(log_file, 'r') as f:
+                content = f.read()
+                
+                ip = log_file.name.split("-")[3]
+                date = log_file.name.split("-")[5] + "-" + log_file.name.split("-")[6] + "-" + log_file.name.split("-")[7][:-7]
+                username = re.search(r'USER ([^\\]+)', content)
+                password = re.search(r'PASS ([^\\]+)', content)
+                filename = re.search(r'STOR ([^\\]+)', content)
+                
+                log_entry = {"timestamp": date}
+                log_entry["ip"] = ip
+
+                if username:
+                    log_entry["username"] = username.group(1)
+                if password:
+                    log_entry["password"] = password.group(1)
+                if filename:
+                    log_entry["filename"] = filename.group(1)
+                    
+                return log_entry
+    
+        # elif log_type == "mysqld":
+        return None
     # TODO: GET LOGS & GET BINARIES

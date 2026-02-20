@@ -1,5 +1,38 @@
 # Changelog
 
+## [Unreleased] - 2026-02-19
+
+### Added
+- **Dionaea Log Parsing**: Full implementation for HTTP and FTP bistream log parsing
+- **HTTP Log Fields**: Extract User-Agent, IP, request type, endpoint, username, password, and uploaded filenames
+- **FTP Log Fields**: Parse username, password, source IP, and transferred filenames
+- **Dynamic JSON Construction**: Logs only include fields that exist, omitting null values
+- **Regex Pattern Matching**: Custom patterns for extracting data from literal escape sequences in logs
+- **Log Type Filtering**: Support for filtering logs by service type (httpd, ftpd, mysqld)
+- **Timestamp Filtering**: Query logs from specific dates onwards
+- **Field Selection UI**: Checkboxes in dashboard to show/hide specific log fields
+- **Log Limit Control**: Configurable number of logs to retrieve per query
+
+### Changed
+- **`_to_json()` Return Type**: Changed from returning a list to returning a single dictionary
+- **Log Aggregation**: Using `append()`
+- **Counter Logic**: Only increment when valid logs are found, not for every file processed
+- **Conditional Field Addition**: Build log dictionaries dynamically based on available data
+
+### Fixed
+- **Cowrie logic**: Added a counter instead of limiting the final returned list size for better optimization
+- **Javascript functions**: Some functions are now reused thanks to the addition of some parameters
+
+### Technical Details
+- **Bistream Directory**: Logs read from `/opt/honeydash/dionaea-data/bistreams/`
+- **Log Filename Format**: Parse timestamp and service type from filename components
+- **Regex Patterns**: 
+  - HTTP User-Agent: `r'User-Agent: ([^\\]+)'`
+  - HTTP Filename: `r'filename="([^"]+)"'`
+  - FTP Username: `r'USER ([^\\]+)'`
+  - FTP Password: `r'PASS ([^\\]+)'`
+  - FTP File: `r'STOR ([^\\]+)'`
+
 ## [Unreleased] - 2026-02-15
 
 ### Added

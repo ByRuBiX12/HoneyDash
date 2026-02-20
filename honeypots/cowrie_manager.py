@@ -698,6 +698,7 @@ class CowrieManager:
                 return {"success": False, "message": "Log file not found"}
             
             logs = []
+            counter = 0
             with open(log_file, 'r') as f:
                 for line in f:
                     try:
@@ -723,11 +724,11 @@ class CowrieManager:
                                 del filtered_log_entry[key]
 
                         logs.append(filtered_log_entry)
+                        counter += 1
+                        if counter >= limit:
+                            break
                     except json.JSONDecodeError:
                         continue
-            
-            # Limit of logs returned
-            logs = logs[:limit]
             
             return {
                 "success": True,
