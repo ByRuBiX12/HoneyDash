@@ -35,7 +35,7 @@ async function makeRequest(endpoint, method = 'GET', body = null) {
             options.body = JSON.stringify(body);
         }
 
-        const response = await fetch(`http://localhost:5000/api${endpoint}`, options);
+        const response = await fetch(`/api${endpoint}`, options);
         const data = await response.json();
         
         responseBox.textContent = JSON.stringify(data, null, 2);
@@ -348,7 +348,7 @@ async function checkSplunkStatus() {
         const response = await makeRequest('/splunk/status');
         updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', response.running, response.installed, response.token);
     } catch (error) {
-        alert('Error checking Splunk SIEM status: ' + error.message);
+        showActionMessage('Error checking Splunk SIEM status: ' + error.message);
     }
 }
 

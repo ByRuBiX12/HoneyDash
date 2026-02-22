@@ -379,6 +379,52 @@ class DionaeaManager:
                     
                 return log_entry
     
-        # elif log_type == "mysqld":
+        elif log_type == "mysqld":
+            with open(log_file, 'r') as f:
+                content = f.read()
+                ip = log_file.name.split("-")[3]
+                date = log_file.name.split("-")[5] + "-" + log_file.name.split("-")[6] + "-" + log_file.name.split("-")[7][:-7]
+                username = re.search(r'\\x00\\x00\\x00([a-zA-Z0-9_-]+)\\x00', content)
+
+                log_entry = {"timestamp": date}
+                log_entry["ip"] = ip
+
+                if username:
+                    username = username.group(1)
+                    log_entry["username"] = username
+
+                    line_pattern = rf'\\x00\\x00\\x00{re.escape(username)}\\x00[^\n\r]*?(?=\n|\r|$)'
+                    line = re.search(line_pattern, content)
+                    if line:
+                        line_content = line.group(0)
+                        # username\x00\x00') = no password was sent
+                        hashed_pattern = rf"{re.escape(username)}\\x00\\x00'\)"
+                        if re.search(hashed_pattern, line_content):
+                            log_entry["password"] = "Password not sent"
+                        else:
+                            # username\xXX<password>\x00')
+                            hash_marker_pattern = rf"{re.escape(username)}\\x[a-fA-F0-9]{{2}}(.+?)\\x00'\)"
+                            hash_match = re.search(hash_marker_pattern, line_content)
+                            
+                            if hash_match:
+                                hash = hash_match.group(1)
+
+                                candidates = re.findall(r'(?:^|[^\\x])([a-zA-Z][a-zA-Z0-9_@!#$%^&*()+\-]{3,})', hash)
+                                
+                                valid = []
+                                for candidate in candidates:
+                                    if candidate[0] == 'x' and len(candidate) > 2 and re.match(r'^x[0-9a-fA-F]{2}', candidate):
+                                            continue
+                                    valid.append(candidate)
+                                
+                                if valid:
+                                    log_entry["password"] = valid[-1] 
+                                else:
+                                    log_entry["password"] = "Password is hashed"
+                            else:
+                                log_entry["password"] = "Password is hashed"
+
+                return log_entry
         return None
-    # TODO: GET LOGS & GET BINARIES
+    
+    # TODO: GET BINARIES

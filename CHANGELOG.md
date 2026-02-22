@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] - 2026-02-22
+### Added
+- **Dionaea MySQL Log Parsing**: Full implementation for MySQL log parsing.
+- **Parsing logic**: Since Dionaea saves hex characters (like \x00) as plaintext, a complex parsing logic has been required to extract correct usernames and passwords. Could be improved in future updates.
+- **MySQL Log Fields**: Extract username, password, source IP and timestamp.
+
 ## [Unreleased] - 2026-02-19
 
 ### Added

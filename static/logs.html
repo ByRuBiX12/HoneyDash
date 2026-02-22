@@ -248,6 +248,26 @@
                                 <label for="dionaea-field-timestamp-ftp" style="color: #fff8c5; cursor: pointer;">Timestamp</label>
                             </div>
                         </div>
+                        
+                        <div id="mysql-filter" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-username-mysql" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-username-mysql" style="color: #fff8c5; cursor: pointer;">Username</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-password-mysql" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-password-mysql" style="color: #fff8c5; cursor: pointer;">Password</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-src_ip-mysql" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-src_ip-mysql" style="color: #fff8c5; cursor: pointer;">Source IP</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="dionaea-field-timestamp-mysql" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="dionaea-field-timestamp-mysql" style="color: #fff8c5; cursor: pointer;">Timestamp</label>
+                            </div>
+                        </div>
+                        
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn btn-success" onclick="selectAllFields('dionaea')" style="flex: 1;">Select All</button>
                             <button class="btn btn-secondary" onclick="deselectAllFields('dionaea')" style="flex: 1;">Deselect All</button>

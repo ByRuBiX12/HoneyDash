@@ -1,5 +1,5 @@
-// API URL
-const API_URL = 'http://localhost:5000/api';
+// API URL - using relative path to work from any IP
+const API_URL = '/api';
 
 // Función auxiliar para hacer peticiones
 async function makeRequest(endpoint, method = 'GET', body = null) {
@@ -163,7 +163,9 @@ async function getLogs(service) {
                     filteredLogs = filterDionaeaHttpLogFields(data.logs);
                 } else if (filterOption === 'ftpd') {
                     filteredLogs = filterDionaeaFtpLogFields(data.logs);
-                } // MYSQL logs
+                } else if (filterOption === 'mysqld') {
+                    filteredLogs = filterDionaeaMySqlLogFields(data.logs);
+                }
 
                 let output = `Total de logs encontrados: ${data.logs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
@@ -277,21 +279,49 @@ function filterDionaeaFtpLogFields(logs) {
     return filteredLogs;
 }
 
+// Filter Dionaea MySQL log fields based on checkbox selection
+function filterDionaeaMySqlLogFields(logs) {
+    const fields = ['username', 'password', 'src_ip', 'timestamp'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`dionaea-field-${field}-mysql`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
 // Toggle Dionaea filter options based on log type
 function toggleDionaeaFilter() {
     const logType = document.getElementById('log-type-dionaea').value;
     if (logType === 'httpd') {
         document.getElementById('http-filter').style.display = 'grid';
         document.getElementById('ftp-filter').style.display = 'none';
-        //document.getElementById('mysql-filter').style.display = 'none';
+        document.getElementById('mysql-filter').style.display = 'none';
     } else if (logType === 'ftpd') {
         document.getElementById('http-filter').style.display = 'none';
         document.getElementById('ftp-filter').style.display = 'grid';
-        //document.getElementById('mysql-filter').style.display = 'none';
+        document.getElementById('mysql-filter').style.display = 'none';
     } else if (logType === 'mysqld') {
         document.getElementById('http-filter').style.display = 'none';
         document.getElementById('ftp-filter').style.display = 'none';
-        //document.getElementById('mysql-filter').style.display = 'grid';
+        document.getElementById('mysql-filter').style.display = 'grid';
     }
 }
 
