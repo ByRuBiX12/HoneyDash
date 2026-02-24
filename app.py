@@ -291,7 +291,19 @@ def dionaea_logs():
             "message": "Error retrieving Dionaea logs"
         }), 500
 
-# TODO: ENDPOINT PARA BINARIES
+@app.route('/api/dionaea/binaries', methods=['GET'])
+def dionaea_binaries():
+    """Retrieves metadata of binaries captured by Dionaea"""
+    try:
+        page = request.args.get('page', default=1, type=int)
+        result = dionaea_manager.get_binaries(page=page)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error retrieving Dionaea binaries"
+        }), 500
 
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])

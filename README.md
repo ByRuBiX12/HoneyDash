@@ -28,10 +28,13 @@
 - **Service lifecycle**: Full start/stop/status control via Docker container management
 - **Port exposure**: Follows official Dionaea documentation with UDP/TCP support for 16 services
 - **Low-interaction honeypot**: Emulates vulnerabilities without requiring full service implementations
-- **Log parsing**: Extract and filter HTTP and FTP bistream logs with field selection
+- **Log parsing**: Extract and filter HTTP, FTP, and MySQL bistream logs with field selection
   - **HTTP logs**: User-Agent, IP, request type, endpoint, credentials, uploaded filenames
   - **FTP logs**: Username, password, source IP, transferred files
-  - **MySQL logs**: Username, password, source IP, timestamp.
+  - **MySQL logs**: Username, password, source IP, timestamp
+- **Binary viewer**: Display captured malware with MD5 hash, size, and timestamp
+- **VirusTotal integration**: Direct links to analyze binaries on VirusTotal based on their MD5 hash
+- **Paginated view**: 9 binaries per page with styled grid and Previous/Next navigation buttons
 - **Advanced filtering**: Query logs by service type, timestamp, and custom field visibility
 - **Smart JSON output**: Only includes fields that exist in logs, omitting null values
 

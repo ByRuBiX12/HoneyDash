@@ -5,6 +5,9 @@ import re
 import json
 from pathlib import Path
 import shutil
+import hashlib
+import datetime
+from itertools import islice
 
 
 class DionaeaManager:
@@ -427,4 +430,68 @@ class DionaeaManager:
                 return log_entry
         return None
     
-    # TODO: GET BINARIES
+    def get_binaries(self, page):
+        """Get binaries captured by Dionaea"""
+        try:
+            if not self._detect_docker_installation():
+                return {
+                    "success": False,
+                    "message": "Docker is not installed"
+                }
+            if not self._detect_container():
+                return {
+                    "success": False,
+                    "message": "Dionaea is not installed"
+                }
+            
+            binaries_dir = self.data_dir / "binaries"
+            if not binaries_dir.exists():
+                return {
+                    "success": False,
+                    "message": "Binaries directory not found"
+                }
+            files = []
+            for f in binaries_dir.iterdir():
+                if f.is_file():
+                    files.append(f)
+            
+            total = len(files)
+            
+            if total == 0:
+                return {
+                    "success": False,
+                    "message": "No binaries found"
+                }
+
+            start_idx = (page - 1) * 9
+            end_idx = start_idx + 9
+            
+            if start_idx >= total:
+                return {
+                    "success": False,
+                    "message": "No more binaries available",
+                    "total": total,
+                    "page": page
+                }
+
+            binaries = []
+            for binary in files[start_idx:end_idx]:
+                binaries.append({
+                    "md5hash": hashlib.md5(open(binary, 'rb').read()).hexdigest(),
+                    "size": binary.stat().st_size,
+                    "timestamp": datetime.datetime.fromtimestamp(os.path.getctime(binary)).strftime("%Y-%m-%d %H:%M:%S")
+                })
+            
+            return {
+                "success": True,
+                "binaries": binaries,
+                "total": total,
+                "page": page,
+                "total_pages": (total + 9 - 1) // 9
+            }
+        
+        except Exception as e:
+            return {
+                "success": False,
+                "message": str(e)
+            }

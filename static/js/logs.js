@@ -349,3 +349,98 @@ async function sendToSplunk(service) {
         return;
     }
 }
+
+// GET: Get Dionaea binaries information and show them in cards
+async function getBinaries() {
+    try {
+        let currentPage = 1;
+        
+        const loadPage = async (page) => {
+            const response = await makeRequest(`/dionaea/binaries?page=${page}`);
+            
+            const binariesContainer = document.getElementById('binaries-container');
+            binariesContainer.innerHTML = '';
+            binariesContainer.style.marginBottom = '1rem';
+
+            if (response.binaries.length === 0) {
+                binariesContainer.innerHTML = '<p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No binaries found.</p>';
+                return;
+            }
+            
+            const leftArrow = document.createElement('a');
+            leftArrow.className = 'pagination-arrow';
+            leftArrow.innerHTML = '&#9668; Previous';
+            if (currentPage === 1) {
+                leftArrow.classList.add('pagination-arrow-disabled');
+            }
+            leftArrow.onclick = async () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    await loadPage(currentPage);
+                }
+            };
+            binariesContainer.appendChild(leftArrow);
+            
+            const rightArrow = document.createElement('a');
+            rightArrow.className = 'pagination-arrow';
+            rightArrow.innerHTML = 'Next &#9658;';
+            if (currentPage >= response.total_pages) {
+                rightArrow.classList.add('pagination-arrow-disabled');
+            }
+            rightArrow.onclick = async () => {
+                if (currentPage < response.total_pages) {
+                    currentPage++;
+                    await loadPage(currentPage);
+                }
+            };
+            binariesContainer.appendChild(rightArrow);
+
+            printBinaries(response);
+        };
+        
+        await loadPage(currentPage);
+        
+    } catch (error) {
+        showActionMessage(`Error: ${error.message}`);
+    }
+}
+
+async function printBinaries(response) {
+    try {
+        response.binaries.forEach(binary => {
+                const binaryCard = document.createElement('div');
+                binaryCard.className = 'binary';
+
+                const md5Hash = document.createElement('p');
+                md5Hash.innerHTML = `<strong>MD5 Hash:</strong> <span style="font-family: 'Courier New', monospace; font-size: 0.85rem; word-break: break-all;">${binary.md5hash}</span>`;
+                binaryCard.appendChild(md5Hash);
+
+                const size = document.createElement('p');
+                const sizeInKB = (binary.size / 1024).toFixed(2);
+                size.innerHTML = `<strong>Size:</strong> <span>${binary.size} bytes (${sizeInKB} KB)</span>`;
+                binaryCard.appendChild(size);
+
+                const timestamp = document.createElement('p');
+                timestamp.innerHTML = `<strong>Timestamp:</strong> <span>${binary.timestamp}</span>`;
+                binaryCard.appendChild(timestamp);
+
+                const searchLink = document.createElement('a');
+                searchLink.href = `https://www.virustotal.com/gui/search/${binary.md5hash}`;
+                searchLink.target = '_blank';
+                searchLink.classList.add('search-link');
+                searchLink.title = 'Search on VirusTotal';
+
+                const searchIcon = document.createElement('a');
+                searchIcon.className = 'search-icon';
+                searchIcon.innerHTML = 'Analyze &#x2315;';
+                
+                searchLink.appendChild(searchIcon);
+                binaryCard.appendChild(searchLink);
+                document.getElementById('binaries-container').appendChild(binaryCard);
+            });
+            
+            showActionMessage(`Successfully loaded ${response.binaries.length} binaries`);
+    } catch (error) {
+        showActionMessage(`Error displaying binaries: ${error.message}`);
+    }
+}

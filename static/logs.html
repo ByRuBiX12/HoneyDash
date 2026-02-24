@@ -278,11 +278,6 @@
                 <div style="background: #2c3e50; color: #ecf0f1; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.5; max-height: 600px; overflow-y: auto; margin-bottom: 1rem;">
                     <div id="dionaea-logs" style="white-space: pre-wrap;">Waiting for request...</div>
                 </div>
-                <!-- TODO -->
-                <p>¡PARA MySQL!</p>
-                <p>Obtener username, password e intentos de conexión fallidos y fecha (a partir del nombre del log)</p>
-                <p>ANTES DE ENVIAR SPLUNK HAY QUE PASARLO A JSON</p>
-                <p>¡¡¡ACORDARSE DE HACER GET BINARIES!!!</p>
 
                 <!-- Actions -->
                 <div class="card-actions">
@@ -291,13 +286,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="service-card">
             <div class="card-header">
                 <h3>Dionaea Honeypot Binaries</h3>
             </div>
             <div class="card-body">
-                <p>Obtener lista paginada con búsqueda de archivos subidos</p>
-                <p>Mostrar nombre, extensión, tamaño, hash y fecha de subida</p>
-                <p>Incluir botón para buscar su hash en virustotal (VirusTotal tiene API para verlo desde HoneyDash?)</p>
+                <div id="binaries-container" class="binaries-container">
+                    <p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No binaries loaded. Click "Get Binaries" to fetch them.</p>
+                </div>
+                               
+                <!-- Actions -->
+                <div class="card-actions">
+                    <div>
+                        <button id="getBinaries" class="btn btn-primary" style="color: black" onclick="getBinaries()">Get Binaries</button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>

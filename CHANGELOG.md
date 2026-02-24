@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased] - 2026-02-24
+### Added
+- **Dionaea Binary Viewer**: Display captured malware binaries in paginated grid view (9 per page (3x3 grid))
+- **Binary Metadata**: Show MD5 hash, file size, and capture timestamp for each binary
+- **VirusTotal Integration**: Direct links to analyze binaries on VirusTotal using MD5 hash
+- **CSS Grid Layout**: 3-column responsive grid with hover effects on binary cards and buttons
+- **Pagination System**: Page-based navigation (Previous/Next arrows) with visual feedback
+
+### Changed
+- **Backend Pagination**: Simplified to 9 binaries per page using direct list slicing
+
+### Fixed
+- **Pagination Math**: Corrected index calculation from previous attempts
+
 ## [Unreleased] - 2026-02-22
 ### Added
 - **Dionaea MySQL Log Parsing**: Full implementation for MySQL log parsing.
