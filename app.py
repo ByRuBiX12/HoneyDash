@@ -8,6 +8,7 @@ import pwd
 
 from honeypots.cowrie_manager import CowrieManager
 from honeypots.dionaea_manager import DionaeaManager
+from honeypots.ddospot_manager import DDoSPotManager
 from siem.splunk_manager import SplunkManager
 
 # Add siem and honeypots directories to path
@@ -305,6 +306,69 @@ def dionaea_binaries():
             "message": "Error retrieving Dionaea binaries"
         }), 500
 
+
+# ============== DDOSPOT #ENDPOINTS ==============
+
+@app.route('/api/ddospot/status', methods=['GET'])
+def ddospot_status():
+    """Gets the current status of DDoSPot"""
+    try:
+        status = ddospot_manager.get_status()
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error getting DDoSPot status"
+        }), 500
+
+@app.route('/api/ddospot/install', methods=['POST'])
+def ddospot_install():
+    """Installs DDOSPot honeypot"""
+    try:
+        # Check if running as root
+        if os.geteuid() != 0: # Get EFFECTIVE not real UID
+            return jsonify({
+                "success": False,
+                "message": "Root privileges are required to install DDoSPot"
+            }), 403
+        
+        result = ddospot_manager.install()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error installing DDosPot"
+        }), 500
+
+@app.route('/api/ddospot/start', methods=['POST'])
+def ddospot_start():
+    """Starts DDoSPot"""
+    try:
+        result = ddospot_manager.start()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error starting DDosPot"
+        }), 500
+
+@app.route('/api/ddospot/stop', methods=['POST'])
+def ddospot_stop():
+    """Stop DDoSPot"""
+    try:
+        result = splunk_manager.stop()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error stopping DDosPot"
+        })
+
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])
 def splunk_status():
@@ -427,6 +491,8 @@ if __name__ == '__main__':
     cowrie_manager = CowrieManager()
     # Start Dionaea manager
     dionaea_manager = DionaeaManager()
+    # Start DDoSPot manager
+    ddospot_manager = DDoSPotManager()
     # Start Splunk manager
     splunk_manager = SplunkManager()
 

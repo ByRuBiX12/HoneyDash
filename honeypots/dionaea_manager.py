@@ -343,6 +343,8 @@ class DionaeaManager:
                 filename = re.search(r'filename="([^"]+)"', request)
                 
                 log_entry = {"timestamp": date}
+                log_entry["honeypot"] = 'dionaea'
+                log_entry["type"] = 'http'
                 
                 if ip:
                     log_entry["ip"] = ip.group(1)
@@ -371,6 +373,8 @@ class DionaeaManager:
                 filename = re.search(r'STOR ([^\\]+)', content)
                 
                 log_entry = {"timestamp": date}
+                log_entry["honeypot"] = 'dionaea'
+                log_entry["type"] = 'ftp'
                 log_entry["ip"] = ip
 
                 if username:
@@ -390,6 +394,8 @@ class DionaeaManager:
                 username = re.search(r'\\x00\\x00\\x00([a-zA-Z0-9_-]+)\\x00', content)
 
                 log_entry = {"timestamp": date}
+                log_entry["honeypot"] = 'dionaea'
+                log_entry["type"] = 'mysql'
                 log_entry["ip"] = ip
 
                 if username:

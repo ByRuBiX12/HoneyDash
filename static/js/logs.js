@@ -85,6 +85,7 @@ function deselectAllFields(service) {
 async function getLogs(service) {
     showActionMessage('Buscando logs...');
     const logsBox = document.getElementById(`${service}-logs`);
+    const logsBoxHidden = document.getElementById(`${service}-logs-hidden`)
 
     if (service === 'cowrie') {
         try {
@@ -113,6 +114,7 @@ async function getLogs(service) {
 
                 let output = `Total de logs encontrados: ${data.logs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
+                let outputHidden = JSON.stringify(filteredLogs);
 
                 filteredLogs.forEach((log, index) => {
                     output += `--- Log ${index + 1} ---\n`;
@@ -123,6 +125,7 @@ async function getLogs(service) {
                 });
 
                 logsBox.textContent = output;
+                logsBoxHidden.textContent = outputHidden;
                 showActionMessage(`${data.logs.length} logs encontrados`);
             } else {
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -169,6 +172,7 @@ async function getLogs(service) {
 
                 let output = `Total de logs encontrados: ${data.logs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
+                let outputHidden = JSON.stringify(filteredLogs);
 
                 filteredLogs.forEach((log, index) => {
                     output += `--- Log ${index + 1} ---\n`;
@@ -179,6 +183,7 @@ async function getLogs(service) {
                 });
 
                 logsBox.textContent = output;
+                logsBoxHidden.textContent = outputHidden;
                 showActionMessage(`${data.logs.length} logs encontrados`);
             } else {
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -198,7 +203,7 @@ async function getLogs(service) {
 
 // Filter Cowrie log fields based on checkbox selection
 function filterLogFields(logs) {
-    const fields = ['eventid', 'timestamp', 'src_ip', 'src_port', 'username', 'password', 'duration', 'message'];
+    const fields = ['honeypot', 'eventid', 'timestamp', 'src_ip', 'src_port', 'username', 'password', 'duration', 'message'];
     const selectedFields = [];
     for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
@@ -225,7 +230,7 @@ function filterLogFields(logs) {
 
 // Filter Dionaea HTTP log fields based on checkbox selection
 function filterDionaeaHttpLogFields(logs) {
-    const fields = ['user_agent', 'timestamp', 'src_ip', 'request_type', 'endpoint', 'username', 'password', 'filename'];
+    const fields = ['honeypot', 'type', 'user_agent', 'timestamp', 'src_ip', 'request_type', 'endpoint', 'username', 'password', 'filename'];
     const selectedFields = [];
     for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
@@ -234,7 +239,7 @@ function filterDionaeaHttpLogFields(logs) {
             selectedFields.push(field);
         }
     }
-
+    
     const filteredLogs = [];
     for (let i = 0; i < logs.length; i++) {
         const log = logs[i];
@@ -253,7 +258,7 @@ function filterDionaeaHttpLogFields(logs) {
 
 // Filter Dionaea FTP log fields based on checkbox selection
 function filterDionaeaFtpLogFields(logs) {
-    const fields = ['username', 'password', 'src_ip', 'filename', 'timestamp'];
+    const fields = ['honeypot', 'type', 'username', 'password', 'src_ip', 'filename', 'timestamp'];
     const selectedFields = [];
     for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
@@ -281,7 +286,7 @@ function filterDionaeaFtpLogFields(logs) {
 
 // Filter Dionaea MySQL log fields based on checkbox selection
 function filterDionaeaMySqlLogFields(logs) {
-    const fields = ['username', 'password', 'src_ip', 'timestamp'];
+    const fields = ['honeypot', 'type', 'username', 'password', 'src_ip', 'timestamp'];
     const selectedFields = [];
     for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
@@ -327,21 +332,19 @@ function toggleDionaeaFilter() {
 
 // POST: Enviar logs a Splunk
 async function sendToSplunk(service) {
-    const logsBox = document.getElementById(`${service}-logs`).textContent;
+    const logsBox = document.getElementById(`${service}-logs-hidden`).textContent;
 
     try {
         const logsData = JSON.parse(logsBox);
 
-        if (!logsData.logs || logsData.logs.length === 0) {
-            showActionMessage('No logs detected to send to Splunk.');
-            return;
-        }
-
         const payload = {
-            logs: logsData.logs
+            logs: logsData
         };
 
-        const response = await makeRequest('/api/splunk/send', 'POST', payload);
+        const response = await makeRequest('/splunk/send', 'POST', payload);
+        if (response.success) {
+            showActionMessage(`${service} logs succesfully sent to Splunk`);
+        }
     }
     catch (error) {
         showActionMessage('No valid logs to send to Splunk.');

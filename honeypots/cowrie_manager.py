@@ -709,6 +709,7 @@ class CowrieManager:
                             continue
                         # Only include relevant fields in original order
                         filtered_log_entry = {
+                            "honeypot" : 'cowrie',
                             "eventid": log_entry.get('eventid'),
                             "timestamp": log_entry.get('timestamp')[:-8], # not showing miliseconds and timezone
                             "src_ip": log_entry.get('src_ip'),
