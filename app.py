@@ -360,7 +360,7 @@ def ddospot_start():
 def ddospot_stop():
     """Stop DDoSPot"""
     try:
-        result = splunk_manager.stop()
+        result = ddospot_manager.stop()
         status_code = 200 if result["success"] else 400
         return jsonify(result), status_code
     except Exception as e:

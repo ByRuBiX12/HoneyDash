@@ -272,7 +272,7 @@ class CowrieManager:
             if clone_result.returncode != 0:
                 return {
                     "success": False,
-                    "message": "Error clonando repositorio de Cowrie",
+                    "message": "Error cloning Cowrie repository",
                     "error": clone_result.stderr
                 }
             

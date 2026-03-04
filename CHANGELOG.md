@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased] - 2026-03-03
+### Added
+- **DDoSPot Full Installation**: Automated Docker-based deployment with container creation
+- **DDoSPot Port Support**: Listens on 5 ports (DNS:53 (udp/tcp), NTP:123 (udp), SNMP:161 (udp), SSDP:1900 (udp), CHARGEN:19 (udp))
+
+### Fixed
+- **Automatic Dockerfile Patching**: Fixes Alpine compatibility issues (venv, chown syntax, Python path)
+
+## [Unreleased] - 2026-02-28
+### Added
+- **DDoSPot Honeypot**: Initial structure and API endpoints (status, install, start, stop)
+- **DDoSPot Manager**: Created `ddospot_manager.py` skeleton with basic class structure
+- **Honeypot Identification**: All honeypot logs now include `honeypot` field (cowrie/dionaea)
+- **Log Type Field**: Dionaea logs now include `type` field (http/ftp/mysql) for better filtering
+- **Hidden JSON Storage**: Logs stored in hidden textarea for Splunk integration
+
+### Fixed
+- **Splunk Log Sending**: Fixed misconfiguration in HTML that prevented logs from being sent to Splunk
+- **Log Field Selection**: Updated field filters to include new `honeypot` and `type` fields
+
 ## [Unreleased] - 2026-02-24
 ### Added
 - **Dionaea Binary Viewer**: Display captured malware binaries in paginated grid view (9 per page (3x3 grid))

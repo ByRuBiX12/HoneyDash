@@ -342,6 +342,62 @@ async function stopDionaea() {
     }
 }
 
+// DDoSPot Functions
+async function checkDDoSPotStatus() {
+    try {
+        const response = await makeRequest('/ddospot/status');
+        updateStatusUI('ddospot-status', 'ddospot-installed', null, response.running, response.installed, null, 'ddospot-start-btn', 'ddospot-stop-btn', 'ddospot-install-btn', null);
+    } catch (error) {
+        showActionMessage('Error checking DDoSPot Honeypot status: ' + error.message);
+    }
+}
+
+async function installDDoSPot() {
+    try {
+        showActionMessage('Installing DDoSPot Honeypot... This may take a few minutes.');
+        const response = await makeRequest('/ddospot/install', 'POST');
+        const statusResponse = await makeRequest('/ddospot/status');
+        if (response.success) {
+            showActionMessage('DDoSPot Honeypot installed successfully.');
+            showActionMessage('DDoSPot docker container name: ' + response.container_name);
+            showActionMessage('You can find DDoSPot logs and binaries in: ' + response.data_dir);
+            updateStatusUI('ddospot-status', 'ddospot-installed', null, statusResponse.running, statusResponse.installed, null, 'ddospot-start-btn', 'ddospot-stop-btn', 'ddospot-install-btn', null);            
+        }
+    } catch (error) {
+        showActionMessage('Error installing DDoSPot Honeypot: ' + error.message);
+    }
+}
+
+async function startDDoSPot() {
+    try {
+        showActionMessage('Starting DDoSPot Honeypot...');
+        const response = await makeRequest('/ddospot/start', 'POST');
+        if (response.success) {
+            showActionMessage('DDoSPot Honeypot started successfully. Listening on ports 19/udp, 53/tcp/udp, 123/udp, 161/udp, 1900/udp.');
+            checkDDoSPotStatus();
+        } else {
+            showActionMessage('Error: ' + (response.message || 'Unknown error'));
+        }
+    } catch (error) {
+        showActionMessage('Error starting DDoSPot Honeypot: ' + error.message);
+    }
+}
+
+async function stopDDoSPot() {
+    try {
+        showActionMessage('Stopping DDoSPot Honeypot...');
+        const response = await makeRequest('/ddospot/stop', 'POST');
+        if (response.success) {
+            showActionMessage('DDoSPot Honeypot stopped successfully.');
+            checkDDoSPotStatus();
+        } else {
+            showActionMessage('Error: ' + (response.message || 'Unknown error'));
+        }
+    } catch (error) {
+        showActionMessage('Error stopping DDoSPot Honeypot: ' + error.message);
+    }
+}
+
 // Splunk Functions
 async function checkSplunkStatus() {
     try {
@@ -382,5 +438,6 @@ async function stopSplunk() {
 window.addEventListener('DOMContentLoaded', () => {
     checkCowrieStatus();
     checkDionaeaStatus();
+    checkDDoSPotStatus();
     checkSplunkStatus();
 });

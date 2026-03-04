@@ -179,7 +179,7 @@ class DionaeaManager:
             print("[+] Dionaea installed successfully!")
             print(f"[+] Container name: {self.container_name}")
             print(f"[+] Data directory: {self.data_dir}")
-            print(f"[+] Exposed ports: 21, 23, 42, 80, 135, 443, 445, 1433, 1723, 1883, 1900/udp, 3306, 5060, 5060/udp, 5061, 11211")
+            print("[+] Exposed ports: 21, 23, 42, 80, 135, 443, 445, 1433, 1723, 1883, 1900/udp, 3306, 5060, 5060/udp, 5061, 11211")
             
             return {
                 "success": True,

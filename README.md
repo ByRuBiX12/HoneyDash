@@ -18,6 +18,7 @@
 - **Log retrieval**: Query Cowrie JSON logs with filtering by limit, event type, and timestamp
 - **Auto-cleanup**: Restores SSH and iptables on exit (SIGINT handler)
 - **Security**: Cowrie runs as non-root user (automatic privilege dropping)
+- - **Honeypot identification**: All logs include `honeypot` field (cowrie/dionaea)
 
 ### Dionaea Honeypot Management
 - **Docker-based deployment**: Uses official `dinotools/dionaea` Docker image for hassle-free installation
@@ -37,6 +38,17 @@
 - **Paginated view**: 9 binaries per page with styled grid and Previous/Next navigation buttons
 - **Advanced filtering**: Query logs by service type, timestamp, and custom field visibility
 - **Smart JSON output**: Only includes fields that exist in logs, omitting null values
+- **Honeypot identification**: All logs include `honeypot` field (cowrie/dionaea) and `type` field for service classification
+
+### DDoSPot Honeypot Management
+- **Docker-based deployment**: Uses official `aelth/ddospot` repository with automated Docker container creation
+- **One-click installation**: Automated cloning, Dockerfile patching, image building, and container creation
+- **Multi-protocol DDoS simulation**: Captures amplification attacks on 5 protocols (DNS, NTP, SNMP, SSDP, CHARGEN)
+- **Port exposure**: DNS (53 UDP/TCP), NTP (123 UDP), SNMP (161 UDP), SSDP (1900 UDP), CHARGEN (19 UDP)
+- **Persistent data storage**: Attack logs stored in `/opt/honeydash/ddospot-data/`
+- **Automatic compatibility fixes**: Patches Dockerfile for Alpine 3.18 (Python 3.11) and virtual environment isolation
+- **Service lifecycle**: Full start/stop/status control via Docker container management
+- **Low-interaction honeypot**: Emulates vulnerable DDoS amplification services without full protocol implementations
 
 ### Splunk SIEM Integration
 - **Status monitoring**: Check if Splunk is installed and running

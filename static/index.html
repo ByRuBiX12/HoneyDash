@@ -108,9 +108,16 @@
                 <div class="card-body">
                     <p>DDoS attack honeypot for traffic analysis</p>
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="checkDDoSPotStatus()">Check Status</button>
-                        <button class="btn btn-success" onclick="startDDoSPot()">Start &#9658;</button>
-                        <button class="btn btn-danger" onclick="stopDDoSPot()">Stop &#9632;</button>
+                        <div style="width: 100%;">
+                            <button class="btn btn-info" id="ddospot-install-btn" onclick="installDDoSPot()">Install (Docker required) &#8681;</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-success" id="ddospot-start-btn" onclick="startDDoSPot()">Start &#9658;</button>
+                            <button class="btn btn-danger" id="ddospot-stop-btn" onclick="stopDDoSPot()">Stop &#9632;</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="checkDDoSPotStatus()">Check Status</button>
+                        </div>
                     </div>
                 </div>
             </div>
