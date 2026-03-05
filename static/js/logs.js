@@ -85,7 +85,8 @@ function deselectAllFields(service) {
 async function getLogs(service) {
     showActionMessage('Buscando logs...');
     const logsBox = document.getElementById(`${service}-logs`);
-    const logsBoxHidden = document.getElementById(`${service}-logs-hidden`)
+    const logsBoxHidden = document.getElementById(`${service}-logs-hidden`);
+    const logsContainer = document.getElementById(`${service}-logs-container`);
 
     if (service === 'cowrie') {
         try {
@@ -124,16 +125,19 @@ async function getLogs(service) {
                     output += '\n';
                 });
 
+                logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
                 showActionMessage(`${data.logs.length} logs encontrados`);
             } else {
+                logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
                 document.getElementById('sendToSplunk').disabled = true;
                 document.getElementById('sendToSplunk').classList.add('disabled');
                 showActionMessage(`Error: ${data.error}`);
             }
         } catch (error) {
+            logsContainer.style.display = 'none';
             logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
             document.getElementById('sendToSplunk').disabled = true;
             document.getElementById('sendToSplunk').classList.add('disabled');
@@ -160,13 +164,12 @@ async function getLogs(service) {
                     document.getElementById('sendToSplunkDionaea').disabled = false;
                     document.getElementById('sendToSplunkDionaea').classList.remove('disabled');
                 }
-                const filterOption = document.getElementById('log-type-dionaea').value;
                 let filteredLogs = [];
-                if (filterOption === 'httpd') {
+                if (type === 'httpd') {
                     filteredLogs = filterDionaeaHttpLogFields(data.logs);
-                } else if (filterOption === 'ftpd') {
+                } else if (type === 'ftpd') {
                     filteredLogs = filterDionaeaFtpLogFields(data.logs);
-                } else if (filterOption === 'mysqld') {
+                } else if (type === 'mysqld') {
                     filteredLogs = filterDionaeaMySqlLogFields(data.logs);
                 }
 
@@ -182,10 +185,12 @@ async function getLogs(service) {
                     output += '\n';
                 });
 
+                logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
                 showActionMessage(`${data.logs.length} logs encontrados`);
             } else {
+                logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
                 document.getElementById('sendToSplunkDionaea').disabled = true;
                 document.getElementById('sendToSplunkDionaea').classList.add('disabled');
@@ -193,12 +198,78 @@ async function getLogs(service) {
             }
         }
         catch (error) {
+            logsContainer.style.display = 'none';
             logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
             document.getElementById('sendToSplunkDionaea').disabled = true;
             document.getElementById('sendToSplunkDionaea').classList.add('disabled');
             showActionMessage(`Error: ${error.message}`);
         }
-    }
+    } else if (service === 'ddospot') {
+        try {
+            const limit = document.getElementById('log-limit-ddospot').value || 50;
+            const protocol = document.getElementById('log-protocol-ddospot').value;
+            const timestampInput = document.getElementById('log-timestamp-ddospot').value;
+
+            let url = `${API_URL}/ddospot/logs?limit=${limit}&protocol=${protocol}`
+
+            if (timestampInput) {
+                url += `&timestamp=${timestampInput}`;
+            }
+
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.success) {
+                const statusResponse = await makeRequest('/splunk/status');
+                if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
+                    document.getElementById('sendToSplunkDdospot').disabled = false;
+                    document.getElementById('sendToSplunkDdospot').classList.remove('disabled');
+                }
+                let filteredLogs = [];
+                if (protocol === 'dnspot') {
+                    filteredLogs = filterDdospotDnsLogFields(data.logs);
+                } else if (protocol === 'ntpot') {
+                    filteredLogs = filterDdospotNtpLogFields(data.logs);
+                } else if (protocol === 'genericpot') {
+                    filteredLogs = filterDdospotSnmpLogFields(data.logs);
+                } else if (protocol === 'ssdpot') {
+                    filteredLogs = filterDdospotSsdpLogFields(data.logs);
+                } else if (protocol === 'chargenpot') {
+                    filteredLogs = filterDdospotChargenLogFields(data.logs);
+                }
+
+                let output = `Total de logs encontrados: ${data.logs.length}\n`;
+                output += '='.repeat(80) + '\n\n';
+                let outputHidden = JSON.stringify(filteredLogs);
+
+                filteredLogs.forEach((log, index) => {
+                    output += `--- Log ${index + 1} ---\n`;
+                    for (const [key, value] of Object.entries(log)) {
+                        output += `${key}: ${value}\n`;
+                    }
+                    output += '\n';
+                });
+
+                logsContainer.style.display = 'block';
+                logsBox.textContent = output;
+                logsBoxHidden.textContent = outputHidden;
+                showActionMessage(`${data.logs.length} logs encontrados`);
+            } else {
+                logsContainer.style.display = 'none';
+                logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
+                document.getElementById('sendToSplunkDdospot').disabled = true;
+                document.getElementById('sendToSplunkDdospot').classList.add('disabled');
+                showActionMessage(`Error: ${data.error}`);
+            }
+        }
+        catch (error) {
+            logsContainer.style.display = 'none';
+            logsBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+            document.getElementById('sendToSplunkDdospot').disabled = true;
+            document.getElementById('sendToSplunkDdospot').classList.add('disabled');
+            showActionMessage(`Error: ${error.message}`);
+        }
+        }
 }
 
 // Filter Cowrie log fields based on checkbox selection
@@ -327,6 +398,70 @@ function toggleDionaeaFilter() {
         document.getElementById('http-filter').style.display = 'none';
         document.getElementById('ftp-filter').style.display = 'none';
         document.getElementById('mysql-filter').style.display = 'grid';
+    }
+}
+
+// Filter DDoSPot DNS log fields based on checkbox selection
+function filterDdospotDnsLogFields(logs) {
+    const fields = ['honeypot', 'protocol', 'source_ip', 'source_port', 'domain_name', 'dns_type', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`ddospot-field-${field}-dns`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+    
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
+// Toggle DDoSPot filter options based on log type
+function toggleDdospotFilter() {
+    const protocol = document.getElementById('log-protocol-ddospot').value;
+    if (protocol === 'dnspot') {
+        document.getElementById('dns-filter').style.display = 'grid';
+        document.getElementById('ntp-filter').style.display = 'none';
+        document.getElementById('snmp-filter').style.display = 'none';
+        document.getElementById('ssdp-filter').style.display = 'none';
+        document.getElementById('chargen-filter').style.display = 'none';
+    } else if (protocol === 'ntpot') {
+        document.getElementById('dns-filter').style.display = 'none';
+        document.getElementById('ntp-filter').style.display = 'grid';
+        document.getElementById('snmp-filter').style.display = 'none';
+        document.getElementById('ssdp-filter').style.display = 'none';
+        document.getElementById('chargen-filter').style.display = 'none';
+    } else if (protocol === 'genericpot') {
+        document.getElementById('dns-filter').style.display = 'none';
+        document.getElementById('ntp-filter').style.display = 'none';
+        document.getElementById('snmp-filter').style.display = 'grid';
+        document.getElementById('ssdp-filter').style.display = 'none';
+        document.getElementById('chargen-filter').style.display = 'none';
+    } else if (protocol === 'ssdpot') {
+        document.getElementById('dns-filter').style.display = 'none';
+        document.getElementById('ntp-filter').style.display = 'none';
+        document.getElementById('snmp-filter').style.display = 'none';
+        document.getElementById('ssdp-filter').style.display = 'grid';
+        document.getElementById('chargen-filter').style.display = 'none';
+    } else if (protocol === 'chargenpot') {
+        document.getElementById('dns-filter').style.display = 'none';
+        document.getElementById('ntp-filter').style.display = 'none';
+        document.getElementById('snmp-filter').style.display = 'none';
+        document.getElementById('ssdp-filter').style.display = 'none';
+        document.getElementById('chargen-filter').style.display = 'grid';
     }
 }
 

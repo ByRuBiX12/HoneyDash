@@ -369,6 +369,23 @@ def ddospot_stop():
             "message": "Error stopping DDosPot"
         })
 
+@app.route('/api/ddospot/logs', methods=['GET'])
+def ddospot_logs():
+    """Retrieves DDoSPot logs with optional filtering"""
+    try:
+        limit = request.args.get('limit', default=50, type=int)
+        protocol = request.args.get('protocol', default=None, type=str)
+        timestamp = request.args.get('timestamp', default=None, type=str)
+
+        result = ddospot_manager.get_logs(limit=limit, protocol=protocol, timestamp=timestamp)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error retrieving DDoSPot logs"
+        })
+
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])
 def splunk_status():

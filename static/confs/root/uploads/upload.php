@@ -25,7 +25,7 @@
     </style>
     <title>File Uploaded</title>
 </head>
-<body>
+<body style="overflow: hidden;">
     <h2>Your certificate will be reviewed soon</h2>
 </body>
 </html>

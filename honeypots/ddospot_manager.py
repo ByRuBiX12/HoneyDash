@@ -3,7 +3,10 @@ import subprocess
 import random
 import re
 import json
+import sqlite3
 from pathlib import Path
+from datetime import datetime
+import ipaddress
 
 class DDoSPotManager:
     """DDoSPot Honeypot Manager"""
@@ -11,6 +14,8 @@ class DDoSPotManager:
     def __init__(self):
         self.container_name = "honeydash-ddospot"
         self.data_dir = Path("/opt/honeydash/ddospot-data")
+        self.logs_dir = Path("/opt/honeydash/ddospot-data/logs")
+        self.db_dir = Path("/opt/honeydash/ddospot-data/db")
         self.install_path = Path("/opt/ddospot") # Installation path for DDoSPot
         docker_installed = self._detect_docker_installation()
         ddospot_container = self._detect_container()
@@ -155,6 +160,8 @@ class DDoSPotManager:
                 }
             
             os.makedirs(self.data_dir, exist_ok=True)
+            os.makedirs(self.logs_dir, exist_ok=True)
+            os.makedirs(self.db_dir, exist_ok=True)
             
             # Allow container writes
             subprocess.run(["chmod", "-R", "777", str(self.data_dir)], check=False)
@@ -193,7 +200,9 @@ class DDoSPotManager:
             print(f"[!] Creating container with image: {image_name}")
             create_result = subprocess.run(
                 f"docker create --name {self.container_name} --restart unless-stopped --network host" 
-                f" -v {self.data_dir}:/data {image_name}",
+                f" -v {self.logs_dir}:/ddospot/logs"
+                f" -v {self.db_dir}:/ddospot/db"
+                f" {image_name}",
                 shell=True,
                 capture_output=True,
                 text=True
@@ -291,4 +300,85 @@ class DDoSPotManager:
             return {
                 "success": False,
                 "message": f"Error stopping DDoSPot: {str(e)}"
+            }
+    
+    def _ip_int_to_str(self, ip_int):
+        """Convert IP from int32 to string"""
+        return str(ipaddress.IPv4Address(ip_int))
+    
+    def get_logs(self, limit, protocol, timestamp):
+        """Get DDoSPot attack logs from SQLite database"""
+        try:
+            if not self.is_installed():
+                return {
+                    "success": False,
+                    "message": "DDoSPot is not installed",
+                    "logs": []
+                }
+            
+            db_path = self.db_dir / f"{protocol}.sqlite3"
+            
+            if not db_path.exists():
+                return {
+                    "success": False,
+                    "message": f"Database not found: {db_path}",
+                    "logs": []
+                }
+            
+            conn = sqlite3.connect(str(db_path))
+            cursor = conn.cursor()
+            
+            if protocol == 'dnspot':
+                query = """
+                SELECT s.src_ip, s.src_port, d.domain_name, d.dns_type, a.start, a.latest, a.count, a.amplification
+                FROM dnspot_attack a
+                JOIN dnspot_sources s ON a.src_id = s.src_ip
+                JOIN dnspot_domains d ON a.domain_id = d.id
+                """
+                if timestamp:
+                    query += f" WHERE a.start >= '{timestamp}'"
+                query += " ORDER BY a.start DESC LIMIT ?"
+                
+                cursor.execute(query, (limit,))
+                rows = cursor.fetchall()
+                
+                logs = []
+                for row in rows:
+                    logs.append({
+                        "honeypot": "ddospot",
+                        "protocol": "dns",
+                        "src_ip": self._ip_int_to_str(row[0]),
+                        "src_port": row[1],
+                        "domain_name": row[2],
+                        "dns_type": row[3],
+                        "attack_start": row[4],
+                        "attack_end": row[5],
+                        "packet_count": row[6],
+                        "amplification_factor": round(row[7], 2) if row[7] else 0
+                    })
+            
+            elif protocol == 'ntp':
+                # QUERY
+                return
+            elif protocol == 'snmp':
+                # QUERY
+                return
+            elif protocol == 'ssdp':
+                # QUERY
+                return
+            elif protocol == 'chargen':
+                # QUERY
+                return 
+            
+            return {
+                "success": True,
+                "message": f"Found {len(logs)} attack logs",
+                "logs": logs
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error reading DDoSPot logs: {str(e)}",
+                "logs": []
             }

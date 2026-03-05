@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased] - 2026-03-05
+### Added
+- **DDoSPot Log Parsing**: Full implementation for DNS log parsing
+- **DDoSPot Log Sending**: Sending DNS DDosPot logs to Splunk working
+- **Dynamic JSON Construction**: Logs only include fields that exist, omitting null values
+
+### Fixed
+- **Repeated variable**: `getLogs` function was creating a repeated unnecessary variable
+
 ## [Unreleased] - 2026-03-03
 ### Added
 - **DDoSPot Full Installation**: Automated Docker-based deployment with container creation
