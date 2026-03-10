@@ -393,12 +393,12 @@
                                 <label for="ddospot-field-protocol-dns" style="color: #fff8c5; cursor: pointer;">Protocol</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="ddospot-field-source_ip-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="ddospot-field-source_ip-dns" style="color: #fff8c5; cursor: pointer;">Source IP</label>
+                                <input type="checkbox" id="ddospot-field-src_ip-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-src_ip-dns" style="color: #fff8c5; cursor: pointer;">Source IP</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="ddospot-field-source_port-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                <label for="ddospot-field-source_port-dns" style="color: #fff8c5; cursor: pointer;">Source Port</label>
+                                <input type="checkbox" id="ddospot-field-src_port-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-src_port-dns" style="color: #fff8c5; cursor: pointer;">Source Port</label>
                             </div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <input type="checkbox" id="ddospot-field-domain_name-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
@@ -424,6 +424,10 @@
                                 <input type="checkbox" id="ddospot-field-amplification_factor-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
                                 <label for="ddospot-field-amplification_factor-dns" style="color: #fff8c5; cursor: pointer;">Amplification Factor</label>
                             </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-severity-dns" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-severity-dns" style="color: #fff8c5; cursor: pointer;">Severity</label>
+                            </div>
                         </div>
                         <div id="ntp-filter" style="display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-bottom: 1rem;">
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -433,6 +437,38 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <input type="checkbox" id="ddospot-field-protocol-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
                                 <label for="ddospot-field-protocol-ntp" style="color: #fff8c5; cursor: pointer;">Protocol</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-src_ip-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-src_ip-ntp" style="color: #fff8c5; cursor: pointer;">Source IP</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-src_port-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-src_port-ntp" style="color: #fff8c5; cursor: pointer;">Source Port</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-mode-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-mode-ntp" style="color: #fff8c5; cursor: pointer;">Mode</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-attack_start-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-attack_start-ntp" style="color: #fff8c5; cursor: pointer;">Attack Start</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-attack_end-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-attack_end-ntp" style="color: #fff8c5; cursor: pointer;">Attack End</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-packet_count-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-packet_count-ntp" style="color: #fff8c5; cursor: pointer;">Packet Count</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-amplification_factor-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-amplification_factor-ntp" style="color: #fff8c5; cursor: pointer;">Amplification Factor</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-severity-ntp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-severity-ntp" style="color: #fff8c5; cursor: pointer;">Severity</label>
                             </div>
                         </div>
                         
@@ -444,6 +480,38 @@
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <input type="checkbox" id="ddospot-field-protocol-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
                                 <label for="ddospot-field-protocol-snmp" style="color: #fff8c5; cursor: pointer;">Protocol</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-src_ip-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-src_ip-snmp" style="color: #fff8c5; cursor: pointer;">Source IP</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-src_port-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-src_port-snmp" style="color: #fff8c5; cursor: pointer;">Source Port</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-dst_port-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-dst_port-snmp" style="color: #fff8c5; cursor: pointer;">Destination Port</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-attack_start-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-attack_start-snmp" style="color: #fff8c5; cursor: pointer;">Attack Start</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-attack_end-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-attack_end-snmp" style="color: #fff8c5; cursor: pointer;">Attack End</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-packet_count-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-packet_count-snmp" style="color: #fff8c5; cursor: pointer;">Packet Count</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-amplification_factor-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-amplification_factor-snmp" style="color: #fff8c5; cursor: pointer;">Amplification Factor</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="ddospot-field-severity-snmp" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="ddospot-field-severity-snmp" style="color: #fff8c5; cursor: pointer;">Severity</label>
                             </div>
                         </div>
                         

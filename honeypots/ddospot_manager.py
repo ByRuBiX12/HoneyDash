@@ -327,7 +327,7 @@ class DDoSPotManager:
             
             conn = sqlite3.connect(str(db_path))
             cursor = conn.cursor()
-            
+
             if protocol == 'dnspot':
                 query = """
                 SELECT s.src_ip, s.src_port, d.domain_name, d.dns_type, a.start, a.latest, a.count, a.amplification
@@ -344,6 +344,14 @@ class DDoSPotManager:
                 
                 logs = []
                 for row in rows:
+                    # Severity field heuristic
+                    if row[7] >= 10:
+                        severity = "high"
+                    elif row[7] >= 5:
+                        severity = "medium"
+                    else:
+                        severity = "low"
+
                     logs.append({
                         "honeypot": "ddospot",
                         "protocol": "dns",
@@ -354,19 +362,111 @@ class DDoSPotManager:
                         "attack_start": row[4],
                         "attack_end": row[5],
                         "packet_count": row[6],
-                        "amplification_factor": round(row[7], 2) if row[7] else 0
+                        "amplification_factor": round(row[7], 2) if row[7] else 0,
+                        "severity": severity
                     })
             
-            elif protocol == 'ntp':
+            elif protocol == 'ntpot':
+                query = """
+                SELECT s.src_ip, s.src_port, a.mode, a.start, a.latest, a.count, a.request_size, a.response_size
+                FROM ntpot_attack a
+                JOIN ntpot_sources s ON a.src_id = s.src_ip
+                """
+                if timestamp:
+                    query += f" WHERE a.start >= '{timestamp}'"
+                query += " ORDER BY a.start DESC LIMIT ?"
+
+                cursor.execute(query, (limit,))
+                rows = cursor.fetchall()
+    
+                logs = []
+                for row in rows:
+                    # Amplification factor calculation
+                    if row[6] != 0:
+                        amplification = round(row[7] / row[6], 2)
+                    else:
+                        amplification = 0
+
+                    # Severity field heuristic
+                    mode = row[2]
+                    severity = "unknown"
+                    if mode == 7: # monlist (obsolete but highly abused)
+                        severity = "high"
+                        mode = "7 (monlist)"
+                    elif mode == 6: # control message (can be abused for reflection)
+                        if amplification >= 10:
+                            severity = "high"
+                        else:
+                            severity = "medium"
+                        mode = "6 (control)"
+                    elif mode == 3: # client mode (low risk)
+                        if amplification > 1:
+                            severity = "medium"
+                        else:
+                            severity = "low"
+                        mode = "3 (client)"
+                    else:
+                        mode = f"{mode} (unknown)"
+
+                    logs.append({
+                        "honeypot": "ddospot",
+                        "protocol": "ntp",
+                        "src_ip": self._ip_int_to_str(row[0]),
+                        "src_port": row[1],
+                        "mode": mode,
+                        "attack_start": row[3],
+                        "attack_end": row[4],
+                        "packet_count": row[5],
+                        "amplification_factor": amplification,
+                        "severity": severity
+                    })
+
+            elif protocol == 'genericpot': # SNMP
+                query = """
+                SELECT s.src_ip, s.src_port, a.dst_port, a.start, a.latest, a.count, a.request_size, a.response_size
+                FROM genericpot_attack a
+                JOIN genericpot_sources s ON a.src_id = s.src_ip
+                """
+                if timestamp:
+                    query += f" WHERE a.start >= '{timestamp}'"
+                query += " ORDER BY a.start DESC LIMIT ?"
+                
+                cursor.execute(query, (limit,))
+                rows = cursor.fetchall()
+                
+                logs = []
+                for row in rows:
+                    # Amplification factor calculation
+                    if row[6] != 0:
+                        amplification = round(row[7] / row[6], 2)
+                    else:
+                        amplification = 0
+
+                    # Severity field heuristic
+                    if amplification >= 10:
+                        severity = "high"
+                    elif amplification >= 5:
+                        severity = "medium"
+                    else:
+                        severity = "low"
+
+                    logs.append({
+                        "honeypot": "ddospot",
+                        "protocol": "generic",
+                        "src_ip": self._ip_int_to_str(row[0]),
+                        "src_port": row[1],
+                        "dst_port": row[2],
+                        "attack_start": row[3],
+                        "attack_end": row[4],
+                        "packet_count": row[5],
+                        "amplification_factor": amplification,
+                        "severity": severity
+                    })
+
+            elif protocol == 'ssdpot':
                 # QUERY
                 return
-            elif protocol == 'snmp':
-                # QUERY
-                return
-            elif protocol == 'ssdp':
-                # QUERY
-                return
-            elif protocol == 'chargen':
+            elif protocol == 'chargenpot':
                 # QUERY
                 return 
             

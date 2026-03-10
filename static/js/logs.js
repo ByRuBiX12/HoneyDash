@@ -403,11 +403,67 @@ function toggleDionaeaFilter() {
 
 // Filter DDoSPot DNS log fields based on checkbox selection
 function filterDdospotDnsLogFields(logs) {
-    const fields = ['honeypot', 'protocol', 'source_ip', 'source_port', 'domain_name', 'dns_type', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor'];
+    const fields = ['honeypot', 'protocol', 'src_ip', 'src_port', 'domain_name', 'dns_type', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor', 'severity'];
     const selectedFields = [];
     for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
         const checkbox = document.getElementById(`ddospot-field-${field}-dns`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+    
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
+// Filter DDoSPot NTP log fields based on checkbox selection
+function filterDdospotNtpLogFields(logs) {
+    const fields = ['honeypot', 'protocol', 'src_ip', 'src_port', 'mode', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor', 'severity'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`ddospot-field-${field}-ntp`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+    
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
+// Filter DDoSPot SNMP log fields based on checkbox selection
+function filterDdospotSnmpLogFields(logs) {
+    const fields = ['honeypot', 'protocol', 'src_ip', 'src_port', 'dst_port', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor', 'severity'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`ddospot-field-${field}-snmp`);
         if (checkbox && checkbox.checked) {
             selectedFields.push(field);
         }

@@ -49,9 +49,12 @@
 - **Automatic compatibility fixes**: Patches Dockerfile for Alpine 3.18 (Python 3.11) and virtual environment isolation
 - **Service lifecycle**: Full start/stop/status control via Docker container management
 - **Low-interaction honeypot**: Emulates vulnerable DDoS amplification services without full protocol implementations
-- **Log parsing**: Extract and filter DNS, NTP, SNMP, SSDP and CHARGEN logs with field selection
-  - **DNS Logs**: Source IP, source port, domain name, DNS Type, attack start, attack end, packet count, amplification factor
-- **Advanced filtering**: Query logs by service type, timestamp, and custom field visibility
+- **Log parsing**: Extract and filter DNS, NTP, and SNMP logs from SQLite database with field selection
+  - **DNS Logs**: Source IP/port, domain name, DNS type, timestamps, packet count, amplification factor, severity
+  - **NTP Logs**: Source IP/port, mode (client/control/monlist), timestamps, packet count, amplification factor, severity
+  - **SNMP Logs**: Source IP/port, destination port, timestamps, packet count, amplification factor, severity
+- **Severity detection**: Automatic risk classification based on amplification factor and attack mode
+- **Advanced filtering**: Query logs by protocol, timestamp, and custom field visibility
 - **Smart JSON output**: Only includes fields that exist in logs, omitting null values
 - **Honeypot identification**: All logs include `honeypot` field (cowrie/dionaea/ddospot) and `protocol` field for service classification
 

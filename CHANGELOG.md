@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] - 2026-03-10
+### Added
+- **DDoSPot NTP Log Parsing**: Full implementation with mode detection (client/control/monlist) and severity classification
+- **DDoSPot SNMP Log Parsing**: Complete log retrieval with amplification factor calculation and severity clasification
+- **Amplification Factor Calculation**: Dynamic calculation for NTP and SNMP based on request/response sizes (DNS had its own)
+- **Severity Detection**: Automatic risk classification (low/medium/high) based on amplification factor (and NTP mode in NTP case)
+
+### Changed
+- **DDoSPot DNS severity**: Severity calculated field was also added to DNS logs
+
 ## [Unreleased] - 2026-03-05
 ### Added
 - **DDoSPot Log Parsing**: Full implementation for DNS log parsing
