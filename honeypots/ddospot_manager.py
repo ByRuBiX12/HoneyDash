@@ -352,6 +352,16 @@ class DDoSPotManager:
                     else:
                         severity = "low"
 
+                    # Number of packets = scan or attack (10 max due to default DDoSPot blacklist)
+                    if row[6] >= 8:
+                        if severity == "low":
+                            severity = "medium"
+                        elif severity == "medium":
+                            severity = "high"
+                    elif row[6] >= 5:
+                        if severity == "low":
+                            severity = "medium"
+
                     logs.append({
                         "honeypot": "ddospot",
                         "protocol": "dns",
@@ -362,7 +372,7 @@ class DDoSPotManager:
                         "attack_start": row[4],
                         "attack_end": row[5],
                         "packet_count": row[6],
-                        "amplification_factor": round(row[7], 2) if row[7] else 0,
+                        "amplification_factor": row[7],
                         "severity": severity
                     })
             
@@ -408,6 +418,16 @@ class DDoSPotManager:
                     else:
                         mode = f"{mode} (unknown)"
 
+                    # Number of packets = scan or attack (10 max due to default DDoSPot blacklist)
+                    if row[5] >= 8:
+                        if severity == "low":
+                            severity = "medium"
+                        elif severity == "medium":
+                            severity = "high"
+                    elif row[5] >= 5:
+                        if severity == "low":
+                            severity = "medium"
+
                     logs.append({
                         "honeypot": "ddospot",
                         "protocol": "ntp",
@@ -450,9 +470,19 @@ class DDoSPotManager:
                     else:
                         severity = "low"
 
+                    # Number of packets = scan or attack (10 max due to default DDoSPot blacklist)
+                    if row[5] >= 8:
+                        if severity == "low":
+                            severity = "medium"
+                        elif severity == "medium":
+                            severity = "high"
+                    elif row[5] >= 5:
+                        if severity == "low":
+                            severity = "medium"
+
                     logs.append({
                         "honeypot": "ddospot",
-                        "protocol": "generic",
+                        "protocol": "snmp",
                         "src_ip": self._ip_int_to_str(row[0]),
                         "src_port": row[1],
                         "dst_port": row[2],
@@ -464,11 +494,109 @@ class DDoSPotManager:
                     })
 
             elif protocol == 'ssdpot':
-                # QUERY
-                return
+                query = """
+                SELECT s.src_ip, s.src_port, a.st, a.start, a.latest, a.count, a.request_size, a.response_size, a.mx
+                FROM ssdpot_attack a
+                JOIN ssdpot_sources s ON a.src_id = s.src_ip
+                """
+                if timestamp:
+                    query += f" WHERE a.start >= '{timestamp}'"
+                query += " ORDER BY a.start DESC LIMIT ?"
+                
+                cursor.execute(query, (limit,))
+                rows = cursor.fetchall()
+
+                logs = []
+                for row in rows:
+                    # Amplification factor calculation
+                    if row[6] != 0:
+                        amplification = round(row[7] / row[6], 2)
+                    else:
+                        amplification = 0
+
+                    # Severity field heuristic
+                    severity = "low"
+                    if row[2] == "ssdp:all" or amplification >= 10: # st = ssdp:all requests for every device
+                        severity = "high"
+                    elif amplification >= 5:
+                        severity = "medium"
+                    
+                    if row[8] <= 2: # low mx = short response time
+                        if severity == "medium":
+                            severity = "high"
+                        elif severity == "low":
+                            severity = "medium"
+
+                    # Number of packets = scan or attack (10 max due to default DDoSPot blacklist)
+                    if row[5] >= 8:
+                        if severity == "low":
+                            severity = "medium"
+                        elif severity == "medium":
+                            severity = "high"
+                    elif row[5] >= 5:
+                        if severity == "low":
+                            severity = "medium"
+
+                    logs.append({
+                        "honeypot": "ddospot",
+                        "protocol": "ssdp",
+                        "src_ip": self._ip_int_to_str(row[0]),
+                        "src_port": row[1],
+                        "st": row[2],
+                        "mx": row[8],
+                        "attack_start": row[3],
+                        "attack_end": row[4],
+                        "packet_count": row[5],
+                        "amplification_factor": amplification,
+                        "severity": severity
+                    })
+
             elif protocol == 'chargenpot':
-                # QUERY
-                return 
+                query = """
+                SELECT s.src_ip, s.src_port, a.start, a.latest, a.count, a.request_size, a.response_size
+                FROM chargenpot_attack a
+                JOIN chargenpot_sources s ON a.src_id = s.src_ip
+                """
+                if timestamp:
+                    query += f" WHERE a.start >= '{timestamp}'"
+                query += " ORDER BY a.start DESC LIMIT ?"
+                
+                cursor.execute(query, (limit,))
+                rows = cursor.fetchall()
+                
+                logs = []
+                for row in rows:
+                    # Amplification factor calculation
+                    if row[5] != 0:
+                        amplification = round(row[6] / row[5], 2)
+                    else:
+                        amplification = 0
+
+                    # Severity field heuristic
+                    if amplification >= 5:
+                        severity = "high"
+                    else:
+                        severity = "low"
+
+                    # Number of packets = scan or attack (10 max due to default DDoSPot blacklist)
+                    if row[4] >= 8:
+                        if severity == "low":
+                            severity = "high"
+                    elif row[4] >= 3:
+                        if severity == "low":
+                            severity = "medium"
+
+                    logs.append({
+                        "honeypot": "ddospot",
+                        "protocol": "chargen",
+                        "src_ip": self._ip_int_to_str(row[0]),
+                        "src_port": row[1],
+                        "attack_start": row[2],
+                        "attack_end": row[3],
+                        "packet_count": row[4],
+                        "amplification_factor": amplification,
+                        "severity": severity
+                    })
             
             return {
                 "success": True,

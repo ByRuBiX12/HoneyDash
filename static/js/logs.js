@@ -485,6 +485,62 @@ function filterDdospotSnmpLogFields(logs) {
     return filteredLogs;
 }
 
+// Filter DDoSPot SSDP log fields based on checkbox selection
+function filterDdospotSsdpLogFields(logs) {
+    const fields = ['honeypot', 'protocol', 'src_ip', 'src_port', 'st', 'mx', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor', 'severity'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`ddospot-field-${field}-ssdp`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+    
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
+// Filter DDoSPot CHARGEN log fields based on checkbox selection
+function filterDdospotChargenLogFields(logs) {
+    const fields = ['honeypot', 'protocol', 'src_ip', 'src_port', 'attack_start', 'attack_end', 'packet_count', 'amplification_factor', 'severity'];
+    const selectedFields = [];
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const checkbox = document.getElementById(`ddospot-field-${field}-chargen`);
+        if (checkbox && checkbox.checked) {
+            selectedFields.push(field);
+        }
+    }
+    
+    const filteredLogs = [];
+    for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
+        const filteredLog = {};
+        for (let j = 0; j < selectedFields.length; j++) {
+            const field = selectedFields[j];
+            if (log.hasOwnProperty(field)) {
+                filteredLog[field] = log[field];
+            }
+        }
+        filteredLogs.push(filteredLog);
+    }
+
+    return filteredLogs;
+}
+
 // Toggle DDoSPot filter options based on log type
 function toggleDdospotFilter() {
     const protocol = document.getElementById('log-protocol-ddospot').value;

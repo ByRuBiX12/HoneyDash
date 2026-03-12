@@ -53,7 +53,9 @@
   - **DNS Logs**: Source IP/port, domain name, DNS type, timestamps, packet count, amplification factor, severity
   - **NTP Logs**: Source IP/port, mode (client/control/monlist), timestamps, packet count, amplification factor, severity
   - **SNMP Logs**: Source IP/port, destination port, timestamps, packet count, amplification factor, severity
-- **Severity detection**: Automatic risk classification based on amplification factor and attack mode
+  - **SSDP Logs**: Source IP/port, source target, maximum time, timestamps, packet count, amplification factor, severity
+  - **CHARGEN Logs**: Source IP/port, timestamps, packet count, amplification factor, severity
+- **Severity detection**: Automatic risk classification based on amplification factor, attack mode (NTP), source target (SSDP), maximum time (SSDP) and amount of requests
 - **Advanced filtering**: Query logs by protocol, timestamp, and custom field visibility
 - **Smart JSON output**: Only includes fields that exist in logs, omitting null values
 - **Honeypot identification**: All logs include `honeypot` field (cowrie/dionaea/ddospot) and `protocol` field for service classification

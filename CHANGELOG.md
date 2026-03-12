@@ -1,4 +1,13 @@
 # Changelog
+## [Unreleased] - 2026-03-12
+### Added
+- **DDoSPot SSDP Log Parsing**: Full implementation with source target, maximum time and severity classification
+- **DDoSPot CHARGEN Log Parsing**: Log retrieval with amplification factor calculation and severity classification
+- **Amplification Factor Calculation**: Dynamic calculation for SSDP and CHARGEN based on request/response sizes (both have their response size configurated by default)
+- **Severity Detection**: Automatic risk classification (low/medium/high) based on amplification factor, source target and maximum time in SSDP Logs, and packet count
+
+### Changed
+- **DDoSPot DNS severity heuristic**: Now severity also considers requests count to calculate itself
 
 ## [Unreleased] - 2026-03-10
 ### Added
