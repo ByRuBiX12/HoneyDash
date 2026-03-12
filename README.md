@@ -159,17 +159,44 @@ GET  /api/cowrie/logs?limit=50&event_id=cowrie.login.success&timestamp=2024-01-0
 
 ### Dionaea Endpoints
 ```bash
-# Status and control
+# Status
 GET  /api/dionaea/status
+
+# Installation
 POST /api/dionaea/install        # Creates Docker container with all services
+
+# Operations
 POST /api/dionaea/start
 POST /api/dionaea/stop
+
+# Log retrieval
+GET /api/dionaea/logs
+GET /api/dionaea/binaries
+```
+
+### DDoSPoT Endpoints
+```bash
+# Status
+GET  /api/ddospot/status
+
+# Installation
+POST /api/ddospot/install        # Creates Docker container with all services
+
+# Operations
+POST /api/ddospot/start
+POST /api/ddospot/stop
+
+# Log retrieval
+GET /api/ddospot/logs
 ```
 
 ### Splunk Endpoints
 ```bash
-# Status and control
+# Status and configuration 
 GET  /api/splunk/status
+POST /api/splunk/set-path        # Manual path: {"path": "/custom/path"}
+
+# Operations
 POST /api/splunk/start
 POST /api/splunk/stop
 
@@ -232,6 +259,8 @@ HoneyDash/
 **"Must run with sudo"**: Execute as `sudo python3 app.py` from your regular user (not root)
 
 **Cowrie auto-detection fails**: Use `/api/cowrie/set-path` endpoint with custom path
+
+**Splunk auto-detection fails**: Use `/api/splunk/set-path` endpoint with custom path
 
 **Lost SSH access**: SSH moved to random port shown in `/api/cowrie/setup-redirect` response. Run `/api/cowrie/cleanup` to restore port 22
 

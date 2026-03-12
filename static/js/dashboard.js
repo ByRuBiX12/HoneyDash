@@ -174,7 +174,7 @@ async function checkCowrieStatus() {
         const response = await makeRequest('/cowrie/status');
         updateStatusUI('cowrie-status', 'cowrie-installed', 'cowrie-configured', response.running, response.installed, response.configured, 'cowrie-start-btn', 'cowrie-stop-btn', 'cowrie-install-btn', 'cowrie-configure-btn');
         if (response.installed) {
-            document.getElementById('custom-path').value = response.cowrie_path || '';
+            document.getElementById('cowrie-custom-path').value = response.cowrie_path || '';
         }
     } catch (error) {
         showActionMessage('Error checking Cowrie Honeypot status: ' + error.message);
@@ -209,23 +209,34 @@ async function stopCowrie() {
     }
 }
 
-async function setCustomPath() {
-    const path = document.getElementById('custom-path').value;
+// Cowrie & Splunk manually set path function
+async function setCustomPath(service) {
+    const path = document.getElementById(`${service}-custom-path`).value;
+    let name = "";
+    if (service === 'cowrie') {
+        name = "Cowrie";
+    } else if (service === 'splunk') {
+        name = "Splunk";
+    }
     if (!path) {
-        showActionMessage('Please enter a valid path for Cowrie Honeypot.');
+        showActionMessage('Please enter a valid path for ' + name + '.');
         return;
     }
     try {
-        const response = await makeRequest('/cowrie/set-path', 'POST', { path: path });
+        const response = await makeRequest(`/` + service + `/set-path`, 'POST', { path: path });
         if (response.success) {
-            showActionMessage('Custom path for Cowrie Honeypot set successfully.');
-            const statusResponse = await makeRequest('/cowrie/status');
-            updateStatusUI('cowrie-status', 'cowrie-installed', 'cowrie-configured', statusResponse.running, statusResponse.installed, statusResponse.configured, 'cowrie-start-btn', 'cowrie-stop-btn', 'cowrie-install-btn', 'cowrie-configure-btn');
+            showActionMessage(`Custom path for ${name} set successfully.`);
+            const statusResponse = await makeRequest(`/${service}/status`);
+            if (service === 'splunk') {
+                updateStatusSplunk(`${service}-status`, `${service}-installed`, `${service}-token`, statusResponse.running, statusResponse.installed, statusResponse.token);
+            } else {
+                updateStatusUI(`${service}-status`, `${service}-installed`, `${service}-configured`, statusResponse.running, statusResponse.installed, statusResponse.configured, `${service}-start-btn`, `${service}-stop-btn`, `${service}-install-btn`, `${service}-configure-btn`);
+            }
         } else {
-            showActionMessage(path + ' is not a valid path for Cowrie Honeypot. Please enter a valid path.');
+            showActionMessage(path + ' is not a valid path for ' + name + ' Honeypot. Please enter a valid path.');
         }
     } catch (error) {
-        showActionMessage('Error setting custom path for Cowrie Honeypot: ' + error.message);
+        showActionMessage(`Error setting custom path for ${name}: ` + error.message);
     }
 }
 
@@ -403,6 +414,9 @@ async function checkSplunkStatus() {
     try {
         const response = await makeRequest('/splunk/status');
         updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', response.running, response.installed, response.token);
+        if (response.installed) {
+            document.getElementById('splunk-custom-path').value = response.splunk_path || '';
+        }
     } catch (error) {
         showActionMessage('Error checking Splunk SIEM status: ' + error.message);
     }

@@ -37,9 +37,9 @@ class SplunkManager:
 
             if "splunkd is running" in result.stdout:
                 self.search_token()
-                return {"installed": True, "running": True, "token": self.splunk_hec_token}
+                return {"installed": True, "running": True, "token": self.splunk_hec_token, "splunk_path": str(self.splunk_path)}
             else:
-                return {"installed": True, "running": False, "token": self.splunk_hec_token}
+                return {"installed": True, "running": False, "token": self.splunk_hec_token, "splunk_path": str(self.splunk_path)}
 
         except Exception as e:
             return {"success": False,
@@ -254,4 +254,19 @@ class SplunkManager:
             return {
                 "success": False,
                 "message": f"Error: {str(e)}"
+            }
+
+    def set_splunk_path(self, path):
+        """Manually sets the Splunk installation path"""
+        self.splunk_path = Path(path)
+        
+        if self._is_installed():
+            return {
+                "success": True,
+                "message": f"Splunk path set to {self.splunk_path}"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Splunk not found at {self.splunk_path}. Please check the path and try again."
             }

@@ -66,8 +66,8 @@
                             <button class="btn btn-danger" id="cowrie-stop-btn" onclick="stopCowrie()">Stop &#9632;</button>
                         </div>
                         <div>
-                            <input type="text" id="custom-path" placeholder="Enter custom path" oninput="document.getElementById('set-path-btn').disabled = !this.value.trim(); document.getElementById('set-path-btn').classList.toggle('disabled', !this.value.trim());">
-                            <button class="btn btn-secondary" onclick="setCustomPath()">Set Path</button>
+                            <input type="text" id="cowrie-custom-path" placeholder="Enter custom path" oninput="document.getElementById('set-cowrie-path-btn').disabled = !this.value.trim(); document.getElementById('set-cowrie-path-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" id="set-cowrie-path-btn" onclick="setCustomPath('cowrie')" disabled>Set Path</button>
                             <button class="btn btn-primary" onclick="checkCowrieStatus()">Check Status</button>
                         </div>
                     </div>
@@ -151,6 +151,10 @@
                         </div>
                         <div>
                             <button class="btn btn-info" id="create-token-btn" onclick="createSplunkToken()">Create Token &#9881;</button>
+                            <input type="text" id="splunk-custom-path" placeholder="Enter custom path" oninput="document.getElementById('set-splunk-path-btn').disabled = !this.value.trim(); document.getElementById('set-splunk-path-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" id="set-splunk-path-btn" onclick="setCustomPath('splunk')" disabled>Set Path</button>
+                        </div>
+                        <div>
                             <button class="btn btn-primary" onclick="checkSplunkStatus()">Check Status</button>
                         </div>
                     </div>

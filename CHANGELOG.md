@@ -1,4 +1,11 @@
 # Changelog
+## [Unreleased] - 2026-03-13
+### Added
+- **Splunk Custom Path**: Now it is posible to manually set Splunk installation path (as Cowrie)
+
+### Changed
+- **Cowrie JS Custom Path Function**: The same function now works for both Cowrie and Splunk (instead of creating a new one)
+
 ## [Unreleased] - 2026-03-12
 ### Added
 - **DDoSPot SSDP Log Parsing**: Full implementation with source target, maximum time and severity classification

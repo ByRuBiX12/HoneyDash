@@ -399,6 +399,28 @@ def splunk_status():
             "message": "Error getting Splunk status"
         }), 500
 
+@app.route('/api/splunk/set-path', methods=['POST'])
+def splunk_set_path():
+    """Manually sets Splunk installation path"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'path' not in data:
+            return jsonify({
+                "success": False,
+                "message": "'path' field is required in JSON"
+            }), 400
+        
+        result = splunk_manager.set_splunk_path(data['path'])
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error setting Splunk path"
+        }), 500
+
 @app.route('/api/splunk/start', methods=['POST'])
 def splunk_start():
     """Starts Splunk"""
