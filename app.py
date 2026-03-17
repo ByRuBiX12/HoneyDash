@@ -10,6 +10,7 @@ from honeypots.cowrie_manager import CowrieManager
 from honeypots.dionaea_manager import DionaeaManager
 from honeypots.ddospot_manager import DDoSPotManager
 from siem.splunk_manager import SplunkManager
+from ids.suricata_manager import SuricataManager
 
 # Add siem and honeypots directories to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -307,7 +308,7 @@ def dionaea_binaries():
         }), 500
 
 
-# ============== DDOSPOT #ENDPOINTS ==============
+# ============== DDOSPOT ENDPOINTS ==============
 
 @app.route('/api/ddospot/status', methods=['GET'])
 def ddospot_status():
@@ -367,7 +368,7 @@ def ddospot_stop():
         return jsonify({
             "error": str(e),
             "message": "Error stopping DDosPot"
-        })
+        }), 500
 
 @app.route('/api/ddospot/logs', methods=['GET'])
 def ddospot_logs():
@@ -384,7 +385,7 @@ def ddospot_logs():
             "success": False,
             "error": str(e),
             "message": "Error retrieving DDoSPot logs"
-        })
+        }), 500
 
 # ============== SPLUNK ENDPOINTS ==============
 @app.route('/api/splunk/status', methods=['GET'])
@@ -432,7 +433,7 @@ def splunk_start():
         return jsonify({
             "error": str(e),
             "message": "Error starting Splunk"
-        })
+        }), 500
 
 @app.route('/api/splunk/stop', methods=['POST'])
 def splunk_stop():
@@ -445,7 +446,7 @@ def splunk_stop():
         return jsonify({
             "error": str(e),
             "message": "Error stopping Splunk"
-        })
+        }), 500
 
 @app.route('/api/splunk/search', methods=['GET'])
 def splunk_search():
@@ -457,7 +458,7 @@ def splunk_search():
         return jsonify({
             "error": str(e),
             "message": "Error searching for token in Splunk"
-        })
+        }), 500
     
 @app.route('/api/splunk/create', methods=['POST'])
 def splunk_create():
@@ -469,7 +470,7 @@ def splunk_create():
         return jsonify({
             "error": str(e),
             "message": "Error creating token in Splunk"
-        })
+        }), 500
 
 @app.route('/api/splunk/send', methods=['POST'])
 def splunk_send():
@@ -483,6 +484,89 @@ def splunk_send():
         return jsonify({
             "error": str(e),
             "message": "Error sending event to Splunk"
+        }), 500
+
+# ============== SURICATA ENDPOINTS ==============
+@app.route('/api/suricata/status', methods=['GET'])
+def suricata_status():
+    """Gets the current status of Suricata"""
+    try:
+        status = suricata_manager.get_status()
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error getting Suricata status"
+        }), 500
+
+@app.route('/api/suricata/set-path', methods=['POST']) # Binary path
+def suricata_set_path():
+    """Manually sets Suricata binary path"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'path' not in data:
+            return jsonify({
+                "success": False,
+                "message": "'path' field is required in JSON"
+            }), 400
+        
+        result = suricata_manager.set_suricata_bin_path(data['path'])
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error setting Suricata path"
+        }), 500
+    
+@app.route('/api/suricata/set-log-path', methods=['POST']) # Log path
+def suricata_set_log_path():
+    """Manually sets Suricata logs path"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'path' not in data:
+            return jsonify({
+                "success": False,
+                "message": "'path' field is required in JSON"
+            }), 400
+        
+        result = suricata_manager.set_suricata_log_path(data['path'])
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error setting Suricata log path"
+        }), 500
+
+@app.route('/api/suricata/start', methods=['POST'])
+def suricata_start():
+    """Starts Suricata"""
+    try:
+        result = suricata_manager.start()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error starting Suricata"
+        }), 500
+
+@app.route('/api/suricata/stop', methods=['POST'])
+def suricata_stop():
+    """Stops Suricata"""
+    try:
+        result = suricata_manager.stop()
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Error stopping Suricata"
         }), 500
 
 # ============== ERROR HANDLING ==============
@@ -534,5 +618,7 @@ if __name__ == '__main__':
     ddospot_manager = DDoSPotManager()
     # Start Splunk manager
     splunk_manager = SplunkManager()
+    # Start Suricata manager
+    suricata_manager = SuricataManager()
 
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False) # Set to False to avoid running the initialization twice

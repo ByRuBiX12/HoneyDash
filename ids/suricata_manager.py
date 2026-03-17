@@ -1,0 +1,214 @@
+import os
+import subprocess
+import random
+import re
+import json
+from pathlib import Path
+
+class SuricataManager:
+    def __init__(self):
+        self.bin_path = Path("/usr/bin/suricata")
+        self.log_path = Path("/var/log/suricata")
+
+    def _is_installed(self):
+        """Checks if Suricata is installed"""
+        return self.bin_path.exists() and self.log_path.exists()
+    
+    def get_status(self):
+        """Get the current status of Suricata"""
+        if not self._is_installed():
+            return {
+                "installed": False,
+                "running": False
+            }
+        
+        try:
+            result = subprocess.run(["pgrep", "-f", self.bin_path], capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                return {
+                    "installed": True,
+                    "running": True,
+                    "suricata_path": str(self.bin_path),
+                    "log_path": str(self.log_path)
+                }
+            else:
+                return {
+                    "installed": True,
+                    "running": False,
+                    "suricata_path": str(self.bin_path),
+                    "log_path": str(self.log_path)
+                }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "message": "Error checking Suricata status"
+            }
+        
+    def start(self):
+        """Starts Suricata"""
+        if not self._is_installed():
+            return {
+                "success": False,
+                "message": "Suricata is not installed"
+            }
+        
+        try:
+            result = subprocess.run([
+                "systemctl", "start", "suricata"
+            ], capture_output=True, text=True)
+
+            if result.returncode == 0:
+                return {
+                    "success": True,
+                    "message": "Suricata started successfully"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": result.stderr,
+                    "error": "Failed to start Suricata"
+                }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error: {str(e)}"
+            }
+        
+    def stop(self):
+        """Stops Suricata"""
+        if not self._is_installed():
+            return {
+                "success": False,
+                "message": "Suricata is not installed"
+            }
+        
+        try:
+            result = subprocess.run([
+                "systemctl", "stop", "suricata"
+            ], capture_output=True, text=True)
+
+            if result.returncode == 0:
+                return {
+                    "success": True,
+                    "message": "Suricata stopped successfully"
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": result.stderr,
+                    "error": "Failed to stop Suricata"
+                }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error: {str(e)}"
+            }
+        
+    def set_suricata_bin_path(self, bin_path):
+        """Manually sets the Suricata installation path"""
+        self.bin_path = Path(bin_path)
+
+        if self._is_installed():
+            return {
+                "success": True,
+                "message": f"Suricata binary path set to {self.bin_path}"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Suricata not found at {self.bin_path}. Please check the path and try again."
+            }
+        
+    def set_suricata_log_path(self, log_path):
+        """Manually sets the Suricata log path"""
+        self.log_path = Path(log_path)
+
+        if self._is_installed():
+            return {
+                "success": True,
+                "message": f"Suricata log path set to {self.log_path}"
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Suricata logs not found at {self.log_path}. Please check the path and try again."
+            }
+
+    def get_alerts(self, severity, protocol, timestamp_from, timestamp_to, page):
+        """Retrieves alerts from Suricata logs within a specified time range"""
+        try:
+            if not self._is_installed():
+                return {
+                    "success": False,
+                    "message": "Suricata is not installed"
+                }
+            
+            alerts = []
+            for log in self.log_path.glob("eve.json*"):
+                with open(log, "r") as f:
+                    for line in f:
+                        alert = json.loads(line)
+                        if alert["event_type"] == "alert":
+                            alert_severity = alert["alert"]["severity"]
+                            alert_protocol = alert["proto"]
+                            if severity != "any" and alert_severity != severity:
+                                continue
+                            if protocol != "any" and alert_protocol != protocol:
+                                continue
+                            alert_time = alert["timestamp"]
+                            if timestamp_from <= alert_time <= timestamp_to:
+                                alerts.append(alert)
+
+                                total = len(alerts)
+                                if total == 0:
+                                    return {
+                                        "success": False,
+                                        "message": "No alerts found"
+                                    }
+                                
+                                start_idx = (page - 1) * 9
+                                end_idx = start_idx + 9
+                                if start_idx >= total:
+                                    return {
+                                        "success": False,
+                                        "message": "No more alerts available",
+                                        "total": total,
+                                        "page": page
+                                    }
+                                
+                                alerts_filtered = []
+                                for a in alerts[start_idx:end_idx]:
+                                    alerts_filtered.append({
+                                        "source": "suricata",
+                                        "timestamp": a["timestamp"], # 2
+                                        "src_ip": a["src_ip"], # 2
+                                        "src_port": a["src_port"], # 2
+                                        "dest_ip": a["dest_ip"], # 2
+                                        "dest_port": a["dest_port"], # 2
+                                        "in_iface": a["in_iface"], # 1
+                                        "protocol": a["proto"], # 1
+                                        "app_proto": a["app_proto"] if "app_proto" in a else "N/A", # 1
+                                        "signature": a["alert"]["signature"] if "signature" in a["alert"] else "N/A", # 2 | Mostrar nombre (signature) en el pop-up de detalles de la alerta
+                                        "category": a["alert"]["category"] if "category" in a["alert"] else "N/A", # 1
+                                        "cve": a["alert"]["metadata"]["cve"] if "cve" in a["alert"]["metadata"] else "N/A", # 1
+                                        "severity": a["alert"]["severity"] if "severity" in a["alert"] else "N/A" # 2
+                                    })
+                                    
+                                return {
+                                    "success": True,
+                                    "alerts": alerts_filtered,
+                                    "total": total,
+                                    "page": page,
+                                    "total_pages": (total + 8) // 9  
+                                }
+                            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": str(e)
+            }

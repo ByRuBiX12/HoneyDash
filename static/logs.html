@@ -317,23 +317,6 @@
                 </div>
             </div>
         </div>
-        <div class="service-card">
-            <div class="card-header">
-                <h3>Dionaea Honeypot Binaries</h3>
-            </div>
-            <div class="card-body">
-                <div id="binaries-container" class="binaries-container">
-                    <p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No binaries loaded. Click "Get Binaries" to fetch them.</p>
-                </div>
-                               
-                <!-- Actions -->
-                <div class="card-actions">
-                    <div>
-                        <button id="getBinaries" class="btn btn-primary" style="color: black" onclick="getBinaries()">Get Binaries</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Logs de DDoSPot-->
         <div class="service-card">
@@ -617,6 +600,88 @@
                 <div class="card-actions">
                     <div>
                         <button id="sendToSplunkDdospot" class="btn btn-primary" onclick="sendToSplunk('ddospot')" disabled>Send to Splunk</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Binaries & Alerts -->
+        <h2 class="section-title">Binaries & Alerts</h2>
+        <hr class="section-divider">
+
+        <div class="service-card">
+            <div class="card-header">
+                <h3>Dionaea Honeypot Binaries</h3>
+            </div>
+            <div class="card-body">
+                <div id="binaries-container" class="binaries-container">
+                    <p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No binaries loaded. Click "Get Binaries" to fetch them.</p>
+                </div>
+                               
+                <!-- Actions -->
+                <div class="card-actions">
+                    <div>
+                        <button id="getBinaries" class="btn btn-primary" style="color: black" onclick="getBinaries()">Get Binaries</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suricata Alerts -->
+        <div class="service-card">
+            <div class="card-header">
+                <h3>Suricata Alerts</h3>
+            </div>
+            <div class="card-body">
+                <!-- Query Filters Section -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; cursor: pointer; margin-bottom: 0.5rem;" onclick="toggleQueryFilter('query-suricata-filter-content', 'query-suricata-filter-toggle')">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="color: #fff8c5; margin: 0;">Search Filters</h4>
+                            <span id="query-suricata-filter-toggle" style="color: #eeaf00; font-size: 1.2rem; transition: transform 0.3s;">▼</span>
+                        </div>
+                    </div>
+                    <div id="query-suricata-filter-content" style="display: none; background: rgba(0, 0, 0, 0.1); padding: 1rem; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label for="log-severity-suricata" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Severity:</label>
+                                <select type="number" id="log-severity-suricata" value="any" style="width: 100%;">
+                                    <option value="any">Any</option>
+                                    <option value="1">Critical</option>
+                                    <option value="2">High</option>
+                                    <option value="3">Medium</option>
+                                    <option value="4">Low</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="log-protocol-suricata" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Protocol:</label>
+                                <select id="log-protocol-suricata" style="width: 100%">
+                                    <option value="any">Any</option>
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="log-timestamp-ddospot" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">From Date (optional):</label>
+                                <input type="datetime-local" id="log-timestamp-ddospot" style="width: 100%">
+                            </div>
+                        </div>
+                    </div>  
+                </div>
+                <!-- Alerts Display -->
+                <div id="alerts-container" class="alerts-container">
+                    <p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No alerts loaded. Click "Get Alerts" to fetch them.</p>
+                </div>
+                <!-- Load Alerts -->
+                <div class="card-actions">
+                    <div>
+                        <button id="getAlerts" class="btn btn-primary" style="color: black" onclick="getAlerts()">Get Alerts</button>
+                    </div>
+                </div>
+                <!-- Send To Splunk -->
+                <div class="card-actions">
+                    <div>
+                        <button id="sendToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send to Splunk</button>
                     </div>
                 </div>
             </div>

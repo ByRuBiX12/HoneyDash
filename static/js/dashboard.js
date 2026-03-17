@@ -46,20 +46,22 @@ async function makeRequest(endpoint, method = 'GET', body = null) {
     }
 }
 
-// Update ANY Honeypot status UI
+// Update ANY Honeypot & Suricata status UI
 function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigured, isRunning, isInstalled, isConfigured, buttonStart, buttonStop, buttonInstall, buttonConfigure) {
     const UIRunning = document.getElementById(elementIdRunning);
     const UIInstalled = document.getElementById(elementIdInstalled);
     const UIConfigured = elementIdConfigured ? document.getElementById(elementIdConfigured) : null;
     const startBtn = document.getElementById(buttonStart);
     const stopBtn = document.getElementById(buttonStop);
-    const installBtn = document.getElementById(buttonInstall);
+    const installBtn = buttonInstall ? document.getElementById(buttonInstall) : null;
     const configureBtn = buttonConfigure ? document.getElementById(buttonConfigure) : null;
     if (isInstalled) {
         UIInstalled.textContent = 'Installed';
         UIInstalled.className = 'status-ui installed';
-        installBtn.disabled = true;
-        installBtn.classList.add('disabled');
+        if (installBtn) {
+            installBtn.disabled = true;
+            installBtn.classList.add('disabled');
+        }
         if (configureBtn) {
             configureBtn.disabled = false;
             configureBtn.classList.remove('disabled');
@@ -68,21 +70,6 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
         startBtn.classList.remove('disabled');
         stopBtn.disabled = false;
         stopBtn.classList.remove('disabled');
-        if (isRunning) {
-            UIRunning.textContent = 'Running';
-            UIRunning.className = 'status-ui running';
-            startBtn.disabled = true;
-            startBtn.classList.add('disabled');
-            stopBtn.disabled = false;
-            stopBtn.classList.remove('disabled');
-        } else {
-            UIRunning.textContent = 'Stopped';
-            UIRunning.className = 'status-ui stopped';
-            startBtn.disabled = false;
-            startBtn.classList.remove('disabled');
-            stopBtn.disabled = true;
-            stopBtn.classList.add('disabled');
-        }
         if (isConfigured) {
             startBtn.disabled = false;
             startBtn.classList.remove('disabled');
@@ -100,11 +87,28 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
                 configureBtn.classList.remove('disabled');
             }
         }
+        if (isRunning) {
+            UIRunning.textContent = 'Running';
+            UIRunning.className = 'status-ui running';
+            startBtn.disabled = true;
+            startBtn.classList.add('disabled');
+            stopBtn.disabled = false;
+            stopBtn.classList.remove('disabled');
+        } else {
+            UIRunning.textContent = 'Stopped';
+            UIRunning.className = 'status-ui stopped';
+            startBtn.disabled = false;
+            startBtn.classList.remove('disabled');
+            stopBtn.disabled = true;
+            stopBtn.classList.add('disabled');
+        }
     } else {
         UIInstalled.textContent = 'Not Installed';
         UIInstalled.className = 'status-ui not-installed';
-        installBtn.disabled = false;
-        installBtn.classList.remove('disabled');
+        if (installBtn) {
+            installBtn.disabled = false;
+            installBtn.classList.remove('disabled');
+        }
         if (configureBtn) {
             configureBtn.disabled = true;
             configureBtn.classList.add('disabled');
@@ -209,7 +213,7 @@ async function stopCowrie() {
     }
 }
 
-// Cowrie & Splunk manually set path function
+// Cowrie, Splunk & Suricata manually set path function
 async function setCustomPath(service) {
     const path = document.getElementById(`${service}-custom-path`).value;
     let name = "";
@@ -217,24 +221,30 @@ async function setCustomPath(service) {
         name = "Cowrie";
     } else if (service === 'splunk') {
         name = "Splunk";
+    } else if (service === 'suricata') {
+        name = "Suricata";
     }
     if (!path) {
         showActionMessage('Please enter a valid path for ' + name + '.');
         return;
     }
     try {
-        const response = await makeRequest(`/` + service + `/set-path`, 'POST', { path: path });
+        const response = await makeRequest(`/${service}/set-path`, 'POST', { path: path });
         if (response.success) {
             showActionMessage(`Custom path for ${name} set successfully.`);
-            const statusResponse = await makeRequest(`/${service}/status`);
-            if (service === 'splunk') {
-                updateStatusSplunk(`${service}-status`, `${service}-installed`, `${service}-token`, statusResponse.running, statusResponse.installed, statusResponse.token);
-            } else {
-                updateStatusUI(`${service}-status`, `${service}-installed`, `${service}-configured`, statusResponse.running, statusResponse.installed, statusResponse.configured, `${service}-start-btn`, `${service}-stop-btn`, `${service}-install-btn`, `${service}-configure-btn`);
-            }
+            document.getElementById(`set-${service}-path-btn`).disabled = true;
+            document.getElementById(`set-${service}-path-btn`).classList.add('disabled');
         } else {
             showActionMessage(path + ' is not a valid path for ' + name + ' Honeypot. Please enter a valid path.');
         }
+        const statusResponse = await makeRequest(`/${service}/status`);
+            if (service === 'splunk') {
+                updateStatusSplunk(`${service}-status`, `${service}-installed`, `${service}-token`, statusResponse.running, statusResponse.installed, statusResponse.token);
+            } else if (service === 'cowrie') {
+                updateStatusUI(`${service}-status`, `${service}-installed`, `${service}-configured`, statusResponse.running, statusResponse.installed, statusResponse.configured, `${service}-start-btn`, `${service}-stop-btn`, `${service}-install-btn`, `${service}-configure-btn`);
+            } else { // Suricata
+                updateStatusUI(`${service}-status`, `${service}-installed`, null, statusResponse.running, statusResponse.installed, null, `${service}-start-btn`, `${service}-stop-btn`, null, null);
+            }
     } catch (error) {
         showActionMessage(`Error setting custom path for ${name}: ` + error.message);
     }
@@ -428,6 +438,7 @@ async function startSplunk() {
         const response = await makeRequest('/splunk/start', 'POST');
         const statusResponse = await makeRequest('/splunk/status');
         if (response.success) {
+            showActionMessage('Splunk SIEM started successfully. Listening on port 8000 for web interface.');
             updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', statusResponse.running, statusResponse.installed, statusResponse.token);
         }
     } catch (error) {
@@ -441,10 +452,75 @@ async function stopSplunk() {
         const response = await makeRequest('/splunk/stop', 'POST');
         const statusResponse = await makeRequest('/splunk/status');
         if (response.success) {
+            showActionMessage('Splunk SIEM stopped successfully.');
             updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', statusResponse.running, statusResponse.installed, statusResponse.token);
         }
     } catch (error) {
         showActionMessage('Error stopping Splunk SIEM: ' + error.message);
+    }
+}
+
+// Suricata Functions
+async function checkSuricataStatus() {
+    try {
+        const response = await makeRequest('/suricata/status');
+        updateStatusUI('suricata-status', 'suricata-installed', null, response.running, response.installed, null, 'suricata-start-btn', 'suricata-stop-btn', null, null);
+        if (response.installed) {
+            document.getElementById('suricata-custom-path').value = response.suricata_path || '';
+            document.getElementById('suricata-log-path').value = response.log_path || '';
+        }
+    } catch (error) {
+        showActionMessage('Error checking Suricata IDS status: ' + error.message);
+    }
+}
+
+async function setCustomLogPath() {
+    const path = document.getElementById('suricata-log-path').value;
+    if (!path) {
+        showActionMessage('Please enter a valid path for Suricata logs.');
+        return;
+    }
+    try {
+        const response = await makeRequest('/suricata/set-log-path', 'POST', { path: path});
+        if (response.success) {
+            showActionMessage('Custom log path for Suricata set successfully.');
+            document.getElementById('set-suricata-log-path-btn').disabled = true;
+            document.getElementById('set-suricata-log-path-btn').classList.add('disabled');
+        } else {
+            showActionMessage(path + ' is not a valid path for Suricata logs. Please enter a valid path.');
+        }
+        const statusResponse = await makeRequest('/suricata/status');
+        updateStatusUI('suricata-status', 'suricata-installed', null, statusResponse.running, statusResponse.installed, null, 'suricata-start-btn', 'suricata-stop-btn', null, null);
+    } catch (error) {
+        showActionMessage('Error setting custom log path for Suricata: ' + error.message);
+    }
+}
+
+async function startSuricata() {
+    try {
+        showActionMessage('Starting Suricata IDS...');
+        const response = await makeRequest('/suricata/start', 'POST');
+        const statusResponse = await makeRequest('/suricata/status');
+        if (response.success) {
+            showActionMessage('Suricata IDS started successfully. Monitoring network traffic...');
+            updateStatusUI('suricata-status', 'suricata-installed', null, statusResponse.running, statusResponse.installed, null, 'suricata-start-btn', 'suricata-stop-btn', null, null);
+        }
+    } catch (error) {
+        showActionMessage('Error starting Suricata IDS: ' + error.message);
+    }
+}
+
+async function stopSuricata() {
+    try {
+        showActionMessage('Stopping Suricata IDS...');
+        const response = await makeRequest('/suricata/stop', 'POST');
+        const statusResponse = await makeRequest('/suricata/status');
+        if (response.success) {
+            showActionMessage('Suricata IDS stopped successfully.');
+            updateStatusUI('suricata-status', 'suricata-installed', null, statusResponse.running, statusResponse.installed, null, 'suricata-start-btn', 'suricata-stop-btn', null, null);
+        }
+    } catch (error) {
+        showActionMessage('Error stopping Suricata IDS: ' + error.message);
     }
 }
 
@@ -454,4 +530,5 @@ window.addEventListener('DOMContentLoaded', () => {
     checkDionaeaStatus();
     checkDDoSPotStatus();
     checkSplunkStatus();
+    checkSuricataStatus();
 });

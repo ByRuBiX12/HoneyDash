@@ -165,15 +165,27 @@
             <div class="service-card-suricata">
                 <div class="card-header">
                     <h3>Suricata IDS</h3>
-                    <span class="status-ui" id="suricata-installed">Checking...</span>
                     <span class="status-ui" id="suricata-status">Checking...</span>
+                    <span class="status-ui" id="suricata-installed">Checking...</span>
                 </div>
                 <div class="card-body">
                     <p>Security Information and Event Management</p>
                     <div class="card-actions">
-                        <button class="btn btn-primary" onclick="checkSuricataStatus()">Check Status</button>
-                        <button class="btn btn-success" onclick="startSuricata()">Start &#9658;</button>
-                        <button class="btn btn-danger" onclick="stopSuricata()">Stop &#9632;</button>
+                        <div>
+                            <button class="btn btn-success" id="suricata-start-btn" onclick="startSuricata()">Start &#9658;</button>
+                            <button class="btn btn-danger" id="suricata-stop-btn" onclick="stopSuricata()">Stop &#9632;</button>
+                        </div>
+                        <div>
+                            <input type="text" id="suricata-custom-path" placeholder="Enter custom binary path" oninput="document.getElementById('set-suricata-path-btn').disabled = !this.value.trim(); document.getElementById('set-suricata-path-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" id="set-suricata-path-btn" onclick="setCustomPath('suricata')" disabled>Set Binary Path</button>
+                        </div>
+                        <div>
+                            <input type="text" id="suricata-log-path" placeholder="Enter custom log path" oninput="document.getElementById('set-suricata-log-path-btn').disabled = !this.value.trim(); document.getElementById('set-suricata-log-path-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" id="set-suricata-log-path-btn" onclick="setCustomLogPath()" disabled>Set Log Path</button>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" onclick="checkSuricataStatus()">Check Status</button>
+                        </div>
                     </div>
                 </div>
             </div>

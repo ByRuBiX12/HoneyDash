@@ -1,4 +1,17 @@
 # Changelog
+## [Unreleased] - 2026-03-17
+### Added
+- **Suricata IDS Integration**: Initial Suricata manager with status detection, start/stop control and configurable binary/log paths.
+- **Suricata Alerts UI**: New alerts section in Logs page with basic filters (severity/protocol) and a styled alerts grid similar to Dionaea binaries.
+
+### Changed
+- **Logs Page Layout**: Reorganized Binaries and new Alerts sections into a unified "Binaries & Alerts" block.
+- **Dashboard status helper**: `updateStatusUI()` now supports optional controls (so it can be reused for Suricata without install/configure buttons).
+
+### Fixed
+- **API error responses**: Multiple endpoints now return proper HTTP 500 status codes on exceptions.
+- **Dashboard custom path**: `setCustomPath()` improved to support Suricata and avoid UI runtime issues.
+
 ## [Unreleased] - 2026-03-13
 ### Added
 - **Splunk Custom Path**: Now it is posible to manually set Splunk installation path (as Cowrie)

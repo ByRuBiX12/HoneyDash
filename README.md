@@ -67,6 +67,12 @@
 - **Event forwarding**: Send honeypot logs to Splunk with configurable sourcetype and index
 - **Batch processing**: Handles multiple events efficiently with error tracking
 
+### Suricata IDS Integration
+- **Status monitoring**: Check if Suricata is installed and running
+- **Service control**: Start/Stop Suricata from the dashboard
+- **Custom paths**: Manually set Suricata binary path and log path from the UI
+- **Alert visualization**: View Suricata `alert` events from `eve.json*` in the Logs page (with basic filters)
+
 ### REST API
 - Full CRUD operations for honeypot and SIEM management
 - Comprehensive error handling with descriptive messages
@@ -74,6 +80,20 @@
 - CORS-enabled for frontend integration
 - Query parameters for log filtering
 - Dionaea endpoints for status, installation, and control
+
+### Suricata Endpoints
+```bash
+# Status
+GET  /api/suricata/status
+
+# Configuration
+POST /api/suricata/set-path      # Manual path: {"path": "/custom/path/to/suricata"}
+POST /api/suricata/set-log-path  # Manual path: {"path": "/custom/path/to/suricata/logs"}
+
+# Operations
+POST /api/suricata/start
+POST /api/suricata/stop
+```
 
 ### Web Dashboard
 - Modern card-based UI with gradient design

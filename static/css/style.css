@@ -567,6 +567,47 @@ footer {
     color: #ecf0f1;
 }
 
+/* Alerts Section */
+.alerts-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.alert {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(238, 175, 0, 0.3);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.alert:hover {
+    border-color: #eeaf00;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(238, 175, 0, 0.2);
+}
+
+.alert:hover .search-icon {
+    opacity: 1;
+}
+
+.alert p {
+    margin-bottom: 0.8rem;
+}
+
+.alert p:last-child {
+    margin-bottom: 0;
+}
+
+.alert strong {
+    color: #fff8c5;
+}
+
+.alert span {
+    color: #ecf0f1;
+}
+
 .search-link {
     bottom: 10px;
     right: 10px;
