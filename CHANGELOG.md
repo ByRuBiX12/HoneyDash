@@ -1,4 +1,9 @@
 # Changelog
+## [Unreleased] - 2026-03-21
+### Added
+- **Suricata Alerts Detail**: Custom responsive overlay when clicking on any alert card
+- **Alert CVE Button**: Automatically recognizes CVE and display button (non working button yet)
+
 ## [Unreleased] - 2026-03-20
 ### Added
 - **Suricata Alert Pagination**: Stateless cursor-based pagination with 16 alers per page with `cursor_next` and `cursor_prev` instead of same pagination as Dionaea binaries (since this is a different logic) || Unlike Dionaea pagination, HoneyDash Suricata parsing recognizes files read and its reading position automatically

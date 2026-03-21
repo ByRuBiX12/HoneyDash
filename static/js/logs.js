@@ -757,37 +757,85 @@ async function getAlerts() {
 
 async function printAlerts(response) {
     try {
-        response.alerts.forEach(alert => {
+        response.alerts.forEach(alertData => {
                 const alertCard = document.createElement('div');
-                if (alert.severity === 1) {
+                alertCard.style.cursor = 'pointer';
+                if (alertData.severity === 1) {
                     alertCard.className = 'alert alert-critical';
-                } else if (alert.severity === 2) {
+                } else if (alertData.severity === 2) {
                     alertCard.className = 'alert alert-high';
-                } else if (alert.severity === 3) {
+                } else if (alertData.severity === 3) {
                     alertCard.className = 'alert alert-medium';
-                } else if (alert.severity === 4) {
+                } else if (alertData.severity === 4) {
                     alertCard.className = 'alert alert-low';
                 }
+
+                alertCard.onclick = () => {
+                    const details = `Signature: ${alertData.signature}
+Category: ${alertData.category}
+
+Source IP: ${alertData.src_ip}
+Source Port: ${alertData.src_port}
+Destination IP: ${alertData.dest_ip}
+Destination Port: ${alertData.dest_port}
+
+Interface: ${alertData.in_iface}
+Protocol: ${alertData.protocol}
+App Protocol: ${alertData.app_proto}
+
+Severity: ${alertData.severity}
+CVE: ${alertData.cve}
+
+Timestamp: ${alertData.timestamp}`;
+                    
+                    const overlay = document.createElement('div');
+                    overlay.className = 'alert-overlay';
+                    document.body.appendChild(overlay);
+                    
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert-details';
+                    alertDiv.textContent = details;
+                    if (alertData.cve != 'N/A') {
+                        const cveBtn = document.createElement('a');
+                        cveBtn.onclick = (e) => {
+                            getCveDetails(alertData.cve);
+                        }
+                        cveBtn.className = 'cve-button';
+                        cveBtn.textContent = 'View CVE Details';
+                        alertDiv.appendChild(cveBtn);
+                    }
+                    document.body.appendChild(alertDiv);
+
+                    const closeDetails = (event) => {
+                        if (event.target === overlay) {
+                            overlay.remove();
+                            alertDiv.remove();
+                            document.removeEventListener('click', closeDetails);
+                        }
+                    };
+                    document.addEventListener('click', closeDetails);
+                }
+
                 const category = document.createElement('p');
-                category.innerHTML = `<strong>${alert.category}</strong>`;
+                category.innerHTML = `<strong>${alertData.category}</strong>`;
                 alertCard.appendChild(category);
 
                 const proto = document.createElement('p');
-                proto.innerHTML = `<strong>Protocol:</strong> <span>${alert.protocol}</span>`;
+                proto.innerHTML = `<strong>Protocol:</strong> <span>${alertData.protocol}</span>`;
                 alertCard.appendChild(proto);
 
                 const iface = document.createElement('p');
-                iface.innerHTML = `<strong>Interface:</strong> <span>${alert.in_iface}</span>`;
+                iface.innerHTML = `<strong>Interface:</strong> <span>${alertData.in_iface}</span>`;
                 alertCard.appendChild(iface);
 
-                if (alert.cve != 'N/A') {
+                if (alertData.cve != 'N/A') {
                     const cve = document.createElement('p');
-                    cve.innerHTML = `<strong>CVE:</strong> <span>${alert.cve}</span>`;
+                    cve.innerHTML = `<strong>CVE:</strong> <span>${alertData.cve}</span>`;
                     alertCard.appendChild(cve);
                 }
 
                 const timestamp = document.createElement('p');
-                timestamp.innerHTML = `<strong>Timestamp:</strong> <span>${alert.timestamp}</span>`;
+                timestamp.innerHTML = `<strong>Timestamp:</strong> <span>${alertData.timestamp}</span>`;
                 alertCard.appendChild(timestamp);
 
                 document.getElementById('alerts-container').appendChild(alertCard);
@@ -797,4 +845,9 @@ async function printAlerts(response) {
     } catch (error) {
         showActionMessage(`Error displaying alerts: ${error.message}`);
     }
+}
+
+async function getCveDetails(cveId) {
+    alert(cveId);
+    // TODO
 }
