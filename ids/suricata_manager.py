@@ -139,7 +139,7 @@ class SuricataManager:
                 "message": f"Suricata logs not found at {self.log_path}. Please check the path and try again."
             }
 
-    def get_alerts(self, severity, protocol, timestamp_from, timestamp_to, page):
+    def get_alerts(self, severity, protocol, timestamp_from, timestamp_to, cursor_next, cursor_prev):
         """Retrieves alerts from Suricata logs within a specified time range"""
         try:
             if not self._is_installed():
@@ -147,68 +147,97 @@ class SuricataManager:
                     "success": False,
                     "message": "Suricata is not installed"
                 }
+
+            if not timestamp_from:
+                timestamp_from = "0000-01-01T00:00:00"
+            if not timestamp_to:
+                timestamp_to = "9999-12-31T23:59:59"
+            
+            skip_count = cursor_prev if cursor_prev is not None else cursor_next
+            start_position = skip_count
             
             alerts = []
-            for log in self.log_path.glob("eve.json*"):
+            page_size = 16
+            
+            log_to_read = "eve.json*"
+            for log in sorted(self.log_path.glob(log_to_read)):
                 with open(log, "r") as f:
                     for line in f:
-                        alert = json.loads(line)
-                        if alert["event_type"] == "alert":
-                            alert_severity = alert["alert"]["severity"]
-                            alert_protocol = alert["proto"]
-                            if severity != "any" and alert_severity != severity:
+                        alert = json.loads(line)                            
+                        if alert.get("event_type") != "alert":
+                            continue
+                        
+                        alert_severity = alert.get("alert", {}).get("severity")
+                        alert_protocol = alert.get("proto")
+                        if severity != "any" and alert_severity != int(severity):
+                            continue
+                        if protocol != "any" and alert_protocol != protocol:
+                            continue
+                        
+                        alert_time = alert.get("timestamp")
+                        if timestamp_from <= alert_time <= timestamp_to:
+                            if skip_count > 0:
+                                skip_count -= 1
                                 continue
-                            if protocol != "any" and alert_protocol != protocol:
-                                continue
-                            alert_time = alert["timestamp"]
-                            if timestamp_from <= alert_time <= timestamp_to:
-                                alerts.append(alert)
 
-                                total = len(alerts)
-                                if total == 0:
-                                    return {
-                                        "success": False,
-                                        "message": "No alerts found"
-                                    }
-                                
-                                start_idx = (page - 1) * 9
-                                end_idx = start_idx + 9
-                                if start_idx >= total:
-                                    return {
-                                        "success": False,
-                                        "message": "No more alerts available",
-                                        "total": total,
-                                        "page": page
-                                    }
-                                
-                                alerts_filtered = []
-                                for a in alerts[start_idx:end_idx]:
-                                    alerts_filtered.append({
-                                        "source": "suricata",
-                                        "timestamp": a["timestamp"], # 2
-                                        "src_ip": a["src_ip"], # 2
-                                        "src_port": a["src_port"], # 2
-                                        "dest_ip": a["dest_ip"], # 2
-                                        "dest_port": a["dest_port"], # 2
-                                        "in_iface": a["in_iface"], # 1
-                                        "protocol": a["proto"], # 1
-                                        "app_proto": a["app_proto"] if "app_proto" in a else "N/A", # 1
-                                        "signature": a["alert"]["signature"] if "signature" in a["alert"] else "N/A", # 2 | Mostrar nombre (signature) en el pop-up de detalles de la alerta
-                                        "category": a["alert"]["category"] if "category" in a["alert"] else "N/A", # 1
-                                        "cve": a["alert"]["metadata"]["cve"] if "cve" in a["alert"]["metadata"] else "N/A", # 1
-                                        "severity": a["alert"]["severity"] if "severity" in a["alert"] else "N/A" # 2
-                                    })
-                                    
-                                return {
-                                    "success": True,
-                                    "alerts": alerts_filtered,
-                                    "total": total,
-                                    "page": page,
-                                    "total_pages": (total + 8) // 9  
-                                }
+                            alerts.append(alert)
+                            if len(alerts) > page_size:
+                                break
+                
+                if len(alerts) > page_size:
+                    break
+
+            has_next = len(alerts) > page_size
+            alerts = alerts[:page_size]
+
+            if len(alerts) == 0:
+                return {
+                    "success": False,
+                    "message": "No alerts found",
+                    "alerts": [],
+                    "has_next": False,
+                    "cursor_next": start_position,
+                    "cursor_prev": None
+                }
+
+            alerts_filtered = []
+            for a in alerts:
+                metadata = a.get("alert", {}).get("metadata") or {}
+                alerts_filtered.append({
+                    "source": "suricata",
+                    "timestamp": a["timestamp"][:-12], # 1 | not showing miliseconds and timezone
+                    "src_ip": a["src_ip"], #2
+                    "src_port": a["src_port"], #2
+                    "dest_ip": a["dest_ip"], #2
+                    "dest_port": a["dest_port"], #2
+                    "in_iface": a["in_iface"], #1
+                    "protocol": a["proto"], #1
+                    "app_proto": a["app_proto"] if "app_proto" in a else "N/A", #2
+                    "signature": a["alert"]["signature"] if "signature" in a["alert"] else "N/A", #2 y dudosa: mejor poner respuesta de la API NVD?
+                    "category": a["alert"]["category"] if "category" in a["alert"] else "N/A", #1
+                    "cve": metadata.get("cve", "N/A"), #1
+                    "severity": a["alert"]["severity"] if "severity" in a["alert"] else "N/A", #2
+                })
+            
+            next_cursor = start_position + len(alerts)
+            prev_cursor = max(0, start_position - page_size)
+            
+            return {
+                "success": True,
+                "alerts": alerts_filtered,
+                "has_next": has_next,
+                "cursor_next": next_cursor if has_next else None,
+                "cursor_prev": prev_cursor if start_position > 0 else None
+            }
                             
         except Exception as e:
             return {
                 "success": False,
-                "message": str(e)
+                "message": str(e),
+                "alerts": [],
+                "has_next": False,
+                "cursor_next": None,
+                "cursor_prev": None
             }
+
+# TODO: Hacer función get_every_alert() sin paginación para enviar a Splunk

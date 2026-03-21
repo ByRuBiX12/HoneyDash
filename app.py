@@ -199,7 +199,7 @@ def cowrie_cleanup():
 
 @app.route('/api/cowrie/logs', methods=['GET'])
 def cowrie_logs():
-    """Retrieves Cowrie logs with optional filtering""" # El usuario filtrará por límite de logs, tipo de evento y timestamp. Más tarde podrá ocultar campos que no quiera ver <- TODO
+    """Retrieves Cowrie logs with optional filtering"""
     try:
         limit = request.args.get('limit', default=50, type=int)
         event_id = request.args.get('event_id', default=None, type=str)
@@ -567,6 +567,26 @@ def suricata_stop():
         return jsonify({
             "error": str(e),
             "message": "Error stopping Suricata"
+        }), 500
+
+
+@app.route('/api/suricata/alerts', methods=['GET'])
+def suricata_alerts():
+    """Retrieves alerts from Suricata"""
+    try:
+        severity = request.args.get('severity', default="Any", type=str)
+        protocol = request.args.get('protocol', default="Any", type=str)
+        timestamp_from = request.args.get('timestamp_from', default=None, type=str)
+        timestamp_to = request.args.get('timestamp_to', default=None, type=str)
+        cursor_next = request.args.get('cursor_next', default=None, type=int)
+        cursor_prev = request.args.get('cursor_prev', default=None, type=int)
+        result = suricata_manager.get_alerts(severity=severity, protocol=protocol, timestamp_from=timestamp_from, timestamp_to=timestamp_to, cursor_next=cursor_next, cursor_prev=cursor_prev)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error retrieving Suricata alerts"
         }), 500
 
 # ============== ERROR HANDLING ==============

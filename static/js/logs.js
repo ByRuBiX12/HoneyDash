@@ -603,7 +603,7 @@ async function sendToSplunk(service) {
 // GET: Get Dionaea binaries information and show them in cards
 async function getBinaries() {
     try {
-        let currentPage = 1;
+        let currentCursor = 1;
         
         const loadPage = async (page) => {
             const response = await makeRequest(`/dionaea/binaries?page=${page}`);
@@ -620,13 +620,13 @@ async function getBinaries() {
             const leftArrow = document.createElement('a');
             leftArrow.className = 'pagination-arrow';
             leftArrow.innerHTML = '&#9668; Previous';
-            if (currentPage === 1) {
+            if (currentCursor === 1) {
                 leftArrow.classList.add('pagination-arrow-disabled');
             }
             leftArrow.onclick = async () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    await loadPage(currentPage);
+                if (currentCursor > 1) {
+                    currentCursor--;
+                    await loadPage(currentCursor);
                 }
             };
             binariesContainer.appendChild(leftArrow);
@@ -634,13 +634,13 @@ async function getBinaries() {
             const rightArrow = document.createElement('a');
             rightArrow.className = 'pagination-arrow';
             rightArrow.innerHTML = 'Next &#9658;';
-            if (currentPage >= response.total_pages) {
+            if (currentCursor >= response.total_pages) {
                 rightArrow.classList.add('pagination-arrow-disabled');
             }
             rightArrow.onclick = async () => {
-                if (currentPage < response.total_pages) {
-                    currentPage++;
-                    await loadPage(currentPage);
+                if (currentCursor < response.total_pages) {
+                    currentCursor++;
+                    await loadPage(currentCursor);
                 }
             };
             binariesContainer.appendChild(rightArrow);
@@ -648,7 +648,7 @@ async function getBinaries() {
             printBinaries(response);
         };
         
-        await loadPage(currentPage);
+        await loadPage(currentCursor);
         
     } catch (error) {
         showActionMessage(`Error: ${error.message}`);
@@ -692,5 +692,109 @@ async function printBinaries(response) {
             showActionMessage(`Successfully loaded ${response.binaries.length} binaries`);
     } catch (error) {
         showActionMessage(`Error displaying binaries: ${error.message}`);
+    }
+}
+
+// GET: Get Suricata Alerts information and show them in cards
+async function getAlerts() {
+    try {
+        let currentCursor = 0;
+        const severity = document.getElementById('log-severity-suricata').value;
+        const protocol = document.getElementById('log-protocol-suricata').value;
+        const timestampFrom = document.getElementById('log-timestamp_from-suricata').value;
+        const timestampTo = document.getElementById('log-timestamp_to-suricata').value;
+        
+        const loadPage = async (cursor) => {
+            const response = await makeRequest(`/suricata/alerts?severity=${severity}&protocol=${protocol}&timestamp_from=${timestampFrom}&timestamp_to=${timestampTo}&cursor_next=${cursor}`);
+            
+            const alertsContainer = document.getElementById('alerts-container');
+            alertsContainer.innerHTML = '';
+            alertsContainer.style.marginBottom = '1rem';
+
+            if (response.alerts.length === 0) {
+                alertsContainer.innerHTML = '<p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No alerts found.</p>';
+                return;
+            }
+            
+            const leftArrow = document.createElement('a');
+            leftArrow.className = 'pagination-arrow';
+            leftArrow.innerHTML = '&#9668; Previous';
+            if (currentCursor === 0) {
+                leftArrow.classList.add('pagination-arrow-disabled');
+            }
+            leftArrow.onclick = async () => {
+                if (currentCursor > 0) {
+                    currentCursor = response.cursor_prev;
+                    await loadPage(currentCursor);
+                }
+            };
+            alertsContainer.appendChild(leftArrow);
+            
+            const rightArrow = document.createElement('a');
+            rightArrow.className = 'pagination-arrow';
+            rightArrow.innerHTML = 'Next &#9658;';
+            if (response.has_next === false) {
+                rightArrow.classList.add('pagination-arrow-disabled');
+            }
+            
+            rightArrow.onclick = async () => {
+                if (response.has_next === true) {
+                    currentCursor = response.cursor_next;
+                    await loadPage(currentCursor);
+                }
+            };
+
+            alertsContainer.appendChild(rightArrow);
+            printAlerts(response);
+        };
+        
+        await loadPage(currentCursor);
+        
+    } catch (error) {
+        showActionMessage(`Error: ${error.message}`);
+    }
+}
+
+async function printAlerts(response) {
+    try {
+        response.alerts.forEach(alert => {
+                const alertCard = document.createElement('div');
+                if (alert.severity === 1) {
+                    alertCard.className = 'alert alert-critical';
+                } else if (alert.severity === 2) {
+                    alertCard.className = 'alert alert-high';
+                } else if (alert.severity === 3) {
+                    alertCard.className = 'alert alert-medium';
+                } else if (alert.severity === 4) {
+                    alertCard.className = 'alert alert-low';
+                }
+                const category = document.createElement('p');
+                category.innerHTML = `<strong>${alert.category}</strong>`;
+                alertCard.appendChild(category);
+
+                const proto = document.createElement('p');
+                proto.innerHTML = `<strong>Protocol:</strong> <span>${alert.protocol}</span>`;
+                alertCard.appendChild(proto);
+
+                const iface = document.createElement('p');
+                iface.innerHTML = `<strong>Interface:</strong> <span>${alert.in_iface}</span>`;
+                alertCard.appendChild(iface);
+
+                if (alert.cve != 'N/A') {
+                    const cve = document.createElement('p');
+                    cve.innerHTML = `<strong>CVE:</strong> <span>${alert.cve}</span>`;
+                    alertCard.appendChild(cve);
+                }
+
+                const timestamp = document.createElement('p');
+                timestamp.innerHTML = `<strong>Timestamp:</strong> <span>${alert.timestamp}</span>`;
+                alertCard.appendChild(timestamp);
+
+                document.getElementById('alerts-container').appendChild(alertCard);
+            });
+            
+            showActionMessage(`Successfully loaded ${response.alerts.length} alerts`);
+    } catch (error) {
+        showActionMessage(`Error displaying alerts: ${error.message}`);
     }
 }

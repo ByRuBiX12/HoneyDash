@@ -657,13 +657,17 @@
                                 <label for="log-protocol-suricata" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">Protocol:</label>
                                 <select id="log-protocol-suricata" style="width: 100%">
                                     <option value="any">Any</option>
-                                    <option value="tcp">TCP</option>
-                                    <option value="udp">UDP</option>
+                                    <option value="TCP">TCP</option>
+                                    <option value="UDP">UDP</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="log-timestamp-ddospot" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">From Date (optional):</label>
-                                <input type="datetime-local" id="log-timestamp-ddospot" style="width: 100%">
+                                <label for="log-timestamp_from-suricata" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">From Date (optional):</label>
+                                <input type="datetime-local" id="log-timestamp_from-suricata" style="width: 100%">
+                            </div>
+                            <div>
+                                <label for="log-timestamp_to-suricata" style="display: block; font-weight: bold; margin-bottom: 0.5rem; color: #fff8c5;">To Date (optional):</label>
+                                <input type="datetime-local" id="log-timestamp_to-suricata" style="width: 100%">
                             </div>
                         </div>
                     </div>  
@@ -681,7 +685,8 @@
                 <!-- Send To Splunk -->
                 <div class="card-actions">
                     <div>
-                        <button id="sendToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send to Splunk</button>
+                        <button id="sendToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send every alert to Splunk</button>
+                        <button id="sendToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send selected alerts to Splunk</button>
                     </div>
                 </div>
             </div>

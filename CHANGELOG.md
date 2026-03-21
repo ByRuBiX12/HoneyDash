@@ -1,4 +1,13 @@
 # Changelog
+## [Unreleased] - 2026-03-20
+### Added
+- **Suricata Alert Pagination**: Stateless cursor-based pagination with 16 alers per page with `cursor_next` and `cursor_prev` instead of same pagination as Dionaea binaries (since this is a different logic) || Unlike Dionaea pagination, HoneyDash Suricata parsing recognizes files read and its reading position automatically
+- **Suricata Alert Detection**: `has_next` flag in API responses to indicate if more alerts are available (pagination related)
+- **Suricata Alert Parsing Fields**: Severity, protocol and timestamp (from/to not only from) range support
+
+### Changed
+- **Suricata Alert Parsing**: Improved error handling
+
 ## [Unreleased] - 2026-03-17
 ### Added
 - **Suricata IDS Integration**: Initial Suricata manager with status detection, start/stop control and configurable binary/log paths.

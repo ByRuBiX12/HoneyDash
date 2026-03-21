@@ -71,7 +71,11 @@
 - **Status monitoring**: Check if Suricata is installed and running
 - **Service control**: Start/Stop Suricata from the dashboard
 - **Custom paths**: Manually set Suricata binary path and log path from the UI
-- **Alert visualization**: View Suricata `alert` events from `eve.json*` in the Logs page (with basic filters)
+- **Alert visualization**: View Suricata `alert` events from `eve.json*` in the Logs page
+- **Alert filtering**: Filter by severity level and protocol with timestamp range (from/to not only from) support
+- **Stateless pagination**: Cursor-based efficient pagination (`cursor_next`/`cursor_prev`) based
+- **Next detection**: `has_next` flag indicates if more alerts are available beyond current page
+- **Robust parsing**: Handles missing metadata, malformed JSON lines, and missing optional fields
 
 ### REST API
 - Full CRUD operations for honeypot and SIEM management
@@ -80,20 +84,6 @@
 - CORS-enabled for frontend integration
 - Query parameters for log filtering
 - Dionaea endpoints for status, installation, and control
-
-### Suricata Endpoints
-```bash
-# Status
-GET  /api/suricata/status
-
-# Configuration
-POST /api/suricata/set-path      # Manual path: {"path": "/custom/path/to/suricata"}
-POST /api/suricata/set-log-path  # Manual path: {"path": "/custom/path/to/suricata/logs"}
-
-# Operations
-POST /api/suricata/start
-POST /api/suricata/stop
-```
 
 ### Web Dashboard
 - Modern card-based UI with gradient design
@@ -228,6 +218,23 @@ POST /api/splunk/create          # Create HEC token
 POST /api/splunk/send            # Body: {"logs": [{event1}, {event2}]}
 ```
 
+### Suricata Endpoints
+```bash
+# Status
+GET  /api/suricata/status
+
+# Configuration
+POST /api/suricata/set-path      # Manual path: {"path": "/custom/path/to/suricata"}
+POST /api/suricata/set-log-path  # Manual path: {"path": "/custom/path/to/suricata/logs"}
+
+# Operations
+POST /api/suricata/start
+POST /api/suricata/stop
+
+# Alert retrieval (stateless pagination)
+GET  /api/suricata/alerts?severity=any&protocol=any&timestamp_from=TIMESTAMP&timestamp_to=TIMESTAMP&cursor_next=0&cursor_prev=null
+```
+
 ## Security Model
 
 - **Application**: Must run with `sudo` from a non-root user
@@ -259,19 +266,13 @@ HoneyDash/
 
 - [X] Cowrie honeypot integration
 - [X] Dionaea honeypot integration (Docker-based)
+- [X] DDoSPot honeypot integration (Docker-based)
 - [X] Splunk SIEM connectivity
-- [X] Log retrieval and filtering
-- [X] Modern web dashboard with responsive design
-- [ ] Dionaea log parsing and visualization
-- [ ] Captured malware analysis dashboard
-- [ ] Real-time attack monitoring
-- [ ] Suricata IDS integration
-- [ ] Alert correlation and threat intelligence
-- [ ] Real-time log visualization on dashboard
-- [ ] Dionaea honeypot support
-- [ ] DDoSPot honeypot support
+- [X] Suricata IDS integration with alert retrieval and pagination
 - [ ] Suricata IDS integration with CVE enrichment
-- [ ] Advanced threat analytics
+- [X] Log retrieval and filtering for all honeypots
+- [X] Modern web dashboard with responsive design
+- [ ] Real-time log visualization on dashboard
 - [ ] Docker deployment option
 
 ## Troubleshooting
