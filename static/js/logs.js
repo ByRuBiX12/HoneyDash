@@ -771,30 +771,30 @@ async function printAlerts(response) {
                 }
 
                 alertCard.onclick = () => {
-                    const details = `Signature: ${alertData.signature}
-Category: ${alertData.category}
+                    const details = `<strong>Signature</strong>: ${alertData.signature}
+<strong>Category</strong>: ${alertData.category}
 
-Source IP: ${alertData.src_ip}
-Source Port: ${alertData.src_port}
-Destination IP: ${alertData.dest_ip}
-Destination Port: ${alertData.dest_port}
+<strong>Source IP</strong>: ${alertData.src_ip}
+<strong>Source Port</strong>: ${alertData.src_port}
+<strong>Destination IP</strong>: ${alertData.dest_ip}
+<strong>Destination Port</strong>: ${alertData.dest_port}
 
-Interface: ${alertData.in_iface}
-Protocol: ${alertData.protocol}
-App Protocol: ${alertData.app_proto}
+<strong>Interface</strong>: ${alertData.in_iface}
+<strong>Protocol</strong>: ${alertData.protocol}
+<strong>App Protocol</strong>: ${alertData.app_proto}
 
-Severity: ${alertData.severity}
-CVE: ${alertData.cve}
+<strong>Severity</strong>: ${alertData.severity}
+<strong>CVE</strong>: ${alertData.cve}
+<strong>Timestamp</strong>: ${alertData.timestamp}`;
 
-Timestamp: ${alertData.timestamp}`;
-                    
                     const overlay = document.createElement('div');
                     overlay.className = 'alert-overlay';
                     document.body.appendChild(overlay);
                     
                     const alertDiv = document.createElement('div');
+                    alertDiv.id = 'alert-details';
                     alertDiv.className = 'alert-details';
-                    alertDiv.textContent = details;
+                    alertDiv.innerHTML = details;
                     if (alertData.cve != 'N/A') {
                         const cveBtn = document.createElement('a');
                         cveBtn.onclick = (e) => {
@@ -810,6 +810,10 @@ Timestamp: ${alertData.timestamp}`;
                         if (event.target === overlay) {
                             overlay.remove();
                             alertDiv.remove();
+                            const cveDetails = document.getElementById('cve-details');
+                            if (cveDetails) {
+                                cveDetails.remove();
+                            }
                             document.removeEventListener('click', closeDetails);
                         }
                     };
@@ -848,6 +852,37 @@ Timestamp: ${alertData.timestamp}`;
 }
 
 async function getCveDetails(cveId) {
-    alert(cveId);
-    // TODO
+    try {       
+        const alertCard = document.getElementById('alert-details');
+        alertCard.classList.add('slide-left');
+        const cveDetails = document.createElement('div');
+        cveDetails.id = 'cve-details';
+        cveDetails.className = 'cve-details';
+        // Logo loading animation
+        cveDetails.innerHTML = `
+            <div class="loader-container">
+                <img src="/static/assets/Icon.png" class="spinning-logo" alt="Loading...">
+            </div>
+        `;
+        document.body.appendChild(cveDetails);
+
+        const response = await makeRequest(`/suricata/cve-details?cveId=${cveId}`);
+        if (response.success) {
+
+            cveDetails.innerHTML = `
+                <h2>${response.cve_details.cve_id}</h2>
+                <p><strong>Description:</strong> ${response.cve_details.description}</p>
+                <p><strong>Published Date:</strong> ${response.cve_details.published}</p>
+                <p><strong>Status:</strong> ${response.cve_details.vulnStatus}</p>
+                <p><strong>Severity:</strong> ${response.cve_details.severity}</p>
+                <p><strong>Attack Vector:</strong> ${response.cve_details.attackVector}</p>
+                <p><strong>Privileges Required:</strong> ${response.cve_details.privilegesRequired}</p>
+                <p><strong>Weaknesses:</strong> ${response.cve_details.weaknesses.join(', ')}</p>
+            `;
+        } else {
+            showActionMessage(`Error fetching CVE details: ${response.message}`);
+        }
+    } catch (error) {
+        showActionMessage(`Error fetching CVE details: ${error.message}`);
+    }
 }

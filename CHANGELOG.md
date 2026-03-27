@@ -1,4 +1,13 @@
 # Changelog
+## [Unreleased] - 2026-03-27
+### Added
+- **Suricata CVE Details Panel**: Secondary panel (`cve-details`) shown when requesting CVE details from an alert
+- **NVD API Connection**: A GET request is made to the NVD API with CVE-ID fetching more and most valuable and useful fields
+- **CVE Loader Animation**: Spinning logo loader while CVE is being fetched
+
+### Changed
+- **Suricata Alerts UI**: Alert details primary panel can shift left (`slide-left`) to make room for the CVE details panel
+
 ## [Unreleased] - 2026-03-21
 ### Added
 - **Suricata Alerts Detail**: Custom responsive overlay when clicking on any alert card

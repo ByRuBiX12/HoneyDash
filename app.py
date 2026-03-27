@@ -589,6 +589,27 @@ def suricata_alerts():
             "message": "Error retrieving Suricata alerts"
         }), 500
 
+@app.route('/api/suricata/cve-details')
+def suricata_cve_details():
+    """Fetches CVE details from NVD API"""
+    try:
+        cve_id = request.args.get('cveId', default=None, type=str)
+        if not cve_id:
+            return jsonify({
+                "success": False,
+                "message": "'cveId' query parameter is required"
+            }), 400
+        
+        result = suricata_manager.get_cve_details(cve_id)
+        status_code = 200 if result.get("success") else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error fetching CVE details"
+        }), 500
+
 # ============== ERROR HANDLING ==============
 @app.errorhandler(404)
 def not_found(error):

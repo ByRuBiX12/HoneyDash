@@ -76,6 +76,8 @@
 - **Stateless pagination**: Cursor-based efficient pagination (`cursor_next`/`cursor_prev`) based
 - **Next detection**: `has_next` flag indicates if more alerts are available beyond current page
 - **Robust parsing**: Handles missing metadata, malformed JSON lines, and missing optional fields
+- **Alert details modal**: Clicking an alert opens an overlay modal with full alert details
+- **CVE enrichment**: If a CVE is present, a "View CVE Details" button shows a secondary CVE details panel (with a loader while fetching)
 
 ### REST API
 - Full CRUD operations for honeypot and SIEM management
@@ -233,6 +235,9 @@ POST /api/suricata/stop
 
 # Alert retrieval (stateless pagination)
 GET  /api/suricata/alerts?severity=any&protocol=any&timestamp_from=TIMESTAMP&timestamp_to=TIMESTAMP&cursor_next=0&cursor_prev=null
+
+# CVE enrichment (used by the Alerts modal "View CVE Details" button)
+GET  /api/suricata/cve-details?cveId=CVE-YYYY-NNNN
 ```
 
 ## Security Model
@@ -269,7 +274,7 @@ HoneyDash/
 - [X] DDoSPot honeypot integration (Docker-based)
 - [X] Splunk SIEM connectivity
 - [X] Suricata IDS integration with alert retrieval and pagination
-- [ ] Suricata IDS integration with CVE enrichment
+- [X] Suricata IDS integration with CVE enrichment
 - [X] Log retrieval and filtering for all honeypots
 - [X] Modern web dashboard with responsive design
 - [ ] Real-time log visualization on dashboard

@@ -4,6 +4,7 @@ import random
 import re
 import json
 from pathlib import Path
+import requests
 
 class SuricataManager:
     def __init__(self):
@@ -240,4 +241,58 @@ class SuricataManager:
                 "cursor_prev": None
             }
 
+    def get_cve_details(self, cve_id):
+        """Fetches CVE details from NVD API"""
+        try:
+            api_cve_id = ""
+            for char in cve_id:
+                if char == "_":
+                    api_cve_id += "-"
+                else:
+                    api_cve_id += char
+
+            url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={api_cve_id}"
+            response = requests.get(url)
+            data = response.json()
+
+            cvss_metrics = data.get('vulnerabilities', [{}])[0].get('cve', {}).get('metrics', {}).get('cvssMetricV31', [])
+            primary_metric = {}
+            for m in cvss_metrics:
+                if m.get('type') == 'Primary':
+                    primary_metric = m
+                    break
+            if not primary_metric:
+                primary_metric = cvss_metrics[0] if cvss_metrics else {}
+
+            weaknesess_metrics = data.get('vulnerabilities', [{}])[0].get('cve', {}).get('weaknesses', [{}])
+            weakness_ids = []
+            for w in weaknesess_metrics:
+                if w.get('type') == 'Primary':
+                    for d in w.get('description', []):
+                        weakness_ids.append(d.get('value', 'N/A'))
+            if not weakness_ids:
+                for w in weaknesess_metrics[0].get('description', []):
+                    weakness_ids.append(w.get('value', 'N/A'))
+
+            details = {
+                "cve_id": api_cve_id,
+                "description": data.get("vulnerabilities", [{}])[0].get("cve", {}).get("descriptions", [{}])[0].get("value", "N/A"),
+                "published": data.get("vulnerabilities", [{}])[0].get("cve", {}).get("published", "N/A")[:10],
+                "vulnStatus": data.get("vulnerabilities", [{}])[0].get("cve", {}).get("vulnStatus", "N/A"),
+                "severity": f"{primary_metric.get('cvssData', {}).get('baseSeverity', 'N/A')} ({primary_metric.get('cvssData', {}).get('baseScore', 'N/A')})",
+                "attackVector": primary_metric.get('cvssData', {}).get('attackVector', 'N/A'),
+                "privilegesRequired": primary_metric.get('cvssData', {}).get('privilegesRequired', 'N/A'),
+                "weaknesses": weakness_ids
+            }
+            
+            return {
+                "success": True,
+                "cve_details": details
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": str(e)
+            }
+        
 # TODO: Hacer función get_every_alert() sin paginación para enviar a Splunk
