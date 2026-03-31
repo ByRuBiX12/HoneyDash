@@ -75,6 +75,7 @@
 - **Alert filtering**: Filter by severity level and protocol with timestamp range (from/to not only from) support
 - **Stateless pagination**: Cursor-based efficient pagination (`cursor_next`/`cursor_prev`) based
 - **Next detection**: `has_next` flag indicates if more alerts are available beyond current page
+- **Splunk forwarding from alerts view**: Send selected alerts in the current page or send every parsed Suricata alert directly to Splunk
 - **Robust parsing**: Handles missing metadata, malformed JSON lines, and missing optional fields
 - **Alert details modal**: Clicking an alert opens an overlay modal with full alert details
 - **CVE enrichment**: If a CVE is present, a "View CVE Details" button shows a secondary CVE details panel (with a loader while fetching)
@@ -235,6 +236,9 @@ POST /api/suricata/stop
 
 # Alert retrieval (stateless pagination)
 GET  /api/suricata/alerts?severity=any&protocol=any&timestamp_from=TIMESTAMP&timestamp_to=TIMESTAMP&cursor_next=0&cursor_prev=null
+
+# Full alert retrieval (used by "Send every alert to Splunk")
+GET  /api/suricata/every_alert
 
 # CVE enrichment (used by the Alerts modal "View CVE Details" button)
 GET  /api/suricata/cve-details?cveId=CVE-YYYY-NNNN

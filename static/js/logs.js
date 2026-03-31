@@ -107,7 +107,7 @@ async function getLogs(service) {
 
             if (data.success) {
                 const statusResponse = await makeRequest('/splunk/status');
-                if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
+                if (statusResponse.installed && statusResponse.running && statusResponse.token) {
                     document.getElementById('sendToSplunk').disabled = false;
                     document.getElementById('sendToSplunk').classList.remove('disabled');
                 }
@@ -160,7 +160,7 @@ async function getLogs(service) {
 
             if (data.success) {
                 const statusResponse = await makeRequest('/splunk/status');
-                if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
+                if (statusResponse.installed && statusResponse.running && statusResponse.token) {
                     document.getElementById('sendToSplunkDionaea').disabled = false;
                     document.getElementById('sendToSplunkDionaea').classList.remove('disabled');
                 }
@@ -221,7 +221,7 @@ async function getLogs(service) {
 
             if (data.success) {
                 const statusResponse = await makeRequest('/splunk/status');
-                if (statusResponse.installed && statusResponse.installed && statusResponse.token) {
+                if (statusResponse.installed && statusResponse.running && statusResponse.token) {
                     document.getElementById('sendToSplunkDdospot').disabled = false;
                     document.getElementById('sendToSplunkDdospot').classList.remove('disabled');
                 }
@@ -704,6 +704,16 @@ async function getAlerts() {
         const timestampFrom = document.getElementById('log-timestamp_from-suricata').value;
         const timestampTo = document.getElementById('log-timestamp_to-suricata').value;
         
+        const statusResponse = await makeRequest('/splunk/status');
+        if (statusResponse.installed && statusResponse.running && statusResponse.token) {
+            document.getElementById('sendEveryToSplunkSuricata').disabled = false;
+            document.getElementById('sendSelectedToSplunkSuricata').disabled = false;
+            document.getElementById('sendEveryToSplunkSuricata').classList.remove('disabled');
+            document.getElementById('sendSelectedToSplunkSuricata').classList.remove('disabled');
+            document.getElementById('sendEveryToSplunkSuricata').className = 'btn btn-info';
+            document.getElementById('sendSelectedToSplunkSuricata').className = 'btn btn-info';
+        }
+
         const loadPage = async (cursor) => {
             const response = await makeRequest(`/suricata/alerts?severity=${severity}&protocol=${protocol}&timestamp_from=${timestampFrom}&timestamp_to=${timestampTo}&cursor_next=${cursor}`);
             
@@ -757,6 +767,12 @@ async function getAlerts() {
 
 async function printAlerts(response) {
     try {
+        let outputHidden = document.createElement('div');
+        outputHidden.id = 'suricata-logs-hidden';
+        outputHidden.innerHTML = JSON.stringify(response.alerts);
+        outputHidden.style.display = 'none';
+        document.body.appendChild(outputHidden);
+
         response.alerts.forEach(alertData => {
                 const alertCard = document.createElement('div');
                 alertCard.style.cursor = 'pointer';
@@ -884,5 +900,31 @@ async function getCveDetails(cveId) {
         }
     } catch (error) {
         showActionMessage(`Error fetching CVE details: ${error.message}`);
+    }
+}
+
+async function sendSuricataLogsToSplunk() {
+    try {
+        const response = await makeRequest('/suricata/every_alert');
+        if (response.success) {
+            showActionMessage(`Sending ${response.alerts.length} alerts to Splunk. This may take a while...`)
+        }
+        const logsData = response.alerts;
+
+        const payload = {
+            logs: logsData
+        };
+
+        const responseSplunk = await makeRequest('/splunk/send', 'POST', payload);
+        if (responseSplunk && responseSplunk.success) {
+            showActionMessage('Suricata alerts successfully sent to Splunk');
+        } else {
+            showActionMessage('Error sending suricata alerts to Splunk.');
+        }
+    }
+    catch (error) {
+        showActionMessage('Error sending suricata alerts to Splunk.');
+        console.error('Error:', error);
+        return;
     }
 }

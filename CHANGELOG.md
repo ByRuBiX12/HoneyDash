@@ -1,4 +1,16 @@
 # Changelog
+## [Unreleased] - 2026-03-31
+### Added
+- **Suricata full-alert export endpoint**: New backend endpoint `GET /api/suricata/every_alert` to retrieve all parsed Suricata alerts in a single request.
+- **Suricata send action**: Frontend action `sendSuricataLogsToSplunk()` added to send all Suricata alerts to Splunk in one batch.
+
+### Changed
+- **Suricata selected alerts payload**: Current alerts page data is stored in hidden DOM element `suricata-logs-hidden` for selected-alert forwarding to Splunk (same as honeypots)
+
+### Fixed
+- **False error message while sending Suricata alerts**: Fixed frontend message flow to avoid showing "No valid logs to send to Splunk" after a successful send.
+- - **Suricata Logs UI buttons**: Suricata & Honeypots send-to-Splunk buttons are now enabled only when Splunk is installed, running, and a token is available.
+
 ## [Unreleased] - 2026-03-27
 ### Added
 - **Suricata CVE Details Panel**: Secondary panel (`cve-details`) shown when requesting CVE details from an alert

@@ -610,6 +610,19 @@ def suricata_cve_details():
             "message": "Error fetching CVE details"
         }), 500
 
+@app.route('/api/suricata/every_alert')
+def suricata_every_alert():
+    """Retrieves every alert from Suricata"""
+    try:
+        result = suricata_manager.get_every_alert()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error retrieving every Suricata alert"
+        })
+
 # ============== ERROR HANDLING ==============
 @app.errorhandler(404)
 def not_found(error):

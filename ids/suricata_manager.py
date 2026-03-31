@@ -295,4 +295,50 @@ class SuricataManager:
                 "message": str(e)
             }
         
-# TODO: Hacer función get_every_alert() sin paginación para enviar a Splunk
+    def get_every_alert(self):
+        """Retrieves every single alert from Suricata (it may take a while)"""
+        try:
+            if not self._is_installed():
+                return {
+                    "success": False,
+                    "message": "Suricata is not installed"
+                }
+            
+            alerts = []
+            
+            log_to_read = "eve.json*"
+            for log in sorted(self.log_path.glob(log_to_read)):
+                with open(log, "r") as f:
+                    for line in f:
+                        alert = json.loads(line)                            
+                        if alert.get("event_type") != "alert":
+                            continue
+        
+                        metadata = alert.get("alert", {}).get("metadata") or {}
+                        alerts.append({
+                            "source": "suricata",
+                            "timestamp": alert["timestamp"][:-12], # 1 | not showing miliseconds and timezone
+                            "src_ip": alert["src_ip"], #2
+                            "src_port": alert["src_port"], #2
+                            "dest_ip": alert["dest_ip"], #2
+                            "dest_port": alert["dest_port"], #2
+                            "in_iface": alert["in_iface"], #1
+                            "protocol": alert["proto"], #1
+                            "app_proto": alert["app_proto"] if "app_proto" in alert else "N/A", #2
+                            "signature": alert["alert"]["signature"] if "signature" in alert["alert"] else "N/A", #2 y dudosa: mejor poner respuesta de la API NVD?
+                            "category": alert["alert"]["category"] if "category" in alert["alert"] else "N/A", #1
+                            "cve": metadata.get("cve", "N/A"), #1
+                            "severity": alert["alert"]["severity"] if "severity" in alert["alert"] else "N/A", #2
+                        })
+                        
+            return {
+                "success": True,
+                "alerts": alerts
+            }
+                            
+        except Exception as e:
+            return {
+                "success": False,
+                "message": str(e),
+                "alerts": []
+            }

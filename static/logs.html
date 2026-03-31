@@ -683,10 +683,10 @@
                     </div>
                 </div>
                 <!-- Send To Splunk -->
-                <div class="card-actions">
+                <div class="card-actions" style="padding-top: 0.25rem;">
                     <div>
-                        <button id="sendToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send every alert to Splunk</button>
-                        <button id="sendToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send selected alerts to Splunk</button>
+                        <button id="sendEveryToSplunkSuricata" class="btn btn-primary" onclick="sendSuricataLogsToSplunk()" disabled>Send every alert to Splunk</button>
+                        <button id="sendSelectedToSplunkSuricata" class="btn btn-primary" onclick="sendToSplunk('suricata')" disabled>Send selected alerts to Splunk</button>
                     </div>
                 </div>
             </div>
