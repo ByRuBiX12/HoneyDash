@@ -12,8 +12,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 class SplunkManager:
     def __init__(self):
         self.splunk_path = Path("/opt/splunk") # Default Splunk path
-        self.splunk_user = "admin" # TODO: Ask user for credentials
-        self.splunk_password = "admintfg" # TODO: Ask user for credentials
+        self.splunk_user = self.get_user() # Get username from config file
+        self.splunk_password = self.get_pass() # Get password from config file
+        self.creds = None # Will be "OK" when credentials are set and valid
         self.splunk_host = "https://localhost:8089" # Default Splunk host
         self.splunk_hec_url = "http://localhost:8088/services/collector" # Default HEC URL
         self.splunk_hec_token = None # Will be set when created or found
@@ -28,7 +29,10 @@ class SplunkManager:
             return {
                 "installed": False,
                 "running": False,
-                "token": self.splunk_hec_token
+                "token": self.splunk_hec_token,
+                "user": self.get_user(),
+                "password": self.get_pass(),
+                "creds": self.creds
                 }
         
         try:
@@ -37,15 +41,75 @@ class SplunkManager:
 
             if "splunkd is running" in result.stdout:
                 self.search_token()
-                return {"installed": True, "running": True, "token": self.splunk_hec_token, "splunk_path": str(self.splunk_path)}
+                return {"installed": True, "running": True, "token": self.splunk_hec_token, "splunk_path": str(self.splunk_path), "user": self.splunk_user, "password": self.splunk_password, "creds": self.creds}
             else:
-                return {"installed": True, "running": False, "token": self.splunk_hec_token, "splunk_path": str(self.splunk_path)}
+                return {"installed": True, "running": False, "token": self.splunk_hec_token, "splunk_path": str(self.splunk_path), "user": self.splunk_user, "password": self.splunk_password, "creds": self.creds}
 
         except Exception as e:
             return {"success": False,
                     "error": str(e),
                     "message": "Error checking Splunk status"}
-        
+
+    def get_user(self):
+        """Get the Splunk username from config file"""
+        try:
+            with open("siem/config.json", "r") as f:
+                user = json.load(f)
+                return user.get("splunk_user")
+        except Exception:
+            return ""
+
+    def get_pass(self):
+        """Get the Splunk password from config file"""
+        try:
+            with open("siem/config.json", "r") as f:
+                passw = json.load(f)
+                return passw.get("splunk_pass")
+        except Exception:
+            return ""
+
+    def set_user(self, username):
+        """Set the Splunk username in config file"""
+        try:
+            config = {}
+            if Path("siem/config.json").exists():
+                with open("siem/config.json", "r") as f:
+                    config = json.load(f)
+            config["splunk_user"] = username
+            with open("siem/config.json", "w") as f:
+                json.dump(config, f)
+            self.splunk_user = username
+            return {
+                "success": True,
+                "message": "Splunk username updated successfully"
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error: {str(e)}"
+            }
+
+    def set_pass(self, password):
+        """Set the Splunk password in config file"""
+        try:
+            config = {}
+            if Path("siem/config.json").exists():
+                with open("siem/config.json", "r") as f:
+                    config = json.load(f)
+            config["splunk_pass"] = password
+            with open("siem/config.json", "w") as f:
+                json.dump(config, f)
+            self.splunk_password = password
+            return {
+                "success": True,
+                "message": "Splunk password updated successfully"
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "message": f"Error: {str(e)}"
+            }
+
     def start(self):
         """Starts Splunk"""
         if not self._is_installed():
@@ -141,7 +205,16 @@ class SplunkManager:
             r = requests.get(url, headers=headers, verify=False)
             response = r.json()
 
+            for err in response.get("messages", []):
+                if err.get("type") == "ERROR" and err.get("text", "").lower() == "unauthorized":
+                    self.creds = None
+                    return {
+                        "success": False,
+                        "message": "Invalid Splunk credentials"
+                    }
+
             for t in response.get("entry", []):
+                self.creds = "OK"
                 if t.get("name") == "http://honeydash_token":
                     print("[+] HoneyDash token found in Splunk")
                     self.splunk_hec_token = t.get("content", {}).get("token")

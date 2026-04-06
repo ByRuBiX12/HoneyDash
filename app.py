@@ -486,6 +486,50 @@ def splunk_send():
             "message": "Error sending event to Splunk"
         }), 500
 
+@app.route('/api/splunk/set-user', methods=['POST'])
+def splunk_set_user():
+    """Manually sets Splunk username in config file"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'username' not in data:
+            return jsonify({
+                "success": False,
+                "message": "'username' field is required in JSON"
+            }), 400
+        
+        result = splunk_manager.set_user(data['username'])
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error setting Splunk username"
+        }), 500
+
+@app.route('/api/splunk/set-password', methods=['POST'])
+def splunk_set_password():
+    """Manually sets Splunk password in config file"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'password' not in data:
+            return jsonify({
+                "success": False,
+                "message": "'password' field is required in JSON"
+            }), 400
+        
+        result = splunk_manager.set_pass(data['password'])
+        status_code = 200 if result["success"] else 400
+        return jsonify(result), status_code
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "message": "Error setting Splunk password"
+        }), 500
+
 # ============== SURICATA ENDPOINTS ==============
 @app.route('/api/suricata/status', methods=['GET'])
 def suricata_status():

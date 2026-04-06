@@ -62,7 +62,9 @@
 
 ### Splunk SIEM Integration
 - **Status monitoring**: Check if Splunk is installed and running
+- **Credentials monitoring**: Distinguish credential validity state independently from token status
 - **Service control**: Start/Stop Splunk from the dashboard
+- **Manual credentials setup**: Configure Splunk username and password directly from the UI
 - **HEC token management**: Automatic creation and retrieval of HTTP Event Collector tokens
 - **Event forwarding**: Send honeypot logs to Splunk with configurable sourcetype and index
 - **Batch processing**: Handles multiple events efficiently with error tracking
@@ -97,6 +99,7 @@
 - Responsive grid layout (3→2→1 columns)
 - Stacked notification system with smooth slide animations
 - **Logs page**: Filter and visualize Cowrie logs with field selection
+- **Splunk credentials controls**: Inline username/password controls (with password visibility toggle) and dedicated credentials badge
 - JSON response viewer with syntax highlighting
 - Responsive design with gradient UI and hover animations
 - Generic status update function supporting optional UI elements
@@ -208,6 +211,8 @@ GET /api/ddospot/logs
 # Status and configuration 
 GET  /api/splunk/status
 POST /api/splunk/set-path        # Manual path: {"path": "/custom/path"}
+POST /api/splunk/set-user        # Body: {"username": "admin"}
+POST /api/splunk/set-password    # Body: {"password": "your_password"}
 
 # Operations
 POST /api/splunk/start

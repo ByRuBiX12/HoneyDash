@@ -18,11 +18,23 @@ function showActionMessage(message) {
     }, 7400);
 }
 
+function togglePasswordVisibility(inputId, toggleBtn) {
+    const passwordInput = document.getElementById(inputId);
+    if (!passwordInput) {
+        return;
+    }
+
+    if (toggleBtn) {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+        } else {
+            passwordInput.type = 'password';
+        }
+    }
+}
+
 // Función auxiliar para hacer peticiones
 async function makeRequest(endpoint, method = 'GET', body = null) {
-    const responseBox = document.getElementById('api-response');
-    responseBox.textContent = 'Cargando...';
-
     try {
         const options = {
             method: method,
@@ -37,12 +49,10 @@ async function makeRequest(endpoint, method = 'GET', body = null) {
 
         const response = await fetch(`/api${endpoint}`, options);
         const data = await response.json();
-        
-        responseBox.textContent = JSON.stringify(data, null, 2);
+
         return data;
     } catch (error) {
-        const responseBox = document.getElementById('api-response');
-        responseBox.textContent = JSON.stringify({ error: error.message }, null, 2);
+        console.error('Error making request to ' + endpoint + ':', error);
     }
 }
 
@@ -120,13 +130,18 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
     }
 }
 
-function updateStatusSplunk(elementIdRunning, elementIdInstalled, elementIdToken, isRunning, isInstalled, tokenDetected) {
+function updateStatusSplunk(elementIdRunning, elementIdInstalled, elementIdToken, elementIdCreds, isRunning, isInstalled, tokenDetected, creds, user, password) {
     const UIRunning = document.getElementById(elementIdRunning);
     const UIInstalled = document.getElementById(elementIdInstalled);
     const UIToken = document.getElementById(elementIdToken);
+    const UICreds = document.getElementById(elementIdCreds);
     const startBtn = document.getElementById('splunk-start-btn');
     const stopBtn = document.getElementById('splunk-stop-btn');
     const createTokenBtn = document.getElementById('create-token-btn');
+    const userInput = document.getElementById('splunk-user');
+    const passwordInput = document.getElementById('splunk-password');
+    userInput.value = user;
+    passwordInput.value = password;
     if (isInstalled) {
         UIInstalled.textContent = 'Installed';
         UIInstalled.className = 'status-ui installed';
@@ -144,11 +159,27 @@ function updateStatusSplunk(elementIdRunning, elementIdInstalled, elementIdToken
                 UIToken.className = 'status-ui configured';
                 createTokenBtn.disabled = true;
                 createTokenBtn.classList.add('disabled');
+                if (creds) {
+                    UICreds.textContent = 'Creds OK';
+                    UICreds.className = 'status-ui configured';
+                } else {
+                    UICreds.textContent = 'NO creds';
+                    UICreds.className = 'status-ui not-configured';
+                }
             } else {
                 UIToken.textContent = 'NO Token';
                 UIToken.className = 'status-ui not-configured';
                 createTokenBtn.disabled = false;
                 createTokenBtn.classList.remove('disabled');
+                if (creds) {
+                    UICreds.textContent = 'Creds OK';
+                    UICreds.className = 'status-ui configured';
+                } else {
+                    UICreds.textContent = 'NO creds';
+                    UICreds.className = 'status-ui not-configured';
+                    createTokenBtn.disabled = true;
+                    createTokenBtn.classList.add('disabled');
+                }
             }
         } else {
             UIRunning.textContent = 'Stopped';
@@ -159,6 +190,13 @@ function updateStatusSplunk(elementIdRunning, elementIdInstalled, elementIdToken
             stopBtn.classList.add('disabled');
             createTokenBtn.disabled = true;
             createTokenBtn.classList.add('disabled');
+            if (creds) {
+                UICreds.textContent = 'Creds OK';
+                UICreds.className = 'status-ui configured';
+            } else {
+                UICreds.textContent = 'NO creds';
+                UICreds.className = 'status-ui not-configured';
+            }
         }
     } else {
         UIInstalled.textContent = 'Not Installed';
@@ -169,6 +207,8 @@ function updateStatusSplunk(elementIdRunning, elementIdInstalled, elementIdToken
         stopBtn.classList.add('disabled');
         createTokenBtn.disabled = true;
         createTokenBtn.classList.add('disabled');
+        UICreds.textContent = 'NO creds';
+        UICreds.className = 'status-ui not-configured';
     }
 }
 
@@ -239,7 +279,7 @@ async function setCustomPath(service) {
         }
         const statusResponse = await makeRequest(`/${service}/status`);
             if (service === 'splunk') {
-                updateStatusSplunk(`${service}-status`, `${service}-installed`, `${service}-token`, statusResponse.running, statusResponse.installed, statusResponse.token);
+                updateStatusSplunk(`${service}-status`, `${service}-installed`, `${service}-token`, `${service}-creds`, statusResponse.running, statusResponse.installed, statusResponse.token, statusResponse.creds, statusResponse.user, statusResponse.password);
             } else if (service === 'cowrie') {
                 updateStatusUI(`${service}-status`, `${service}-installed`, `${service}-configured`, statusResponse.running, statusResponse.installed, statusResponse.configured, `${service}-start-btn`, `${service}-stop-btn`, `${service}-install-btn`, `${service}-configure-btn`);
             } else { // Suricata
@@ -423,7 +463,7 @@ async function stopDDoSPot() {
 async function checkSplunkStatus() {
     try {
         const response = await makeRequest('/splunk/status');
-        updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', response.running, response.installed, response.token);
+        updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', 'splunk-creds', response.running, response.installed, response.token, response.creds, response.user, response.password);
         if (response.installed) {
             document.getElementById('splunk-custom-path').value = response.splunk_path || '';
         }
@@ -439,7 +479,7 @@ async function startSplunk() {
         const statusResponse = await makeRequest('/splunk/status');
         if (response.success) {
             showActionMessage('Splunk SIEM started successfully. Listening on port 8000 for web interface.');
-            updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', statusResponse.running, statusResponse.installed, statusResponse.token);
+            updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', 'splunk-creds', statusResponse.running, statusResponse.installed, statusResponse.token, statusResponse.creds, statusResponse.user, statusResponse.password);
         }
     } catch (error) {
         showActionMessage('Error starting Splunk SIEM: ' + error.message);
@@ -453,10 +493,54 @@ async function stopSplunk() {
         const statusResponse = await makeRequest('/splunk/status');
         if (response.success) {
             showActionMessage('Splunk SIEM stopped successfully.');
-            updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', statusResponse.running, statusResponse.installed, statusResponse.token);
+            updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', 'splunk-creds', statusResponse.running, statusResponse.installed, statusResponse.token, statusResponse.creds, statusResponse.user, statusResponse.password);
         }
     } catch (error) {
         showActionMessage('Error stopping Splunk SIEM: ' + error.message);
+    }
+}
+
+async function setSplunkUser() {
+    const user = document.getElementById('splunk-user').value;
+    if (!user) {
+        showActionMessage('Please enter a valid username for Splunk.');
+        return;
+    }
+    try {
+        const response = await makeRequest('/splunk/set-user', 'POST', { username: user });
+        if (response.success) {
+            showActionMessage('Splunk username set successfully.');
+            document.getElementById('set-splunk-user-btn').disabled = true;
+            document.getElementById('set-splunk-user-btn').classList.add('disabled');
+        } else {
+            showActionMessage('Error setting Splunk username. Please try again.');
+        }
+        const statusResponse = await makeRequest('/splunk/status');
+        updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', 'splunk-creds', statusResponse.running, statusResponse.installed, statusResponse.token, statusResponse.creds, statusResponse.user, statusResponse.password);
+    } catch (error) {
+        showActionMessage('Error setting Splunk username: ' + error.message);
+    }
+}
+
+async function setSplunkPassword() {
+    const password = document.getElementById('splunk-password').value;
+    if (!password) {
+        showActionMessage('Please enter a valid password for Splunk.');
+        return;
+    }
+    try {
+        const response = await makeRequest('/splunk/set-password', 'POST', { password: password });
+        if (response.success) {
+            showActionMessage('Splunk password set successfully.');
+            document.getElementById('set-splunk-password-btn').disabled = true;
+            document.getElementById('set-splunk-password-btn').classList.add('disabled');
+        } else {
+            showActionMessage('Error setting Splunk password. Please try again.');
+        }
+        const statusResponse = await makeRequest('/splunk/status');
+        updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', 'splunk-creds', statusResponse.running, statusResponse.installed, statusResponse.token, statusResponse.creds, statusResponse.user, statusResponse.password);
+    } catch (error) {
+        showActionMessage('Error setting Splunk password: ' + error.message);
     }
 }
 

@@ -140,6 +140,7 @@
                     <h3>Splunk SIEM</h3>
                     <span class="status-ui" id="splunk-installed">Checking...</span>
                     <span class="status-ui" id="splunk-status">Checking...</span>
+                    <span class="status-ui" id="splunk-creds">Checking Credentials...</span>
                     <span class="status-ui" id="splunk-token">Checking Token...</span>
                 </div>
                 <div class="card-body">
@@ -148,6 +149,15 @@
                         <div>
                             <button class="btn btn-success" id="splunk-start-btn" onclick="startSplunk()">Start &#9658;</button>
                             <button class="btn btn-danger" id="splunk-stop-btn" onclick="stopSplunk()">Stop &#9632;</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap;">
+                            <input type="text" id="splunk-user" placeholder="Enter username" style="flex: 1; min-width: 0;" oninput="document.getElementById('set-splunk-user-btn').disabled = !this.value.trim(); document.getElementById('set-splunk-user-btn').classList.toggle('disabled', !this.value.trim());">
+                            <button class="btn btn-secondary" id="set-splunk-user-btn" style="flex: 0 0 auto; white-space: nowrap;" onclick="setSplunkUser()" disabled>Set User</button>
+                            <div style="position: relative; flex: 1; min-width: 0;">
+                                <input type="password" id="splunk-password" placeholder="Enter password" style="width: 100%; min-width: 0; padding-right: 2.2rem;" oninput="document.getElementById('set-splunk-password-btn').disabled = !this.value.trim(); document.getElementById('set-splunk-password-btn').classList.toggle('disabled', !this.value.trim());">
+                                <button type="button" onclick="togglePasswordVisibility('splunk-password', this)" title="Mostrar/Ocultar contraseña" style="position: absolute; right: 0.45rem; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; font-size: 1rem;">&#x1F441;</button>
+                            </div>
+                            <button class="btn btn-secondary" id="set-splunk-password-btn" style="flex: 0 0 auto; white-space: nowrap;" onclick="setSplunkPassword()" disabled>Set Password</button>
                         </div>
                         <div>
                             <button class="btn btn-info" id="create-token-btn" onclick="createSplunkToken()">Create Token &#9881;</button>
@@ -189,12 +199,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Sección de respuesta JSON | TODO: ELIMINAR ESTE DIV <- ONLY FOR TESTING!!! -->
-        <div class="response-section"">
-            <h3>API Response</h3>
-            <pre id="api-response">Select an action to see the response...</pre>
         </div>
     </main>
     <footer>

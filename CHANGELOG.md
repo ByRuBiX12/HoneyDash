@@ -1,4 +1,18 @@
 # Changelog
+## [Unreleased] - 2026-04-06
+### Added
+- **Splunk credentials configuration endpoints**: Added `POST /api/splunk/set-user` and `POST /api/splunk/set-password` to update Splunk credentials from the dashboard.
+- **Splunk credentials controls in UI**: New Splunk inputs and actions in `index.html` to set username and password directly from the Home view.
+- **Splunk credentials status badge**: Added a dedicated credentials status indicator (`splunk-creds`) to distinguish credentials state from token state.
+
+### Changed
+- **Splunk status payload**: `/api/splunk/status` now includes credentials-related fields (`user`, `password`, `creds`) used by the frontend to render current auth state.
+- **Splunk frontend state handling**: `dashboard.js` now syncs Splunk user/password inputs from backend status and updates token/credentials badges independently.
+- **Splunk send-button gating**: Logs send-to-Splunk actions now require valid credentials in addition to Splunk running state and token availability.
+
+### Fixed
+- **Credentials vs token ambiguity**: Improved backend token search flow to detect and report invalid credentials (`Unauthorized`) apart from "token not found" scenarios.
+
 ## [Unreleased] - 2026-03-31
 ### Added
 - **Suricata full-alert export endpoint**: New backend endpoint `GET /api/suricata/every_alert` to retrieve all parsed Suricata alerts in a single request.

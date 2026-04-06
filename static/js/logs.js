@@ -107,7 +107,7 @@ async function getLogs(service) {
 
             if (data.success) {
                 const statusResponse = await makeRequest('/splunk/status');
-                if (statusResponse.installed && statusResponse.running && statusResponse.token) {
+                if (statusResponse.installed && statusResponse.running && statusResponse.token && statusResponse.creds) {
                     document.getElementById('sendToSplunk').disabled = false;
                     document.getElementById('sendToSplunk').classList.remove('disabled');
                 }
@@ -160,7 +160,7 @@ async function getLogs(service) {
 
             if (data.success) {
                 const statusResponse = await makeRequest('/splunk/status');
-                if (statusResponse.installed && statusResponse.running && statusResponse.token) {
+                if (statusResponse.installed && statusResponse.running && statusResponse.token && statusResponse.creds) {
                     document.getElementById('sendToSplunkDionaea').disabled = false;
                     document.getElementById('sendToSplunkDionaea').classList.remove('disabled');
                 }
@@ -221,7 +221,7 @@ async function getLogs(service) {
 
             if (data.success) {
                 const statusResponse = await makeRequest('/splunk/status');
-                if (statusResponse.installed && statusResponse.running && statusResponse.token) {
+                if (statusResponse.installed && statusResponse.running && statusResponse.token && statusResponse.creds) {
                     document.getElementById('sendToSplunkDdospot').disabled = false;
                     document.getElementById('sendToSplunkDdospot').classList.remove('disabled');
                 }
@@ -705,7 +705,7 @@ async function getAlerts() {
         const timestampTo = document.getElementById('log-timestamp_to-suricata').value;
         
         const statusResponse = await makeRequest('/splunk/status');
-        if (statusResponse.installed && statusResponse.running && statusResponse.token) {
+        if (statusResponse.installed && statusResponse.running && statusResponse.token && statusResponse.creds) {
             document.getElementById('sendEveryToSplunkSuricata').disabled = false;
             document.getElementById('sendSelectedToSplunkSuricata').disabled = false;
             document.getElementById('sendEveryToSplunkSuricata').classList.remove('disabled');
