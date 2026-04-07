@@ -213,8 +213,8 @@ class SplunkManager:
                         "message": "Invalid Splunk credentials"
                     }
 
+            self.creds = "OK"
             for t in response.get("entry", []):
-                self.creds = "OK"
                 if t.get("name") == "http://honeydash_token":
                     print("[+] HoneyDash token found in Splunk")
                     self.splunk_hec_token = t.get("content", {}).get("token")

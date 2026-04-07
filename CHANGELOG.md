@@ -1,4 +1,11 @@
 # Changelog
+## [Unreleased] - 2026-04-07
+### Added
+- **Splunk token creation JS**: `createSplunkToken()` JS function was missing
+
+### Fixed
+- **Splunk credentials status badge**: Creds badge was not working properly when missing token
+
 ## [Unreleased] - 2026-04-06
 ### Added
 - **Splunk credentials configuration endpoints**: Added `POST /api/splunk/set-user` and `POST /api/splunk/set-password` to update Splunk credentials from the dashboard.

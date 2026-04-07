@@ -544,6 +544,22 @@ async function setSplunkPassword() {
     }
 }
 
+async function createSplunkToken() {
+    try {
+        showActionMessage('Creating Splunk HEC token...');
+        const response = await makeRequest('/splunk/create', 'POST');
+        if (response.token) {
+            showActionMessage('Splunk HEC token created successfully. Token: ' + response.token);
+        } else {
+            showActionMessage('Error creating Splunk HEC token. Please try again.');
+        }
+        const statusResponse = await makeRequest('/splunk/status');
+        updateStatusSplunk('splunk-status', 'splunk-installed', 'splunk-token', 'splunk-creds', statusResponse.running, statusResponse.installed, statusResponse.token, statusResponse.creds, statusResponse.user, statusResponse.password);
+    } catch (error) {
+        showActionMessage('Error creating Splunk HEC token: ' + error.message);
+    }
+}
+
 // Suricata Functions
 async function checkSuricataStatus() {
     try {
