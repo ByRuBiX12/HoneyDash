@@ -1,4 +1,12 @@
 # Changelog
+## [Unreleased] - 2026-04-08
+### Added
+- **Feedback when creating Splunk HEC token**: Via `showActionMessage()` JS function
+
+### Changed
+- **Splunk HEC URL**: Now it uses https instead of http
+- **Dashboard Cowrie starting button**: Misconfiguration enabling Cowrie start button wrongly
+
 ## [Unreleased] - 2026-04-07
 ### Added
 - **Splunk token creation JS**: `createSplunkToken()` JS function was missing

@@ -107,8 +107,6 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
         } else {
             UIRunning.textContent = 'Stopped';
             UIRunning.className = 'status-ui stopped';
-            startBtn.disabled = false;
-            startBtn.classList.remove('disabled');
             stopBtn.disabled = true;
             stopBtn.classList.add('disabled');
         }
@@ -546,10 +544,10 @@ async function setSplunkPassword() {
 
 async function createSplunkToken() {
     try {
-        showActionMessage('Creating Splunk HEC token...');
         const response = await makeRequest('/splunk/create', 'POST');
         if (response.token) {
             showActionMessage('Splunk HEC token created successfully. Token: ' + response.token);
+            showActionMessage('Make sure to enable HEC tokens in Splunk Settings!')
         } else {
             showActionMessage('Error creating Splunk HEC token. Please try again.');
         }

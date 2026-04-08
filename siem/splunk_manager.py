@@ -16,7 +16,7 @@ class SplunkManager:
         self.splunk_password = self.get_pass() # Get password from config file
         self.creds = None # Will be "OK" when credentials are set and valid
         self.splunk_host = "https://localhost:8089" # Default Splunk host
-        self.splunk_hec_url = "http://localhost:8088/services/collector" # Default HEC URL
+        self.splunk_hec_url = "https://localhost:8088/services/collector" # Default HEC URL
         self.splunk_hec_token = None # Will be set when created or found
     
     def _is_installed(self):
