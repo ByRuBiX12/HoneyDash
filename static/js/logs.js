@@ -113,7 +113,7 @@ async function getLogs(service) {
                 }
                 const filteredLogs = filterLogFields(data.logs);
 
-                let output = `Total de logs encontrados: ${data.logs.length}\n`;
+                let output = `Total de logs encontrados: ${filteredLogs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
                 let outputHidden = JSON.stringify(filteredLogs);
 
@@ -128,7 +128,7 @@ async function getLogs(service) {
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${data.logs.length} logs encontrados`);
+                showActionMessage(`${filteredLogs.length} logs encontrados`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -173,7 +173,7 @@ async function getLogs(service) {
                     filteredLogs = filterDionaeaMySqlLogFields(data.logs);
                 }
 
-                let output = `Total de logs encontrados: ${data.logs.length}\n`;
+                let output = `Total de logs encontrados: ${filteredLogs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
                 let outputHidden = JSON.stringify(filteredLogs);
 
@@ -188,7 +188,7 @@ async function getLogs(service) {
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${data.logs.length} logs encontrados`);
+                showActionMessage(`${filteredLogs.length} logs encontrados`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -238,7 +238,7 @@ async function getLogs(service) {
                     filteredLogs = filterDdospotChargenLogFields(data.logs);
                 }
 
-                let output = `Total de logs encontrados: ${data.logs.length}\n`;
+                let output = `Total de logs encontrados: ${filteredLogs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
                 let outputHidden = JSON.stringify(filteredLogs);
 
@@ -253,7 +253,7 @@ async function getLogs(service) {
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${data.logs.length} logs encontrados`);
+                showActionMessage(`${filteredLogs.length} logs encontrados`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -294,7 +294,9 @@ function filterLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
     return filteredLogs;
 }
@@ -321,7 +323,9 @@ function filterDionaeaHttpLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -349,7 +353,9 @@ function filterDionaeaFtpLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -377,7 +383,9 @@ function filterDionaeaMySqlLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -423,7 +431,9 @@ function filterDdospotDnsLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -451,7 +461,9 @@ function filterDdospotNtpLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -479,7 +491,9 @@ function filterDdospotSnmpLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -507,7 +521,9 @@ function filterDdospotSsdpLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -535,7 +551,9 @@ function filterDdospotChargenLogFields(logs) {
                 filteredLog[field] = log[field];
             }
         }
-        filteredLogs.push(filteredLog);
+        if (Object.keys(filteredLog).length > 0) {
+            filteredLogs.push(filteredLog);
+        }
     }
 
     return filteredLogs;
@@ -583,6 +601,11 @@ async function sendToSplunk(service) {
 
     try {
         const logsData = JSON.parse(logsBox);
+
+        if (logsData.length === 0) {
+            showActionMessage('No logs to send to Splunk. Please fetch logs first.');
+            return;
+        }
 
         const payload = {
             logs: logsData

@@ -1,4 +1,11 @@
 # Changelog
+## [Unreleased] - 2026-04-17
+### Added
+- **Splunk alert when sending empty logs**: Via `showActionMessage()` JS function
+
+### Fixed
+- **Empty log showing & sending**: Empty logs were shown even when no fields matched. Now if a log has nothing to show, it won't appear either be sent to Splunk
+
 ## [Unreleased] - 2026-04-08
 ### Added
 - **Feedback when creating Splunk HEC token**: Via `showActionMessage()` JS function
