@@ -263,17 +263,26 @@ HoneyDash/
 ├── app.py                    # Flask backend with API endpoints and signal handling
 ├── honeypots/
 │   ├── cowrie_manager.py    # Cowrie lifecycle and log management
-│   └── dionaea_manager.py   # Dionaea Docker container management
+│   ├── dionaea_manager.py   # Dionaea Docker container management
+│   └── ddospot_manager.py   # DDoSPot Docker container management
 ├── siem/
+│   ├── config.json          # Splunk credentials
 │   └── splunk_manager.py    # Splunk integration and HEC communication
+├── ids/
+│   └── suricata_manager.py  # Suricata integration and API communication
 ├── static/
 │   ├── index.html           # Main dashboard interface
+│   ├── logs.html            # Logs dashboard interface
 │   ├── css/
 │   │   └── style.css        # Modern gradient styling with responsive design
 │   ├── js/
 │   │   └── dashboard.js     # Dashboard interactions and API calls
+│   │   └── logs.js          # Logs interactions and sending
 │   └── assets/              # Logo and icons
-└── requirements.txt         # Python dependencies (Flask, requests, etc.)
+│   └── confs/root           # Dionaea fake services
+├── requirements.txt         # Python dependencies (Flask, requests, etc.)
+├── README.md                # HoneyDash info
+└── CHANGELOG.md             # Every single update detailed
 ```
 
 ## Roadmap

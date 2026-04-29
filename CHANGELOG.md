@@ -1,4 +1,8 @@
 # Changelog
+## [Unreleased] - 2026-04-29
+### Changed
+-  **`README.md` updated**: Project structure updated
+
 ## [Unreleased] - 2026-04-17
 ### Added
 - **Splunk alert when sending empty logs**: Via `showActionMessage()` JS function
