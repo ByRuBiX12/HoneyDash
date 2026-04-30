@@ -1,4 +1,8 @@
 # Changelog
+## [Unreleased] - 2026-05-01
+### Changed
+- **`README.md` updated**: Added some usage notes and more troubleshooting information
+
 ## [Unreleased] - 2026-04-30
 ### Added
 - **Logs sent alert**: Alerts of sent logs now include their index and sourcetype for easier searching

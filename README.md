@@ -155,6 +155,10 @@ sudo python3 app.py
 
 Access the dashboard at: `http://localhost:5000`
 
+## IMPORTANT notes about USAGE
+- **Suricata listen interface**: Make sure to configure in `/etc/suricata/suricata.yml` the name of your listening inteface (it could be eth0, ens3...).
+- **DDoSPot BEFORE Dionaea**: Always run DDoSPot before running Dionaea in order to avoid listening conflicts since both try to listen similar ports.
+
 ## API Reference
 
 ### Cowrie Endpoints
@@ -315,6 +319,10 @@ HoneyDash/
 **Splunk token not found**: Ensure Splunk is running, then use `/api/splunk/create` to generate HEC token
 
 **Events not sent to Splunk**: Verify HEC is enabled and token exists. Check logs contain `{"logs": [...]}`structure
+
+**Suricata does not start**: Make sure your listen interface configured in `/etc/suricata/suricata.yml` is correct
+
+**DDoSPot is not listening**: Stop both Dionaea and DDoSPot, and DDoSPot before running Dionaea
 
 ## License
 
