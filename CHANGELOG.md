@@ -1,4 +1,11 @@
 # Changelog
+## [Unreleased] - 2026-04-30
+### Added
+- **Logs sent alert**: Alerts of sent logs now include their index and sourcetype for easier searching
+
+### Changed
+- **Language**: Some alerts and logs boxes showed some text in Spanish
+
 ## [Unreleased] - 2026-04-29
 ### Changed
 -  **`README.md` updated**: Project structure updated

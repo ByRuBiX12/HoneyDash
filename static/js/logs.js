@@ -83,7 +83,7 @@ function deselectAllFields(service) {
 }
 
 async function getLogs(service) {
-    showActionMessage('Buscando logs...');
+    showActionMessage('Searching logs...');
     const logsBox = document.getElementById(`${service}-logs`);
     const logsBoxHidden = document.getElementById(`${service}-logs-hidden`);
     const logsContainer = document.getElementById(`${service}-logs-container`);
@@ -113,7 +113,7 @@ async function getLogs(service) {
                 }
                 const filteredLogs = filterLogFields(data.logs);
 
-                let output = `Total de logs encontrados: ${filteredLogs.length}\n`;
+                let output = `Total logs found: ${filteredLogs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
                 let outputHidden = JSON.stringify(filteredLogs);
 
@@ -128,7 +128,7 @@ async function getLogs(service) {
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${filteredLogs.length} logs encontrados`);
+                showActionMessage(`${filteredLogs.length} logs found`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -173,7 +173,7 @@ async function getLogs(service) {
                     filteredLogs = filterDionaeaMySqlLogFields(data.logs);
                 }
 
-                let output = `Total de logs encontrados: ${filteredLogs.length}\n`;
+                let output = `Total logs found: ${filteredLogs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
                 let outputHidden = JSON.stringify(filteredLogs);
 
@@ -188,7 +188,7 @@ async function getLogs(service) {
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${filteredLogs.length} logs encontrados`);
+                showActionMessage(`${filteredLogs.length} logs found`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -238,7 +238,7 @@ async function getLogs(service) {
                     filteredLogs = filterDdospotChargenLogFields(data.logs);
                 }
 
-                let output = `Total de logs encontrados: ${filteredLogs.length}\n`;
+                let output = `Total logs found: ${filteredLogs.length}\n`;
                 output += '='.repeat(80) + '\n\n';
                 let outputHidden = JSON.stringify(filteredLogs);
 
@@ -253,7 +253,7 @@ async function getLogs(service) {
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
                 logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${filteredLogs.length} logs encontrados`);
+                showActionMessage(`${filteredLogs.length} logs found`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -613,7 +613,7 @@ async function sendToSplunk(service) {
 
         const response = await makeRequest('/splunk/send', 'POST', payload);
         if (response.success) {
-            showActionMessage(`${service} logs succesfully sent to Splunk`);
+            showActionMessage(`${response.size} ${service} logs succesfully sent to Splunk. You can fetch them using the index ${response.index} and sourcetype ${response.sourcetype}.`);
         }
     }
     catch (error) {

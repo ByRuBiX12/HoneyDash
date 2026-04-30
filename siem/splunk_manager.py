@@ -321,6 +321,9 @@ class SplunkManager:
                 }
             return {
                     "success": True,
+                    "size": size,
+                    "index": index,
+                    "sourcetype": sourcetype,
                     "message": f"{size} events successfully sent to Splunk (index={index}, sourcetype={sourcetype})"
                 }
         except Exception as e:
