@@ -630,8 +630,13 @@ async function getBinaries() {
         
         const loadPage = async (page) => {
             const response = await makeRequest(`/dionaea/binaries?page=${page}`);
-            
             const binariesContainer = document.getElementById('binaries-container');
+
+            if (!response.binaries) {
+                binariesContainer.innerHTML = '<p style="color: #bdc3c7; text-align: center; grid-column: 1 / -1;">No binaries found.</p>';
+                return;
+            }
+        
             binariesContainer.innerHTML = '';
             binariesContainer.style.marginBottom = '1rem';
 

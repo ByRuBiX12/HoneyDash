@@ -3,6 +3,9 @@
 ### Changed
 - **`README.md` updated**: Added some usage notes and more troubleshooting information
 
+### Fixed
+- **Dionaea binaries**: The logs page showed an error while fetching Dionaea binaries, and none were found
+
 ## [Unreleased] - 2026-04-30
 ### Added
 - **Logs sent alert**: Alerts of sent logs now include their index and sourcetype for easier searching
