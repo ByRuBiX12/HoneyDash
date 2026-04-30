@@ -109,8 +109,12 @@
 ### Prerequisites
 - **OS**: Linux (Debian/Ubuntu/Kali)
 - **Python**: 3.8+
-- **Docker**: Required for Dionaea honeypot
+- **Docker**: Required for Dionaea & DDoSPot honeypot
 - **Privileges**: Must run with `sudo` from a non-root user
+
+### Optional recommended requisites
+- **Splunk**: Enterprise Edition with terms accepted (execute /opt/splunk/bin/splunk status) and tokens enabled (Settings > Data Inputs > Global Settings)
+- **Suricata**.
 
 ### Installation
 
