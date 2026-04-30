@@ -1,6 +1,13 @@
 # Changelog
 ## [Unreleased] - 2026-04-30
 ### Added
+- **Cowrie userdb file**: HoneyDash now replaces default and basic userdb.example Cowrie file with a more genuine one during installation (it will not change when configuring or restoring its configuration)
+
+### Fixed
+- **Cowrie buttons**: Restore button was not enabling/disabling when it should
+
+## [Unreleased] - 2026-04-30
+### Added
 - **Logs sent alert**: Alerts of sent logs now include their index and sourcetype for easier searching
 
 ### Changed

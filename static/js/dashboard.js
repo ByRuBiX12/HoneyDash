@@ -65,6 +65,7 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
     const stopBtn = document.getElementById(buttonStop);
     const installBtn = buttonInstall ? document.getElementById(buttonInstall) : null;
     const configureBtn = buttonConfigure ? document.getElementById(buttonConfigure) : null;
+    const restoreBtn = document.getElementById('cowrie-restore-btn');
     if (isInstalled) {
         UIInstalled.textContent = 'Installed';
         UIInstalled.className = 'status-ui installed';
@@ -87,6 +88,8 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
             UIConfigured.className = 'status-ui configured';
             configureBtn.disabled = true;
             configureBtn.classList.add('disabled');
+            restoreBtn.disabled = false;
+            restoreBtn.classList.remove('disabled');
         } else {
             if (UIConfigured && configureBtn) {
                 startBtn.disabled = true;
@@ -95,6 +98,8 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
                 UIConfigured.className = 'status-ui not-configured';
                 configureBtn.disabled = false;
                 configureBtn.classList.remove('disabled');
+                restoreBtn.disabled = true;
+                restoreBtn.classList.add('disabled');
             }
         }
         if (isRunning) {
@@ -104,11 +109,19 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
             startBtn.classList.add('disabled');
             stopBtn.disabled = false;
             stopBtn.classList.remove('disabled');
+            if (configureBtn) {// Restore button only works for Cowrie as well as configure button
+                restoreBtn.disabled = true;
+                restoreBtn.classList.add('disabled');
+            }
         } else {
             UIRunning.textContent = 'Stopped';
             UIRunning.className = 'status-ui stopped';
             stopBtn.disabled = true;
             stopBtn.classList.add('disabled');
+            if (configureBtn && isConfigured) {
+                restoreBtn.disabled = false;
+                restoreBtn.classList.remove('disabled');
+            }
         }
     } else {
         UIInstalled.textContent = 'Not Installed';
@@ -120,6 +133,8 @@ function updateStatusUI(elementIdRunning, elementIdInstalled, elementIdConfigure
         if (configureBtn) {
             configureBtn.disabled = true;
             configureBtn.classList.add('disabled');
+            restoreBtn.disabled = true;
+            restoreBtn.classList.add('disabled');
         }
         startBtn.disabled = true;
         startBtn.classList.add('disabled');

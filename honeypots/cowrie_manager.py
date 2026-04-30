@@ -308,6 +308,14 @@ class CowrieManager:
             config_file = install_path / "etc" / "cowrie.cfg"
             if config_dist.exists():
                 subprocess.run(["cp", str(config_dist), str(config_file)])
+
+            # Copy more genuine example userdb file
+            honeydash_userdb = Path("static/confs/cowrie/userdb.example")
+            cowrie_userdb = install_path / "etc" / "userdb.example"
+            if honeydash_userdb.exists():
+                subprocess.run(["cp", str(honeydash_userdb), str(cowrie_userdb)])
+            else:
+                print(f"[!] Warning: HoneyDash userdb.example not found at {honeydash_userdb}")
             
             # Change ownership to the user who will run Cowrie
             sudo_user = os.environ.get("SUDO_USER", "root")
