@@ -199,7 +199,7 @@ class DDoSPotManager:
             
             print(f"[!] Creating container with image: {image_name}")
             create_result = subprocess.run(
-                f"docker create --name {self.container_name} --restart unless-stopped --network host" 
+                f"docker create --name {self.container_name} --restart unless-stopped --network host --privileged --user root "
                 f" -v {self.logs_dir}:/ddospot/logs"
                 f" -v {self.db_dir}:/ddospot/db"
                 f" {image_name}",

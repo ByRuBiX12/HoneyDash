@@ -1,4 +1,8 @@
 # Changelog
+## [Unreleased] - 2026-05-02
+### Fixed
+- **DDoSPot services**: DNS, NTP, SNMP and CharGen were not starting since docker container needs privilege to bind them
+
 ## [Unreleased] - 2026-05-01
 ### Changed
 - **`README.md` updated**: Added some usage notes and more troubleshooting information

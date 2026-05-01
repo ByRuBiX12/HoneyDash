@@ -312,17 +312,21 @@ HoneyDash/
 
 **Cowrie auto-detection fails**: Use `/api/cowrie/set-path` endpoint with custom path
 
+**Cowrie is not starting**: Check your DNS and add, if necessary, `nameserver 8.8.8.8` in your `/etc/resolv.conf` file
+
 **Splunk auto-detection fails**: Use `/api/splunk/set-path` endpoint with custom path
 
-**Lost SSH access**: SSH moved to random port shown in `/api/cowrie/setup-redirect` response. Run `/api/cowrie/cleanup` to restore port 22
-
 **Splunk token not found**: Ensure Splunk is running, then use `/api/splunk/create` to generate HEC token
+
+**Lost SSH access**: SSH moved to random port shown in `/api/cowrie/setup-redirect` response. Run `/api/cowrie/cleanup` to restore port 22
 
 **Events not sent to Splunk**: Verify HEC is enabled and token exists. Check logs contain `{"logs": [...]}`structure
 
 **Suricata does not start**: Make sure your listen interface configured in `/etc/suricata/suricata.yml` is correct
 
 **DDoSPot is not listening**: Stop both Dionaea and DDoSPot, and DDoSPot before running Dionaea
+
+**DDoSPot DNS is not listening**: Check what is listening in port 53 with `sudo lsof -i :53` (probably systemd-resolve?) and stop it (if so, read "Cowrie is not starting" troubleshooting info)
 
 ## License
 
