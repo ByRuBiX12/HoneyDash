@@ -5,6 +5,7 @@
 
 ### Fixed
 - **Dionaea binaries**: The logs page showed an error while fetching Dionaea binaries, and none were found
+- **Cowrie log rotation**: Cowrie rotates current `cowrie.json` file, now HoneyDash browse every Cowrie log, not only the current one
 
 ## [Unreleased] - 2026-04-30
 ### Added

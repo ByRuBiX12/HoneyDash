@@ -701,43 +701,50 @@ class CowrieManager:
             if not self.is_installed():
                 return {"success": False, "message": "Cowrie is not installed"}
             
-            log_file = self.cowrie_path / "var" / "log" / "cowrie" / "cowrie.json"
-            if not log_file.exists():
+            log_dir = self.cowrie_path / "var" / "log" / "cowrie"
+            log_files = sorted(log_dir.glob("cowrie.json*"))
+            if not log_files:
                 return {"success": False, "message": "Log file not found"}
             
             logs = []
             counter = 0
-            with open(log_file, 'r') as f:
-                for line in f:
-                    try:
-                        log_entry = json.loads(line)
-                        if event_id and log_entry.get('eventid') != event_id:
-                            continue
-                        if timestamp and log_entry.get('timestamp', '') < timestamp:
-                            continue
-                        # Only include relevant fields in original order
-                        filtered_log_entry = {
-                            "honeypot" : 'cowrie',
-                            "eventid": log_entry.get('eventid'),
-                            "timestamp": log_entry.get('timestamp')[:-8], # not showing miliseconds and timezone
-                            "src_ip": log_entry.get('src_ip'),
-                            "src_port": log_entry.get('src_port'),
-                            "username": log_entry.get('username'),
-                            "password": log_entry.get('password'),
-                            "duration": log_entry.get('duration'),
-                            "message": log_entry.get('message')
-                        }
-                        # If a field is missing, do not show it
-                        for key in list(filtered_log_entry.keys()):
-                            if filtered_log_entry[key] is None:
-                                del filtered_log_entry[key]
+            for log_file in log_files:
+                if counter >= limit:
+                    break
+                try:
+                    with open(log_file, 'r') as f:
+                        for line in f:
+                            try:
+                                log_entry = json.loads(line)
+                                if event_id and log_entry.get('eventid') != event_id:
+                                    continue
+                                if timestamp and log_entry.get('timestamp', '') < timestamp:
+                                    continue
+                                # Only include relevant fields in original order
+                                filtered_log_entry = {
+                                    "honeypot" : 'cowrie',
+                                    "eventid": log_entry.get('eventid'),
+                                    "timestamp": log_entry.get('timestamp')[:-8], # not showing miliseconds and timezone
+                                    "src_ip": log_entry.get('src_ip'),
+                                    "src_port": log_entry.get('src_port'),
+                                    "username": log_entry.get('username'),
+                                    "password": log_entry.get('password'),
+                                    "duration": log_entry.get('duration'),
+                                    "message": log_entry.get('message')
+                                }
+                                # If a field is missing, do not show it
+                                for key in list(filtered_log_entry.keys()):
+                                    if filtered_log_entry[key] is None:
+                                        del filtered_log_entry[key]
 
-                        logs.append(filtered_log_entry)
-                        counter += 1
-                        if counter >= limit:
-                            break
-                    except json.JSONDecodeError:
-                        continue
+                                logs.append(filtered_log_entry)
+                                counter += 1
+                                if counter >= limit:
+                                    break
+                            except json.JSONDecodeError:
+                                continue
+                except Exception:
+                    continue
             
             return {
                 "success": True,
