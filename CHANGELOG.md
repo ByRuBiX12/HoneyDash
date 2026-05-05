@@ -1,4 +1,12 @@
 # Changelog
+## [Unreleased] - 2026-05-05
+### Added
+- **Credentials encryption**: Splunk password is now encrypted using `cryptography` via a symmetric Fernet key securely generated and not stored in plain text format.
+- **Fast prefiltering for Suricata**: Added a text-based prefiltering technique prior to decoding `eve.json` alerting into json strings, improving large file fetching performance.
+
+### Changed
+- **Optimized Splunk Forwarding**: Splunk HEC event forwarding now uses JSON HTTP Batching with a 5000-event limit to avoid 800MB maximum request limitations securely, instead of sending individual `POST` requests.
+
 ## [Unreleased] - 2026-05-02
 ### Fixed
 - **DDoSPot services**: DNS, NTP, SNMP and CharGen were not starting since docker container needs privilege to bind them

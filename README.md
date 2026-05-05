@@ -65,6 +65,7 @@
 - **Credentials monitoring**: Distinguish credential validity state independently from token status
 - **Service control**: Start/Stop Splunk from the dashboard
 - **Manual credentials setup**: Configure Splunk username and password directly from the UI
+- **Encrypted credentials**: Splunk passwords are encrypted before writing configuration files with `cryptography`
 - **HEC token management**: Automatic creation and retrieval of HTTP Event Collector tokens
 - **Event forwarding**: Send honeypot logs to Splunk with configurable sourcetype and index
 - **Batch processing**: Handles multiple events efficiently with error tracking
@@ -74,6 +75,7 @@
 - **Service control**: Start/Stop Suricata from the dashboard
 - **Custom paths**: Manually set Suricata binary path and log path from the UI
 - **Alert visualization**: View Suricata `alert` events from `eve.json*` in the Logs page
+- **Fast text-based prefiltering**: Performance optimizations for handling large eve.json files without slowing down CPU
 - **Alert filtering**: Filter by severity level and protocol with timestamp range (from/to not only from) support
 - **Stateless pagination**: Cursor-based efficient pagination (`cursor_next`/`cursor_prev`) based
 - **Next detection**: `has_next` flag indicates if more alerts are available beyond current page

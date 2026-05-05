@@ -5,6 +5,7 @@ import base64
 import requests
 from flask import jsonify
 import urllib3
+from cryptography.fernet import Fernet
 
 # Disable SSL warnings for self-signed certificates in local development
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -50,6 +51,19 @@ class SplunkManager:
                     "error": str(e),
                     "message": "Error checking Splunk status"}
 
+
+    def _get_cipher(self):
+        key_file = Path("siem/.secret.key")
+        if not key_file.exists():
+            key = Fernet.generate_key()
+            with open(key_file, "wb") as f:
+                f.write(key)
+        else:
+            with open(key_file, "rb") as f:
+                key = f.read()
+        return Fernet(key)
+
+
     def get_user(self):
         """Get the Splunk username from config file"""
         try:
@@ -63,10 +77,17 @@ class SplunkManager:
         """Get the Splunk password from config file"""
         try:
             with open("siem/config.json", "r") as f:
-                passw = json.load(f)
-                return passw.get("splunk_pass")
+                config = json.load(f)
+                pass_enc = config.get("splunk_pass")
+                if pass_enc:
+                    cipher = self._get_cipher()
+                    try:
+                        return cipher.decrypt(pass_enc.encode()).decode()
+                    except Exception:
+                        return pass_enc
         except Exception:
-            return ""
+            pass
+        return ""
 
     def set_user(self, username):
         """Set the Splunk username in config file"""
@@ -96,7 +117,8 @@ class SplunkManager:
             if Path("siem/config.json").exists():
                 with open("siem/config.json", "r") as f:
                     config = json.load(f)
-            config["splunk_pass"] = password
+            cipher = self._get_cipher()
+            config["splunk_pass"] = cipher.encrypt(password.encode()).decode()
             with open("siem/config.json", "w") as f:
                 json.dump(config, f)
             self.splunk_password = password
@@ -299,32 +321,36 @@ class SplunkManager:
         try:
             logs = event.get("logs", [])
             size = len(logs)
-            errors = []
-            for e in logs:
-                payload = {
-                    "event": e,
-                    "sourcetype": sourcetype,
-                    "index": index
-                }
-                r = requests.post(self.splunk_hec_url, headers=headers, json=payload, verify=False)
-                if r.status_code != 200:
-                    size -= 1
-                    errors.append({
+            
+            batch_size = 5000  # Splunk HEC default max batch size = 800MB
+            count = 0
+            
+            for i in range(0, size, batch_size):
+                batch_logs = logs[i:i + batch_size]
+                payload = ""
+                for e in batch_logs:
+                    event_data = {
                         "event": e,
-                        "status_code": r.status_code,
-                        "response": r.text
-                    })
-            if size == 0:
-                return {
-                    "success": False,
-                    "message": "Failed to send any events to Splunk"
-                }
+                        "sourcetype": sourcetype,
+                        "index": index
+                    }
+                    payload += json.dumps(event_data) + "\n"
+
+                r = requests.post(self.splunk_hec_url, headers=headers, data=payload, verify=False)
+                
+                if r.status_code != 200:
+                    return {
+                        "success": False,
+                        "message": f"Failed to send some events to Splunk: {r.text} (Sent {count}/{size})"
+                    }
+                count += len(batch_logs)
+                
             return {
                     "success": True,
-                    "size": size,
+                    "size": count,
                     "index": index,
                     "sourcetype": sourcetype,
-                    "message": f"{size} events successfully sent to Splunk (index={index}, sourcetype={sourcetype})"
+                    "message": f"{count} events successfully sent to Splunk (index={index}, sourcetype={sourcetype})"
                 }
         except Exception as e:
             return {

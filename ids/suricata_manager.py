@@ -164,16 +164,18 @@ class SuricataManager:
             for log in sorted(self.log_path.glob(log_to_read)):
                 with open(log, "r") as f:
                     for line in f:
-                        alert = json.loads(line)                            
-                        if alert.get("event_type") != "alert":
+                        if '"event_type": "alert"' not in line:
                             continue
-                        
-                        alert_severity = alert.get("alert", {}).get("severity")
-                        alert_protocol = alert.get("proto")
-                        if severity != "any" and alert_severity != int(severity):
-                            continue
-                        if protocol != "any" and alert_protocol != protocol:
-                            continue
+                            
+                        if severity != "any":
+                            if f'"severity": {severity}' not in line:
+                                continue
+                                
+                        if protocol != "any":
+                            if f'"proto": "{protocol}"' not in line:
+                                continue
+                                
+                        alert = json.loads(line)
                         
                         alert_time = alert.get("timestamp")
                         if timestamp_from <= alert_time <= timestamp_to:
@@ -310,9 +312,10 @@ class SuricataManager:
             for log in sorted(self.log_path.glob(log_to_read)):
                 with open(log, "r") as f:
                     for line in f:
-                        alert = json.loads(line)                            
-                        if alert.get("event_type") != "alert":
+                        if '"event_type": "alert"' not in line:
                             continue
+                            
+                        alert = json.loads(line)                            
         
                         metadata = alert.get("alert", {}).get("metadata") or {}
                         alerts.append({
