@@ -140,7 +140,7 @@ class SuricataManager:
                 "message": f"Suricata logs not found at {self.log_path}. Please check the path and try again."
             }
 
-    def get_alerts(self, severity, protocol, timestamp_from, timestamp_to, cursor_next, cursor_prev):
+    def get_alerts(self, severity, protocol, cve, timestamp_from, timestamp_to, cursor_next, cursor_prev):
         """Retrieves alerts from Suricata logs within a specified time range"""
         try:
             if not self._is_installed():
@@ -162,6 +162,9 @@ class SuricataManager:
             
             log_to_read = "eve.json*"
             for log in sorted(self.log_path.glob(log_to_read)):
+                # Skip compressed logs
+                if log.suffix == ".gz":
+                    continue
                 with open(log, "r") as f:
                     for line in f:
                         if '"event_type":"alert"' not in line and '"event_type": "alert"' not in line:
@@ -174,9 +177,16 @@ class SuricataManager:
                         if protocol != "any":
                             if f'"proto":"{protocol}"' not in line and f'"proto": "{protocol}"' not in line:
                                 continue
-                                
+
+                        if cve == "yes":
+                            if f'"cve":' not in line:
+                                continue
+                        if cve == "no":
+                            if f'"cve":' in line:
+                                continue
+
                         alert = json.loads(line)
-                        
+
                         alert_time = alert.get("timestamp")
                         if timestamp_from <= alert_time <= timestamp_to:
                             if skip_count > 0:

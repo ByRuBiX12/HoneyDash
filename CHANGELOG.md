@@ -4,9 +4,13 @@
 - **Credentials encryption**: Splunk password is now encrypted using `cryptography` via a symmetric Fernet key securely generated and not stored in plain text format
 - **Fast prefiltering for Suricata**: Added a text-based prefiltering technique prior to decoding `eve.json` alerting into json strings, improving large file fetching performance
 - **Fast prefiltering for Cowrie**: Similar as Suricata, Cowrie receives a lot of logs in its `cowrie.json` files, making it essential to improve its fetching performance when filtering by event_id field
+- **Suricata CVE prefilter**: User can now choose between showing only alerts with or without CVEs (or every alert as before)
 
 ### Changed
 - **Optimized Splunk Forwarding**: Splunk HEC event forwarding now uses JSON HTTP Batching with a 5000-event limit to avoid 800MB maximum request limitations securely, instead of sending individual `POST` requests
+
+### Fixed
+- **Suricata pagination**: Suricata log parsing was browsing `.gz` files which where emptying the alerts array
 
 ## [Unreleased] - 2026-05-02
 ### Fixed

@@ -620,11 +620,12 @@ def suricata_alerts():
     try:
         severity = request.args.get('severity', default="Any", type=str)
         protocol = request.args.get('protocol', default="Any", type=str)
+        cve = request.args.get('cve', default="Any", type=str)
         timestamp_from = request.args.get('timestamp_from', default=None, type=str)
         timestamp_to = request.args.get('timestamp_to', default=None, type=str)
         cursor_next = request.args.get('cursor_next', default=None, type=int)
         cursor_prev = request.args.get('cursor_prev', default=None, type=int)
-        result = suricata_manager.get_alerts(severity=severity, protocol=protocol, timestamp_from=timestamp_from, timestamp_to=timestamp_to, cursor_next=cursor_next, cursor_prev=cursor_prev)
+        result = suricata_manager.get_alerts(severity=severity, protocol=protocol, cve=cve, timestamp_from=timestamp_from, timestamp_to=timestamp_to, cursor_next=cursor_next, cursor_prev=cursor_prev)
         return jsonify(result), 200
     except Exception as e:
         return jsonify({

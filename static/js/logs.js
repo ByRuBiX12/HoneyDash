@@ -729,6 +729,7 @@ async function getAlerts() {
         let currentCursor = 0;
         const severity = document.getElementById('log-severity-suricata').value;
         const protocol = document.getElementById('log-protocol-suricata').value;
+        const cve = document.getElementById('log-cve-suricata').value;
         const timestampFrom = document.getElementById('log-timestamp_from-suricata').value;
         const timestampTo = document.getElementById('log-timestamp_to-suricata').value;
         
@@ -743,7 +744,7 @@ async function getAlerts() {
         }
 
         const loadPage = async (cursor) => {
-            const response = await makeRequest(`/suricata/alerts?severity=${severity}&protocol=${protocol}&timestamp_from=${timestampFrom}&timestamp_to=${timestampTo}&cursor_next=${cursor}`);
+            const response = await makeRequest(`/suricata/alerts?severity=${severity}&protocol=${protocol}&cve=${cve}&timestamp_from=${timestampFrom}&timestamp_to=${timestampTo}&cursor_next=${cursor}`);
             
             const alertsContainer = document.getElementById('alerts-container');
             alertsContainer.innerHTML = '';
