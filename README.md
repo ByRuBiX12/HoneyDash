@@ -16,6 +16,7 @@
 - **iptables management**: Handles NAT rules automatically for transparent redirection
 - **Lifecycle control**: Start/Stop operations with privilege management
 - **Log retrieval**: Query Cowrie JSON logs with filtering by limit, event type, and timestamp
+- **Fast prefiltering**: Performance optimizations for handling large `cowrie.json` files when filtering by event_id field without slowing down CPU
 - **Auto-cleanup**: Restores SSH and iptables on exit (SIGINT handler)
 - **Security**: Cowrie runs as non-root user (automatic privilege dropping)
 - - **Honeypot identification**: All logs include `honeypot` field (cowrie/dionaea/ddospot)
@@ -75,7 +76,7 @@
 - **Service control**: Start/Stop Suricata from the dashboard
 - **Custom paths**: Manually set Suricata binary path and log path from the UI
 - **Alert visualization**: View Suricata `alert` events from `eve.json*` in the Logs page
-- **Fast text-based prefiltering**: Performance optimizations for handling large eve.json files without slowing down CPU
+- **Fast text-based prefiltering**: Performance optimizations for handling large `eve.json` files without slowing down CPU
 - **Alert filtering**: Filter by severity level and protocol with timestamp range (from/to not only from) support
 - **Stateless pagination**: Cursor-based efficient pagination (`cursor_next`/`cursor_prev`) based
 - **Next detection**: `has_next` flag indicates if more alerts are available beyond current page

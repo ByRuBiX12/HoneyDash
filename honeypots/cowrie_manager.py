@@ -714,10 +714,12 @@ class CowrieManager:
                 try:
                     with open(log_file, 'r') as f:
                         for line in f:
+                            # Fast prefiltering (same logic as Suricata) without prefiltering timestamp (not possible with <)
+                            if event_id and f'"eventid":"{event_id}"' not in line:
+                                continue
+                           
                             try:
                                 log_entry = json.loads(line)
-                                if event_id and log_entry.get('eventid') != event_id:
-                                    continue
                                 if timestamp and log_entry.get('timestamp', '') < timestamp:
                                     continue
                                 # Only include relevant fields in original order
