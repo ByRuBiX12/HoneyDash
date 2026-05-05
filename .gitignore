@@ -21,3 +21,4 @@ env/
 .vscode/
 .idea/
 /var/lib/honeydash/
+siem/.secret.key

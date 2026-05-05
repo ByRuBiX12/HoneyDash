@@ -164,15 +164,15 @@ class SuricataManager:
             for log in sorted(self.log_path.glob(log_to_read)):
                 with open(log, "r") as f:
                     for line in f:
-                        if '"event_type": "alert"' not in line:
+                        if '"event_type":"alert"' not in line and '"event_type": "alert"' not in line:
                             continue
                             
                         if severity != "any":
-                            if f'"severity": {severity}' not in line:
+                            if f'"severity":{severity}' not in line and f'"severity": {severity}' not in line:
                                 continue
                                 
                         if protocol != "any":
-                            if f'"proto": "{protocol}"' not in line:
+                            if f'"proto":"{protocol}"' not in line and f'"proto": "{protocol}"' not in line:
                                 continue
                                 
                         alert = json.loads(line)
@@ -312,7 +312,7 @@ class SuricataManager:
             for log in sorted(self.log_path.glob(log_to_read)):
                 with open(log, "r") as f:
                     for line in f:
-                        if '"event_type": "alert"' not in line:
+                        if '"event_type":"alert"' not in line and '"event_type": "alert"' not in line:
                             continue
                             
                         alert = json.loads(line)                            
