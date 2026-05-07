@@ -3,6 +3,7 @@
 ### Fixed
 - **Dionaea src_ip field**: Dionaea backend was not sending `Source Ip` field correctly to the frontend so it was never shown on any service
 - **Dionaea FTP src_ip field**: Dionaea FTP service `src_ip` field did not appear as a selectable field to display
+- **Dionaea HTTP src_ip field**: Dionaea HTTP service `src_ip` field was being extracted wrongly based on Host content, now it is extracted the same way as FTP and MySQL services perfectly working
 
 ## [Unreleased] - 2026-05-05
 ### Added

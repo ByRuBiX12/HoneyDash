@@ -334,7 +334,7 @@ class DionaeaManager:
                 # fist line = request
                 request = f.readline().strip()
                 user_agent = re.search(r'User-Agent: ([^\\]+)', request)
-                ip = re.search(r'Host: ([^\\]+)', request)
+                ip = log_file.name.split("-")[3]
                 request_type = re.search(r'(GET|POST|HEAD|PUT|DELETE|OPTIONS|TRACE|CONNECT)\s', request)
                 endpoint = re.search(r'(GET|POST|HEAD|PUT|DELETE|OPTIONS|TRACE|CONNECT)\s+(\S+)\s+HTTP', request)
                 date = log_file.name.split("-")[5] + "-" + log_file.name.split("-")[6] + "-" + log_file.name.split("-")[7][:-7]
@@ -347,7 +347,7 @@ class DionaeaManager:
                 log_entry["type"] = 'http'
                 
                 if ip:
-                    log_entry["src_ip"] = ip.group(1)
+                    log_entry["src_ip"] = ip
                 if user_agent:
                     log_entry["user_agent"] = user_agent.group(1)
                 if request_type:
