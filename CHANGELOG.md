@@ -1,4 +1,9 @@
 # Changelog
+## [Unreleased] - 2026-07-05
+### Fixed
+- **Dionaea src_ip field**: Dionaea backend was not sending `Source Ip` field correctly to the frontend so it was never shown on any service
+- **Dionaea FTP src_ip field**: Dionaea FTP service `src_ip` field did not appear as a selectable field to display
+
 ## [Unreleased] - 2026-05-05
 ### Added
 - **Credentials encryption**: Splunk password is now encrypted using `cryptography` via a symmetric Fernet key securely generated and not stored in plain text format

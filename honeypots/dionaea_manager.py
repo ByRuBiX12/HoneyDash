@@ -347,7 +347,7 @@ class DionaeaManager:
                 log_entry["type"] = 'http'
                 
                 if ip:
-                    log_entry["ip"] = ip.group(1)
+                    log_entry["src_ip"] = ip.group(1)
                 if user_agent:
                     log_entry["user_agent"] = user_agent.group(1)
                 if request_type:
@@ -375,7 +375,7 @@ class DionaeaManager:
                 log_entry = {"timestamp": date}
                 log_entry["honeypot"] = 'dionaea'
                 log_entry["type"] = 'ftp'
-                log_entry["ip"] = ip
+                log_entry["src_ip"] = ip
 
                 if username:
                     log_entry["username"] = username.group(1)
@@ -396,7 +396,7 @@ class DionaeaManager:
                 log_entry = {"timestamp": date}
                 log_entry["honeypot"] = 'dionaea'
                 log_entry["type"] = 'mysql'
-                log_entry["ip"] = ip
+                log_entry["src_ip"] = ip
 
                 if username:
                     username = username.group(1)
