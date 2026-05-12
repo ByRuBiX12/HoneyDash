@@ -10,6 +10,11 @@ class SuricataManager:
     def __init__(self):
         self.bin_path = Path("/usr/bin/suricata")
         self.log_path = Path("/var/log/suricata")
+        if self._is_installed():
+            print("[+] Suricata detected at: ", self.bin_path)
+            print("[+] Suricata logs detected at: ", self.log_path)
+        else:
+            print("[!] Suricata not found. Please set the correct paths using set_suricata_bin_path() and set_suricata_log_path() or via interface.")
 
     def _is_installed(self):
         """Checks if Suricata is installed"""

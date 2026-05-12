@@ -19,6 +19,10 @@ class SplunkManager:
         self.splunk_host = "https://localhost:8089" # Default Splunk host
         self.splunk_hec_url = "https://localhost:8088/services/collector" # Default HEC URL
         self.splunk_hec_token = None # Will be set when created or found
+        if self._is_installed():
+            print("[+] Splunk detected at: ", self.splunk_path)
+        else:
+            print("[!] Splunk not found. Please set the correct path using set_splunk_path() or via interface.")
     
     def _is_installed(self):
         """Check if Splunk is installed"""

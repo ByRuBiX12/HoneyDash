@@ -3,6 +3,7 @@
 ### Added
 - **Suricata alert notifications**: Showing a notification when fetching Suricata alerts
 - **Suricata .gz notification**: Added an alert mechanism when fetching logs from Suricata and `.gz` (compressed) logs are detected, warning the user that not all logs might be displayed and, therefore, loaded
+- **Splunk and Suricata initial message**: HoneyDash now displays Splunk and Suricata status message via terminal
 
 ### Fixed
 - **Browser crash on large log amounts**: Browser was slowing down due to injection of hundreds of thousands of JSON objects directly into the DOM (e.g., Cowrie producing nearly 300,000 logs when testing in VPS). A visual UI display limit (max 50,000 lines) plus an efficient JavaScript memory dictionary were introduced to prevent huge browser freezing, still fully loading the entire dataset ready for Splunk mass sending transparently
