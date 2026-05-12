@@ -1,7 +1,10 @@
 // API URL - using relative path to work from any IP
 const API_URL = '/api';
 
-// Función auxiliar para hacer peticiones
+// Dictionary to store logs in memory instead of overloading DOM with hidden elements
+const loadedLogsMemory = {};
+
+// Auxiliary function to make API requests
 async function makeRequest(endpoint, method = 'GET', body = null) {
     try {
         const options = {
@@ -85,7 +88,7 @@ function deselectAllFields(service) {
 async function getLogs(service) {
     showActionMessage('Searching logs...');
     const logsBox = document.getElementById(`${service}-logs`);
-    const logsBoxHidden = document.getElementById(`${service}-logs-hidden`);
+    
     const logsContainer = document.getElementById(`${service}-logs-container`);
 
     if (service === 'cowrie') {
@@ -114,10 +117,15 @@ async function getLogs(service) {
                 const filteredLogs = filterLogFields(data.logs);
 
                 let output = `Total logs found: ${filteredLogs.length}\n`;
+                if (filteredLogs.length > 50000) {
+                    output += `(Showing first 50,000 logs to prevent browser lag. All ${filteredLogs.length} logs are loaded and can be sent to Splunk)\n`;
+                    showActionMessage('More than 50,000 logs found. Displaying first 50,000 to prevent browser lag');
+                }
                 output += '='.repeat(80) + '\n\n';
-                let outputHidden = JSON.stringify(filteredLogs);
+                loadedLogsMemory[service] = filteredLogs;
 
-                filteredLogs.forEach((log, index) => {
+                const logsToDisplay = filteredLogs.slice(0, 50000);
+                logsToDisplay.forEach((log, index) => {
                     output += `--- Log ${index + 1} ---\n`;
                     for (const [key, value] of Object.entries(log)) {
                         output += `${key}: ${value}\n`;
@@ -127,8 +135,8 @@ async function getLogs(service) {
 
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
-                logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${filteredLogs.length} logs found`);
+                
+                showActionMessage(`${filteredLogs.length} logs found and ready to be sent to Splunk`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -174,10 +182,15 @@ async function getLogs(service) {
                 }
 
                 let output = `Total logs found: ${filteredLogs.length}\n`;
+                if (filteredLogs.length > 50000) {
+                    output += `(Showing first 50,000 logs to prevent browser lag. All ${filteredLogs.length} logs are loaded and can be sent to Splunk)\n`;
+                    showActionMessage('More than 50,000 logs found. Displaying first 50,000 to prevent browser lag');
+                }
                 output += '='.repeat(80) + '\n\n';
-                let outputHidden = JSON.stringify(filteredLogs);
+                loadedLogsMemory[service] = filteredLogs;
 
-                filteredLogs.forEach((log, index) => {
+                const logsToDisplay = filteredLogs.slice(0, 50000);
+                logsToDisplay.forEach((log, index) => {
                     output += `--- Log ${index + 1} ---\n`;
                     for (const [key, value] of Object.entries(log)) {
                         output += `${key}: ${value}\n`;
@@ -187,8 +200,8 @@ async function getLogs(service) {
 
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
-                logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${filteredLogs.length} logs found`);
+                
+                showActionMessage(`${filteredLogs.length} logs found and ready to be sent to Splunk`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -239,10 +252,15 @@ async function getLogs(service) {
                 }
 
                 let output = `Total logs found: ${filteredLogs.length}\n`;
+                if (filteredLogs.length > 50000) {
+                    output += `(Showing first 50,000 logs to prevent browser lag. All ${filteredLogs.length} logs are loaded and can be sent to Splunk)\n`;
+                    showActionMessage('More than 50,000 logs found. Displaying first 50,000 to prevent browser lag');
+                }
                 output += '='.repeat(80) + '\n\n';
-                let outputHidden = JSON.stringify(filteredLogs);
+                loadedLogsMemory[service] = filteredLogs;
 
-                filteredLogs.forEach((log, index) => {
+                const logsToDisplay = filteredLogs.slice(0, 50000);
+                logsToDisplay.forEach((log, index) => {
                     output += `--- Log ${index + 1} ---\n`;
                     for (const [key, value] of Object.entries(log)) {
                         output += `${key}: ${value}\n`;
@@ -252,8 +270,8 @@ async function getLogs(service) {
 
                 logsContainer.style.display = 'block';
                 logsBox.textContent = output;
-                logsBoxHidden.textContent = outputHidden;
-                showActionMessage(`${filteredLogs.length} logs found`);
+                
+                showActionMessage(`${filteredLogs.length} logs found and ready to be sent to Splunk`);
             } else {
                 logsContainer.style.display = 'none';
                 logsBox.textContent = JSON.stringify({ error: data.error }, null, 2);
@@ -597,12 +615,10 @@ function toggleDdospotFilter() {
 
 // POST: Enviar logs a Splunk
 async function sendToSplunk(service) {
-    const logsBox = document.getElementById(`${service}-logs-hidden`).textContent;
-
     try {
-        const logsData = JSON.parse(logsBox);
+        const logsData = loadedLogsMemory[service];
 
-        if (logsData.length === 0) {
+        if (!logsData || logsData.length === 0) {
             showActionMessage('No logs to send to Splunk. Please fetch logs first.');
             return;
         }
@@ -726,6 +742,7 @@ async function printBinaries(response) {
 // GET: Get Suricata Alerts information and show them in cards
 async function getAlerts() {
     try {
+        showActionMessage('Fetching alerts...');
         let currentCursor = 0;
         const severity = document.getElementById('log-severity-suricata').value;
         const protocol = document.getElementById('log-protocol-suricata').value;
@@ -796,11 +813,7 @@ async function getAlerts() {
 
 async function printAlerts(response) {
     try {
-        let outputHidden = document.createElement('div');
-        outputHidden.id = 'suricata-logs-hidden';
-        outputHidden.innerHTML = JSON.stringify(response.alerts);
-        outputHidden.style.display = 'none';
-        document.body.appendChild(outputHidden);
+        loadedLogsMemory['suricata'] = response.alerts;
 
         response.alerts.forEach(alertData => {
                 const alertCard = document.createElement('div');
@@ -890,6 +903,9 @@ async function printAlerts(response) {
                 document.getElementById('alerts-container').appendChild(alertCard);
             });
             
+            if (response.gz) {
+                showActionMessage('Compressed files have been found! Decompress them to load and show all the alerts')
+            }
             showActionMessage(`Successfully loaded ${response.alerts.length} alerts`);
     } catch (error) {
         showActionMessage(`Error displaying alerts: ${error.message}`);

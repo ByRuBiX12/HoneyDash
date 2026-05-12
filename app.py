@@ -44,6 +44,42 @@ def api_info():
                 "stop": "/api/cowrie/stop",
                 "cleanup": "/api/cowrie/cleanup",
                 "logs": "/api/cowrie/logs?limit=50&event_id=cowrie.login.success&timestamp=2024-01-01T00:00:00"
+            },
+            "dionaea": {
+                "status": "/api/dionaea/status",
+                "install": "/api/dionaea/install",
+                "start": "/api/dionaea/start",
+                "stop": "/api/dionaea/stop",
+                "logs": "/api/dionaea/logs?limit=50&type=httpd",
+                "binaries": "/api/dionaea/binaries?page=1"
+            },
+            "ddospot": {
+                "status": "/api/ddospot/status",
+                "install": "/api/ddospot/install",
+                "start": "/api/ddospot/start",
+                "stop": "/api/ddospot/stop",
+                "logs": "/api/ddospot/logs?limit=50"
+            },
+            "splunk": {
+                "status": "/api/splunk/status",
+                "set_path": "/api/splunk/set-path",
+                "start": "/api/splunk/start",
+                "stop": "/api/splunk/stop",
+                "search": "/api/splunk/search",
+                "create": "/api/splunk/create",
+                "send": "/api/splunk/send",
+                "set_user": "/api/splunk/set-user",
+                "set_password": "/api/splunk/set-password"
+            },
+            "suricata": {
+                "status": "/api/suricata/status",
+                "set_path": "/api/suricata/set-path",
+                "set_log_path": "/api/suricata/set-log-path",
+                "start": "/api/suricata/start",
+                "stop": "/api/suricata/stop",
+                "alerts": "/api/suricata/alerts",
+                "cve_details": "/api/suricata/cve-details?cveId=CVE-2021-44228",
+                "every_alert": "/api/suricata/every_alert"
             }
         }
     })
@@ -692,6 +728,22 @@ def signal_handler(signal, frame):
 
 
 if __name__ == '__main__':
+    os.system('clear')
+    # HoneyDash logo
+    print(r"""
+ /$$   /$$                                         /$$$$$$$                      /$$      
+| $$  | $$                                        | $$__  $$                    | $$      
+| $$  | $$  /$$$$$$  /$$$$$$$   /$$$$$$  /$$   /$$| $$  \ $$  /$$$$$$   /$$$$$$$| $$$$$$$ 
+| $$$$$$$$ /$$__  $$| $$__  $$ /$$__  $$| $$  | $$| $$  | $$ |____  $$ /$$_____/| $$__  $$
+| $$__  $$| $$  \ $$| $$  \ $$| $$$$$$$$| $$  | $$| $$  | $$  /$$$$$$$|  $$$$$$ | $$  \ $$
+| $$  | $$| $$  | $$| $$  | $$| $$_____/| $$  | $$| $$  | $$ /$$__  $$ \____  $$| $$  | $$
+| $$  | $$|  $$$$$$/| $$  | $$|  $$$$$$$|  $$$$$$$| $$$$$$$/|  $$$$$$$ /$$$$$$$/| $$  | $$
+|__/  |__/ \______/ |__/  |__/ \_______/ \____  $$|_______/  \_______/|_______/ |__/  |__/
+                                         /$$  | $$                                        
+                                        |  $$$$$$/                                        
+                                         \______/                                         
+    """)
+
     # Check if running as root
     if os.geteuid() != 0:
         print("[!] WARNING: HoneyDash is not running as root!")
@@ -704,8 +756,8 @@ if __name__ == '__main__':
         sys.exit(1)
     
     print("\n[+] Starting HoneyDash...")
-    print("[+] API available at: http://localhost:5000")
-    print("[+] Documentation: http://localhost:5000/\n")
+    print("[+] Interface: http://localhost:5000")
+    print("[+] API: http://localhost:5000/api\n")
     
     signal(SIGINT, signal_handler)
 

@@ -159,11 +159,13 @@ class SuricataManager:
             
             alerts = []
             page_size = 16
+            gz = False
             
             log_to_read = "eve.json*"
             for log in sorted(self.log_path.glob(log_to_read)):
                 # Skip compressed logs
                 if log.suffix == ".gz":
+                    gz = True
                     continue
                 with open(log, "r") as f:
                     for line in f:
@@ -210,7 +212,8 @@ class SuricataManager:
                     "alerts": [],
                     "has_next": False,
                     "cursor_next": start_position,
-                    "cursor_prev": None
+                    "cursor_prev": None,
+                    "gz": gz
                 }
 
             alerts_filtered = []
@@ -240,7 +243,8 @@ class SuricataManager:
                 "alerts": alerts_filtered,
                 "has_next": has_next,
                 "cursor_next": next_cursor if has_next else None,
-                "cursor_prev": prev_cursor if start_position > 0 else None
+                "cursor_prev": prev_cursor if start_position > 0 else None,
+                "gz": gz
             }
                             
         except Exception as e:
@@ -250,7 +254,8 @@ class SuricataManager:
                 "alerts": [],
                 "has_next": False,
                 "cursor_next": None,
-                "cursor_prev": None
+                "cursor_prev": None,
+                "gz": gz
             }
 
     def get_cve_details(self, cve_id):

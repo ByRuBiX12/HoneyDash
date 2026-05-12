@@ -1,5 +1,13 @@
 # Changelog
-## [Unreleased] - 2026-07-05
+### [Unreleased] - 2026-05-12
+### Added
+- **Suricata alert notifications**: Showing a notification when fetching Suricata alerts
+- **Suricata .gz notification**: Added an alert mechanism when fetching logs from Suricata and `.gz` (compressed) logs are detected, warning the user that not all logs might be displayed and, therefore, loaded
+
+### Fixed
+- **Browser crash on large log amounts**: Browser was slowing down due to injection of hundreds of thousands of JSON objects directly into the DOM (e.g., Cowrie producing nearly 300,000 logs when testing in VPS). A visual UI display limit (max 50,000 lines) plus an efficient JavaScript memory dictionary were introduced to prevent huge browser freezing, still fully loading the entire dataset ready for Splunk mass sending transparently
+
+## [Unreleased] - 2026-05-07
 ### Fixed
 - **Dionaea src_ip field**: Dionaea backend was not sending `Source Ip` field correctly to the frontend so it was never shown on any service
 - **Dionaea FTP src_ip field**: Dionaea FTP service `src_ip` field did not appear as a selectable field to display
